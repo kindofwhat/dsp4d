@@ -1,0 +1,36 @@
+Patient: John Doe
+Date: November 20, 2025
+Physician: Dr. Smith
+
+MEDICAL REPORT - CARDIOLOGY CONSULTATION
+
+Chief Complaint:
+Patient presents with intermittent chest pain and shortness of breath during physical activity.
+
+History:
+65-year-old male with history of hypertension and hyperlipidemia. Non-smoker. Family history of coronary artery disease.
+
+Physical Examination:
+Blood Pressure: 145/92 mmHg
+Heart Rate: 78 bpm, regular
+Lungs: Clear to auscultation bilaterally
+Heart: Normal S1, S2, no murmurs
+
+Diagnostic Tests:
+- ECG: Normal sinus rhythm, no acute changes
+- Lipid Panel: Total cholesterol 240 mg/dL, LDL 160 mg/dL, HDL 38 mg/dL
+- Troponin: Negative
+
+Diagnosis:
+1. Stable angina pectoris
+2. Hypertension, uncontrolled
+3. Hyperlipidemia
+
+Recommendations:
+1. Start atorvastatin 40mg daily
+2. Increase lisinopril to 20mg daily
+3. Stress test scheduled for next week
+4. Follow-up in 2 weeks
+5. Lifestyle modifications: diet, exercise
+
+Urgency: Routine follow-up required

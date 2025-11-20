@@ -1,0 +1,153 @@
+### DSP4D - LLM Evaluation API - HTTP Test File
+### Use this file in IntelliJ IDEA to test the REST API endpoints
+### Click the green "Run" arrow next to each request to execute it
+
+### Variables
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### =============================================================================
+### Health & Monitoring Endpoints
+### =============================================================================
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Prometheus Metrics
+GET {{baseUrl}}/metrics
+
+### OpenAPI Specification
+GET {{baseUrl}}/openapi
+
+### =============================================================================
+### Document Summarization Endpoints
+### =============================================================================
+
+### 1. Summarize Medical Document - Simple Case
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": "Patient presents with acute chest pain radiating to left arm. ECG shows ST elevation in leads II, III, aVF. Troponin levels elevated at 2.5 ng/mL. Immediate cardiology consultation recommended."
+}
+
+### 2. Summarize Medical Document - Lab Results
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": "Complete Blood Count Results:\n\nWBC: 12.5 x10^9/L (Normal: 4-11)\nRBC: 4.2 x10^12/L (Normal: 4.5-5.5)\nHemoglobin: 13.8 g/dL (Normal: 13-17)\nPlatelets: 250 x10^9/L (Normal: 150-400)\n\nChemistry Panel:\nGlucose: 145 mg/dL (slightly elevated)\nCreatinine: 1.1 mg/dL (Normal)\nAST: 28 U/L (Normal)\nALT: 32 U/L (Normal)\n\nNote: Mild leukocytosis present. Patient reports recent upper respiratory infection."
+}
+
+### 3. Summarize Medical Document - Consultation Note
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": "Cardiology Consultation\n\nPatient: 62-year-old male\nChief Complaint: Exertional dyspnea and fatigue for 3 months\n\nHistory of Present Illness:\nPatient reports progressive shortness of breath with minimal exertion over the past 3 months. Associated symptoms include orthopnea (2-pillow), paroxysmal nocturnal dyspnea, and bilateral lower extremity edema.\n\nPhysical Examination:\n- BP: 145/90 mmHg\n- HR: 92 bpm, irregular\n- Lungs: Bilateral basilar crackles\n- Heart: S3 gallop present, irregular rhythm\n- Extremities: 2+ bilateral pitting edema\n\nAssessment:\nCongestive heart failure, likely due to atrial fibrillation with rapid ventricular response.\n\nPlan:\n1. Initiate diuretic therapy (Furosemide 40mg daily)\n2. Rate control with beta-blocker\n3. Echocardiogram scheduled\n4. Consider anticoagulation after risk stratification\n5. Follow-up in 2 weeks"
+}
+
+### =============================================================================
+### Document Classification Endpoints
+### =============================================================================
+
+### 4. Classify Document - Lab Results
+POST {{baseUrl}}/api/documents/classify
+Content-Type: {{contentType}}
+
+{
+  "content": "Lab Results - Complete Blood Count: WBC 12.5, RBC 4.2, Hemoglobin 13.8 g/dL, Platelets 250k. All values within normal range except mild leukocytosis."
+}
+
+### 5. Classify Document - Emergency
+POST {{baseUrl}}/api/documents/classify
+Content-Type: {{contentType}}
+
+{
+  "content": "STAT - Patient with severe chest pain, ST elevation on ECG, troponin 5.2 ng/mL. IMMEDIATE INTERVENTION REQUIRED. Activating cath lab."
+}
+
+### 6. Classify Document - Routine Follow-up
+POST {{baseUrl}}/api/documents/classify
+Content-Type: {{contentType}}
+
+{
+  "content": "Routine follow-up visit. Patient doing well on current medications. Blood pressure controlled at 130/80. No new complaints. Continue current regimen. Next appointment in 6 months."
+}
+
+### 7. Classify Document - Radiology Report
+POST {{baseUrl}}/api/documents/classify
+Content-Type: {{contentType}}
+
+{
+  "content": "Chest X-Ray Report: PA and lateral views obtained. Lungs are clear bilaterally. No infiltrates, effusions, or pneumothorax. Cardiac silhouette normal size. Impression: Normal chest radiograph."
+}
+
+### =============================================================================
+### Entity Extraction Endpoints
+### =============================================================================
+
+### 8. Extract Entities - Full Medical Note
+POST {{baseUrl}}/api/documents/extract-entities
+Content-Type: {{contentType}}
+
+{
+  "content": "Patient: 55-year-old male with Type 2 Diabetes Mellitus\n\nMedications:\n- Metformin 1000mg BID\n- Lisinopril 10mg daily\n- Atorvastatin 20mg at bedtime\n- Aspirin 81mg daily\n\nVitals:\n- BP: 135/82 mmHg\n- HR: 76 bpm\n- Temp: 36.8°C\n- SpO2: 98% on room air\n\nLab Results:\n- HbA1c: 7.2% (target <7%)\n- LDL: 95 mg/dL\n- Creatinine: 1.0 mg/dL\n- eGFR: 88 mL/min\n\nAssessment:\n1. Type 2 Diabetes - fair control\n2. Hypertension - well controlled\n3. Hyperlipidemia - at goal\n\nPlan:\n- Continue current medications\n- Dietary counseling\n- Increase physical activity\n- Recheck HbA1c in 3 months"
+}
+
+### 9. Extract Entities - Prescription Note
+POST {{baseUrl}}/api/documents/extract-entities
+Content-Type: {{contentType}}
+
+{
+  "content": "New Prescriptions:\n\n1. Amoxicillin 500mg - Take 1 capsule by mouth three times daily for 10 days\n2. Ibuprofen 400mg - Take 1 tablet by mouth every 6 hours as needed for pain\n3. Omeprazole 20mg - Take 1 capsule by mouth once daily before breakfast\n\nDiagnoses:\n- Acute bacterial sinusitis\n- GERD (Gastroesophageal reflux disease)\n\nFollow-up if symptoms persist after 7 days."
+}
+
+### 10. Extract Entities - Procedure Note
+POST {{baseUrl}}/api/documents/extract-entities
+Content-Type: {{contentType}}
+
+{
+  "content": "Procedure: Colonoscopy with polypectomy\n\nIndication: Screening, positive FIT test\n\nProcedure Details:\n- Cecum reached at 12 minutes\n- Two polyps identified in sigmoid colon (6mm and 8mm)\n- Both polyps removed via snare polypectomy\n- Specimens sent to pathology\n\nFindings:\n- 6mm sessile polyp at 25cm (removed)\n- 8mm pedunculated polyp at 30cm (removed)\n- Otherwise normal mucosa throughout colon\n\nPathology pending.\n\nRecommendation: Follow-up colonoscopy in 3 years based on pathology results."
+}
+
+### =============================================================================
+### Performance Testing - Multiple Requests
+### =============================================================================
+
+### 11. Batch Summarization Test (Run this 3-5 times to test performance)
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": "Brief test note: Patient stable, vitals normal, continue current treatment."
+}
+
+### =============================================================================
+### Error Handling Tests
+### =============================================================================
+
+### 12. Empty Content Test
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": ""
+}
+
+### 13. Very Long Content Test
+POST {{baseUrl}}/api/documents/summarize
+Content-Type: {{contentType}}
+
+{
+  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt."
+}
+
+### =============================================================================
+### Notes:
+### - All endpoints return a processing time (processingTimeMs) for performance analysis
+### - For research: Compare response times and quality across different model sizes
+### - Ollama must be running with llama3.2:3b model for these requests to work
+### - Start Ollama: `ollama serve`
+### - Pull model: `ollama pull llama3.2:3b`
+### =============================================================================
