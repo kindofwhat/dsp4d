@@ -41,6 +41,12 @@
             <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
         </dependency>
 
+        <!-- LangChain4j - Required for @RegisterAiService bean generation -->
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
+        </dependency>
+
         <!-- OpenAPI Documentation -->
         <dependency>
             <groupId>io.quarkus</groupId>

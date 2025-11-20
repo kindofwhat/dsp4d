@@ -64,9 +64,25 @@ dsp4d-proj/
 
 ## Quick Start
 
-### 1. Build the Project
+### 1. Ensure Ollama is Running
+
+**IMPORTANT:** Start Ollama before running the application:
 
 ```bash
+# Start Ollama service (in a separate terminal)
+ollama serve
+
+# Pull the default model (if not already done)
+ollama pull llama3.2:3b
+
+# Verify Ollama is running
+curl http://localhost:11434/api/tags
+```
+
+### 2. Build the Project
+
+```bash
+# Navigate to project root
 cd /Users/chrigel/Documents/workspace/private/bfh/dsp4d/dsp4d-proj
 
 # Build all modules
@@ -76,21 +92,23 @@ cd /Users/chrigel/Documents/workspace/private/bfh/dsp4d/dsp4d-proj
 ./mvnw clean install -DskipTests
 ```
 
-### 2. Run the REST API
+### 3. Run the REST API
 
 ```bash
-# Start in development mode (hot reload enabled)
+# Navigate to API module
 cd llm-api
+
+# Start in development mode (hot reload enabled)
 ../mvnw quarkus:dev
 ```
 
-The API will be available at:
+**The API will be available at:**
 - **Swagger UI:** http://localhost:8080/swagger-ui
 - **OpenAPI Spec:** http://localhost:8080/openapi
 - **Health Check:** http://localhost:8080/health
 - **Metrics:** http://localhost:8080/metrics
 
-### 3. Test the API
+**Test the API:**
 
 ```bash
 # Example: Summarize a medical document
@@ -108,86 +126,140 @@ curl -X POST http://localhost:8080/api/documents/classify \
   }'
 ```
 
-### 4. Use the CLI Tool
+### 4. Run the CLI Tool
 
 ```bash
-# Create a sample medical document
-cat > test-report.txt << EOF
-Patient: Anonymous
-Date: 2025-11-20
+# Navigate to CLI module
+cd llm-cli
 
-Chief Complaint: Persistent headache for 3 days
+# Create a sample medical document in the llm-cli directory
+cat > test-document.txt << EOF
+Patient: John Doe
+Date: November 20, 2025
+Physician: Dr. Smith
 
-History: 45-year-old patient presents with severe frontal headache, photophobia, and nausea. No fever. No history of migraines.
+MEDICAL REPORT - CARDIOLOGY CONSULTATION
 
-Physical Exam: Vital signs stable. Neurological exam normal. No papilledema.
+Chief Complaint:
+Patient presents with intermittent chest pain and shortness of breath during physical activity.
 
-Assessment: Likely tension headache vs. migraine without aura.
+History:
+65-year-old male with history of hypertension and hyperlipidemia. Non-smoker. Family history of coronary artery disease.
 
-Plan:
-1. Trial of NSAIDs (Ibuprofen 400mg TID)
-2. Hydration
-3. Follow-up in 1 week if symptoms persist
-4. CT scan if red flags develop
+Physical Examination:
+Blood Pressure: 145/92 mmHg
+Heart Rate: 78 bpm, regular
+Lungs: Clear to auscultation bilaterally
+Heart: Normal S1, S2, no murmurs
+
+Diagnostic Tests:
+- ECG: Normal sinus rhythm, no acute changes
+- Lipid Panel: Total cholesterol 240 mg/dL, LDL 160 mg/dL, HDL 38 mg/dL
+- Troponin: Negative
+
+Diagnosis:
+1. Stable angina pectoris
+2. Hypertension, uncontrolled
+3. Hyperlipidemia
+
+Recommendations:
+1. Start atorvastatin 40mg daily
+2. Increase lisinopril to 20mg daily
+3. Stress test scheduled for next week
+4. Follow-up in 2 weeks
+5. Lifestyle modifications: diet, exercise
+
+Urgency: Routine follow-up required
 EOF
 
-# Run summarization
-cd llm-cli
-../mvnw quarkus:dev -Dquarkus.args="summarize ../test-report.txt"
+# Start the CLI in dev mode
+../mvnw quarkus:dev
+
+# In the CLI prompt, press 'e' to edit command args and enter:
+# test-document.txt
+
+# Or run directly with arguments:
+../mvnw quarkus:dev -Dquarkus.args="test-document.txt"
 
 # Classify the document
-../mvnw quarkus:dev -Dquarkus.args="summarize --classify ../test-report.txt"
+../mvnw quarkus:dev -Dquarkus.args="--classify test-document.txt"
 
 # Extract entities with verbose output
-../mvnw quarkus:dev -Dquarkus.args="summarize --extract --verbose ../test-report.txt"
+../mvnw quarkus:dev -Dquarkus.args="--extract --verbose test-document.txt"
 ```
+
+**CLI Options:**
+- `<documentPath>` - Path to the document file (required)
+- `-c, --classify` - Classify the document instead of summarizing
+- `-e, --extract` - Extract entities instead of summarizing
+- `-v, --verbose` - Show processing time and statistics
+- `-h, --help` - Show help message
 
 ## Configuration
 
-### Switching LLM Providers
+### Configuration Structure
+
+The project uses a **shared configuration** approach to eliminate duplication:
+
+- **Shared:** `shared-config/application-shared.properties` - LLM provider settings, bean discovery, logging
+- **API:** `llm-api/src/main/resources/application.properties` - REST API-specific settings (HTTP, CORS, OpenAPI)
+- **CLI:** `llm-cli/src/main/resources/application.properties` - CLI-specific settings (disable HTTP server)
+
+### Switching LLM Models
 
 The project is configured for **Ollama by default** (local, data sovereignty compliant).
 
-#### Using Ollama (Default)
+#### Change Ollama Model
 
-Edit `llm-core/src/main/resources/application.properties`:
+Edit `shared-config/application-shared.properties`:
 
 ```properties
-# Already configured - just ensure Ollama is running
-quarkus.langchain4j.ollama.base-url=http://localhost:11434
-quarkus.langchain4j.ollama.chat-model.model-id=llama3.2:3b
+# Switch to a different model size
+quarkus.langchain4j.ollama.chat-model.model-id=llama3.2:1b  # Smallest
+# quarkus.langchain4j.ollama.chat-model.model-id=llama3.2:3b  # Default
+# quarkus.langchain4j.ollama.chat-model.model-id=llama3.2:7b  # Larger
 ```
 
-To switch models:
+Then pull the model:
 ```bash
-# Pull different model
 ollama pull llama3.2:1b
-
-# Update application.properties
-# quarkus.langchain4j.ollama.chat-model.model-id=llama3.2:1b
 ```
 
-#### Using OpenAI
+#### Using Environment Variables
 
-1. Uncomment OpenAI configuration in `llm-core/src/main/resources/application.properties`
-2. Set API key:
-   ```bash
-   export QUARKUS_LANGCHAIN4J_OPENAI_API_KEY=sk-your-api-key-here
-   ```
-3. Update `llm-core/pom.xml`:
+You can override settings without editing files:
+
+```bash
+# Use a different model
+export OLLAMA_MODEL=llama3.2:7b
+../mvnw quarkus:dev
+
+# Use a different Ollama instance
+export OLLAMA_URL=http://192.168.1.100:11434
+../mvnw quarkus:dev
+```
+
+#### Using OpenAI (Optional)
+
+1. Add OpenAI dependency to both `llm-api/pom.xml` and `llm-cli/pom.xml`:
    ```xml
-   <!-- Uncomment this dependency -->
    <dependency>
        <groupId>io.quarkiverse.langchain4j</groupId>
        <artifactId>quarkus-langchain4j-openai</artifactId>
    </dependency>
    ```
 
-### Configuration Files
+2. Update `shared-config/application-shared.properties`:
+   ```properties
+   # Comment out Ollama config and add OpenAI
+   quarkus.langchain4j.openai.api-key=${OPENAI_API_KEY}
+   quarkus.langchain4j.openai.chat-model.model-name=gpt-4o-mini
+   ```
 
-- **Core:** `llm-core/src/main/resources/application.properties` - LLM provider settings
-- **API:** `llm-api/src/main/resources/application.properties` - REST API configuration
-- **CLI:** `llm-cli/src/main/resources/application.properties` - CLI settings
+3. Set API key:
+   ```bash
+   export OPENAI_API_KEY=sk-your-api-key-here
+   ```
 
 ## Development Workflow
 
