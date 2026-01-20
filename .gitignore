@@ -1,0 +1,11 @@
+/.idea
+.DS_Store
+
+# LaTeX auxiliary files (in case of manual pdflatex runs)
+*.aux
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz

@@ -195,7 +195,7 @@ Test with:
 
 **Classification Task:**
 - At what model size does accuracy drop below 95%?
-- At what model size does accuracy drop below 80%?
+- **Context Impact:** Does adding Few-Shot or RAG shift this breakpoint to a smaller model size (e.g., enabling 1B instead of 3B)?
 - Where is the steepest drop?
 
 **Action Generation:**
@@ -203,15 +203,19 @@ Test with:
 - At what model size is action appropriateness <90%?
 
 **Example Breakpoint Hypothesis:**
-- 13B models: >95% accuracy
+- 13B models: >95% accuracy (Zero-Shot)
 - 7B models: 90-95% accuracy
-- 3B models: 80-90% accuracy ← **Likely breakpoint**
-- 1B models: <80% accuracy ← **Too small**
+- 3B models:
+  - Zero-Shot: 80% (Fail)
+  - Few-Shot: 92% (Pass)
+  - RAG: 94% (Pass) ← **Strategy Breakpoint**
+- 1B models: <80% accuracy (Too small)
 
 ### Failure Analysis
 
 For each failed test case:
 - **Model size:** Which models failed?
+- **Strategy:** Did it fail in Zero-Shot but pass in Few-Shot?
 - **Failure type:** Misclassification, wrong urgency, inappropriate action?
 - **Pattern:** Is there a pattern in failures? (complexity, document type, finding type)
 - **Fix:** Could few-shot examples be improved? Need more examples?
@@ -230,8 +234,12 @@ For each failed test case:
 - [ ] Random baseline
 - [ ] Document baseline performance
 
-### 3. Model Testing
+### 3. Model & Strategy Testing
 - [ ] Test all model sizes (1B, 3B, 7B, 13B)
+- [ ] **Test Context Strategies:**
+  - Zero-Shot (Baseline)
+  - One-Shot / Few-Shot (Static & Dynamic)
+  - RAG (Retrieval of guidelines/cases)
 - [ ] Test all deployment types (WebLLM, local, hosted, commercial)
 - [ ] Collect latency/throughput metrics
 - [ ] Save all predictions for analysis

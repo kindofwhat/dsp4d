@@ -1,62 +1,51 @@
-# Research Directory (Migrated)
+# Research
 
-**Status:** This directory has been migrated to the phase-based structure.
+This directory contains literature reviews, background research, and theoretical foundations for the project.
 
-## New Location
+## Research Areas
 
-All research materials are now organized under:
+### 1. Context Engineering & In-Context Learning
+**Focus:** Understanding how different context strategies affect model performance.
+- **RAG (Retrieval-Augmented Generation):** Retrieval of guidelines vs. similar cases.
+- **Few-Shot Learning:** Optimal number of examples, static vs. dynamic selection.
+- **Long-Context:** Trade-offs of processing full documents vs. retrieval.
+- **Prompt Engineering:** Chain-of-Thought, System Instructions.
 
-**`../phase1-research/`**
+*Location:* `few-shot-learning/` (to be renamed/expanded) and new notes.
 
-### What Was Here
+### 2. Model Size & Performance (Scaling Laws)
+**Focus:** How performance degrades as model size decreases.
+- Breakpoint analysis for classification tasks.
+- "Densing Law" and quantization effects.
+- Capabilities of Small Language Models (SLMs) like Phi-3, Llama-3.2-1B.
 
-1. **existing-work.md** → Now at `../phase1-research/literature/existing-work.md`
-   - Comprehensive literature review on LLM size vs performance
-   - RAG impact analysis
-   - Leaderboard research
+*Location:* `model-size-studies/`
 
-2. **Research questions** (from old README.md):
-   - What existing work exists on LLM performance vs. size? ✅ Answered in existing-work.md
-   - What existing work exists on RAG impact on LLM performance? ✅ Answered
-   - What existing work exists on Prompt Engineering impact? ⏳ To be explored in Phase 1
-   - What existing work exists on open source models in leaderboards? ✅ Answered
+### 3. Existing Work
+**Focus:** Prior art in medical document processing and SLMs.
+- Literature review on LLM size vs. performance.
+- Benchmarks for medical NLP.
 
-## Migration Guide
+*Location:* `existing-work/`
 
-If you're looking for research materials, see:
+## Key Research Questions for Phase 1
 
-### Phase 1 Structure
+1.  **Context vs. Size:** Can a rich context (RAG/Few-Shot) compensate for a smaller model size (1B/3B)?
+2.  **Retrieval Strategy:** Is it better to retrieve *rules* (guidelines) or *instances* (similar past cases) for medical classification?
+3.  **Efficiency:** What is the latency cost of RAG vs. Long-Context on edge devices (Raspberry Pi)?
+
+## Directory Structure
 
 ```
-phase1-research/
-├── README.md                          # Phase 1 objectives and progress
-├── literature/
-│   ├── existing-work.md              # ← YOUR COMPREHENSIVE RESEARCH IS HERE
-│   ├── papers/                       # Academic papers (PDFs)
-│   └── summaries/                    # Paper summaries
-├── frameworks/
-│   ├── ragas-evaluation.md           # Framework evaluations
-│   ├── langchain-evaluators.md
-│   ├── haystack-evaluation.md
-│   └── framework-comparison.md       # Final selection
-└── benchmarks/
-    ├── medical-benchmarks.md         # Domain-specific benchmarks
-    ├── financial-benchmarks.md
-    ├── legal-benchmarks.md
-    └── security-benchmarks.md
+research/
+├── README.md                          # This file
+├── existing-work/                     # General literature review
+│   └── existing-work.md
+├── context-engineering/               # Strategies (RAG, Few-Shot, etc.)
+│   ├── few-shot-learning/            # (Legacy folder, merging here)
+│   ├── rag-methods.md                # NEW: Research on RAG
+│   └── context-window-studies.md     # NEW: Research on context length
+└── model-size-studies/                # Scaling laws and quantization
+    ├── classification-tasks.md
+    └── small-model-capabilities.md
 ```
-
-## Outstanding Research Questions
-
-From the original README, still to be addressed in Phase 1:
-
-- [ ] **Prompt Engineering Impact**: How does prompt engineering affect LLM performance?
-  - Investigate few-shot prompting, chain-of-thought, etc.
-  - Impact on smaller models specifically
-  - To be documented in `phase1-research/literature/prompt-engineering.md`
-
-## Notes
-
-This directory is kept for backward compatibility. All new research work should go in `phase1-research/`.
-
-To avoid confusion, this directory may be removed after confirming all content has been successfully migrated and no external references point here.

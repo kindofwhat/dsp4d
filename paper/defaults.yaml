@@ -1,0 +1,50 @@
+# Pandoc defaults file
+# Reference: https://pandoc.org/MANUAL.html#defaults-files
+
+# Input/Output
+from: markdown
+to: pdf
+
+# PDF engine
+pdf-engine: pdflatex
+
+# Document settings
+standalone: true
+table-of-contents: true
+toc-depth: 3
+number-sections: true
+
+# Citation processing
+citeproc: true
+bibliography: paper/references.bib
+# Uncomment and adjust for specific citation style:
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/ieee.csl
+
+# Typography
+variables:
+  # Document class
+  documentclass: article
+
+  # Page geometry
+  geometry:
+    - margin=2.5cm
+    - a4paper
+
+  # Font size
+  fontsize: 11pt
+
+  # Line spacing (1.5 for academic papers)
+  linestretch: 1.5
+
+  # Links
+  colorlinks: true
+  linkcolor: blue
+  urlcolor: blue
+  citecolor: blue
+
+# Code blocks
+highlight-style: tango
+
+# Metadata (can be overridden in paper.md frontmatter)
+metadata:
+  lang: en-US

@@ -1,15 +1,18 @@
-# Few-Shot Examples
+# Context Examples & RAG Corpus
 
-**Goal:** Create 10-20 high-quality input-output pairs per document type for few-shot prompting
+**Goal:** Create high-quality input-output pairs per document type to serve as context for various engineering strategies.
 
 ## Overview
 
-This directory contains few-shot examples that will be provided in prompts to help LLMs classify documents and generate appropriate actions.
+This directory contains curated examples that serve multiple purposes in our context engineering experiments:
+1.  **Few-Shot / One-Shot:** Examples provided directly in the prompt.
+2.  **RAG Knowledge Base:** A corpus of "past cases" that can be retrieved dynamically based on similarity.
+3.  **Fine-Tuning Data:** (Optional) Potential dataset for future fine-tuning experiments.
 
 **Approach:**
-- **3-5 examples per prompt**: Dynamically selected based on similarity to input document
-- **High quality**: Each example validated by medical expert
-- **Diverse**: Cover common cases, edge cases, and urgency levels
+- **High Quality:** Each example validated by a medical expert.
+- **Diverse:** Cover common cases, edge cases, and urgency levels.
+- **Structured:** Stored in JSON for programmatic access by any strategy.
 
 ## Directory Structure
 
