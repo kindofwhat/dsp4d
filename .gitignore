@@ -1,0 +1,17 @@
+/.idea
+.DS_Store
+node_modules/
+node_modules/*
+
+# LaTeX auxiliary files (in case of manual pdflatex runs)
+*.aux
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+golden-ansers-engine/frontend/package-lock.json
+.gitignore
+.gitignore
+~$emenantrag Gen KI 1.0 HS25-Sprecher-Haegler.docx

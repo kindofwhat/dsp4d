@@ -1,0 +1,281 @@
+%% BFH Thesis LaTeX Template
+%% Based on BFH Thesisvorlage (Word template)
+%% Converted for use with Pandoc
+%%
+%% Typography: Lucida Sans style (using TeX Gyre Heros / Helvetica)
+%% Language: German (de-CH)
+
+\documentclass[11pt,a4paper]{article}
+
+%% ============================================================================
+%% PACKAGES
+%% ============================================================================
+
+% Encoding and fonts
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tgheros}  % TeX Gyre Heros (Helvetica clone, similar to Lucida Sans)
+\renewcommand{\familydefault}{\sfdefault}
+
+% Language
+\usepackage[ngerman]{babel}
+
+% Page geometry - BFH standard margins
+\usepackage[
+  a4paper,
+  top=3cm,
+  bottom=3cm,
+  left=2.5cm,
+  right=2.5cm,
+  headheight=1.5cm,
+  footskip=1.5cm
+]{geometry}
+
+% Graphics and colors
+\usepackage{graphicx}
+\usepackage{xcolor}
+\definecolor{bfhblue}{RGB}{100,132,155}  % BFH corporate blue (#64849B)
+\definecolor{bfhgray}{RGB}{166,166,166}  % Table header gray
+
+% Tables
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+
+% Longtable configuration for Pandoc
+\usepackage{calc}  % for calculating minipage widths
+
+% Fix for Pandoc tables without captions (uses LTcaptype=none)
+\newcounter{none}
+
+% Math (if needed)
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Links and references
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdfborder={0 0 0}
+}
+
+% Headers and footers
+\usepackage{fancyhdr}
+
+% Bibliography
+$if(csl-refs)$
+% Definitions for citeproc bibliography
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacing}
+\setlength{\cslentryspacing}{0em}
+
+% Fix for citeproctext
+\newcommand{\citeproctext}{}
+
+\newenvironment{CSLReferences}[2]
+ {\begin{list}{}%
+   {\setlength{\itemindent}{0pt}
+    \setlength{\leftmargin}{\cslhangindent}
+    \setlength{\parsep}{0pt}
+    \setlength{\itemsep}{\cslentryspacing}}}
+ {\end{list}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\dimexpr\linewidth-\csllabelwidth}{#1}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+$endif$
+
+% Captions
+\usepackage[font=small,labelfont=bf]{caption}
+
+% Float control
+\usepackage{float}
+
+% Code highlighting (if needed)
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
+
+%% ============================================================================
+%% TYPOGRAPHY - Match BFH Template
+%% ============================================================================
+
+% Line spacing (BFH uses ~1.28)
+\usepackage{setspace}
+\setstretch{1.28}
+
+% Paragraph settings
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5\baselineskip}
+
+% Tight list (used by Pandoc)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+%% ============================================================================
+%% HEADERS AND FOOTERS
+%% ============================================================================
+
+\pagestyle{fancy}
+\fancyhf{}
+
+% Header: empty for now (BFH logo could be added)
+\fancyhead{}
+
+% Footer: page number right, BFH department info left
+\fancyfoot[L]{\small\textcolor{bfhblue}{$if(department)$$department$$endif$}}
+\fancyfoot[R]{\small\thepage}
+
+% Remove header line
+\renewcommand{\headrulewidth}{0pt}
+
+% First page style (for title page)
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[R]{\small\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+%% ============================================================================
+%% TITLE PAGE COMMAND
+%% ============================================================================
+
+\newcommand{\maketitlepage}{
+  \begin{titlepage}
+    \thispagestyle{empty}
+
+    % Cover image (if provided)
+    $if(cover-image)$
+    \begin{center}
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{$cover-image$}
+    \end{center}
+    \vspace{1cm}
+    $else$
+    \vspace*{2cm}
+    $endif$
+
+    % Title
+    \begin{center}
+      {\fontsize{24pt}{28pt}\selectfont\bfseries $title$\par}
+      \vspace{0.5cm}
+      $if(subtitle)$
+      {\fontsize{14pt}{18pt}\selectfont $subtitle$\par}
+      $endif$
+    \end{center}
+
+    \vspace{1cm}
+
+    % Metadata table
+    \begin{center}
+    \begin{tabular}{@{}p{4cm}p{8cm}@{}}
+      $if(thesis-type)$
+      \textbf{$thesis-type$} & \\[0.5em]
+      $endif$
+      $if(studiengang)$
+      Studiengang: & $studiengang$ \\[0.3em]
+      $endif$
+      $if(author)$
+      Autor*in: & $for(author)$$author$$sep$, $endfor$ \\[0.3em]
+      $endif$
+      $if(betreuer)$
+      Betreuer*in: & $betreuer$ \\[0.3em]
+      $endif$
+      $if(auftraggeber)$
+      Auftraggeber*in: & $auftraggeber$ \\[0.3em]
+      $endif$
+      $if(experte)$
+      Expert*in: & $experte$ \\[0.3em]
+      $endif$
+      $if(date)$
+      Datum: & $date$ \\[0.3em]
+      $endif$
+    \end{tabular}
+    \end{center}
+
+    \vfill
+
+    % BFH Logo at bottom (if provided)
+    $if(logo)$
+    \begin{flushleft}
+      \includegraphics[height=2cm]{$logo$}
+    \end{flushleft}
+    $endif$
+
+  \end{titlepage}
+}
+
+%% ============================================================================
+%% ABSTRACT ENVIRONMENT
+%% ============================================================================
+
+\newenvironment{abstract-de}{
+  \clearpage
+  \section*{Abstract}
+  \addcontentsline{toc}{section}{Abstract}
+}{}
+
+%% ============================================================================
+%% DECLARATION OF INDEPENDENCE
+%% ============================================================================
+
+\newcommand{\declaration}{
+  \clearpage
+  \section*{Selbständigkeitserklärung}
+  \addcontentsline{toc}{section}{Selbständigkeitserklärung}
+
+  Ich bestätige, dass ich die vorliegende Arbeit selbstständig und ohne Benutzung
+  anderer als der im Literaturverzeichnis angegebenen Quellen und Hilfsmittel
+  angefertigt habe. Sämtliche Textstellen, die nicht von mir stammen, sind als
+  Zitate gekennzeichnet und mit dem genauen Hinweis auf ihre Herkunft versehen.
+
+  Ich bestätige weiterhin, dass ich bei der Erstellung dieser Studienarbeit
+  durchgehend steuernd gearbeitet habe und von einer KI erzeugte Texte bzw.
+  Textfragmente nicht unreflektiert übernommen habe.
+
+  \vspace{2cm}
+
+  \noindent
+  \begin{tabular}{@{}p{6cm}p{6cm}@{}}
+    Ort, Datum: & Unterschrift: \\[1.5cm]
+    \hrulefill & \hrulefill
+  \end{tabular}
+}
+
+%% ============================================================================
+%% DOCUMENT
+%% ============================================================================
+
+\begin{document}
+
+% Title page
+\maketitlepage
+
+% Abstract (if provided)
+$if(abstract)$
+\begin{abstract-de}
+$abstract$
+\end{abstract-de}
+$endif$
+
+% Table of contents
+$if(toc)$
+\clearpage
+\tableofcontents
+\clearpage
+$endif$
+
+% Main content
+$body$
+
+% Declaration (if enabled)
+$if(declaration)$
+\declaration
+$endif$
+
+\end{document}

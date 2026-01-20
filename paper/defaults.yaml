@@ -1,0 +1,42 @@
+# Pandoc defaults file for BFH Thesis
+# Reference: https://pandoc.org/MANUAL.html#defaults-files
+# Template based on BFH Thesisvorlage
+
+# Input/Output
+from: markdown
+to: pdf
+
+# PDF engine
+pdf-engine: pdflatex
+
+# Custom BFH thesis template
+template: templates/bfh-thesis.tex
+
+# Input files (order matters - concatenated in sequence)
+input-files:
+  - chapters/00-frontmatter/metadata.yaml
+  - chapters/01-introduction/index.md
+  - chapters/02-theory/index.md
+  - chapters/03-methodology/index.md
+  - chapters/04-results/index.md
+  - chapters/05-discussion/index.md
+  - chapters/99-backmatter/index.md
+
+# Document settings
+standalone: true
+table-of-contents: true
+toc-depth: 3
+number-sections: true
+
+# Citation processing
+citeproc: true
+bibliography: references.bib
+# APA style (BFH standard)
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+
+# Code blocks
+highlight-style: tango
+
+# Default metadata (override in paper.md frontmatter)
+metadata:
+  lang: de-CH
