@@ -25,9 +25,11 @@ tasks:
       - echo "Installing BasicTeX..."
       - brew install --cask basictex
       - echo ""
-      - echo "Open a NEW terminal, then run 'task setup-latex'"
-    status:
-      - which pandoc
+      - echo "=========================================="
+      - echo "IMPORTANT - BasicTeX has been installed!"
+      - echo "You MUST restart your terminal, then run:"
+      - echo "  cd paper && task setup-latex"
+      - echo "=========================================="
 
   setup-linux:
     internal: true
@@ -56,10 +58,31 @@ tasks:
 
   setup-latex-darwin:
     internal: true
+    preconditions:
+      - sh: test -d /Library/TeX/texbin || test -d /usr/local/texlive/*/bin/*
+        msg: "BasicTeX not found. Please run 'task setup' first and restart your terminal."
     cmds:
-      - sudo /Library/TeX/texbin/tlmgr update --self
-      - sudo /Library/TeX/texbin/tlmgr install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck framed
-      - echo "LaTeX packages installed"
+      - |
+        # Find tlmgr in common locations
+        if [ -x "/Library/TeX/texbin/tlmgr" ]; then
+          TLMGR="/Library/TeX/texbin/tlmgr"
+        elif [ -x "/usr/local/texlive/2024/bin/universal-darwin/tlmgr" ]; then
+          TLMGR="/usr/local/texlive/2024/bin/universal-darwin/tlmgr"
+        elif [ -x "/usr/local/texlive/2023/bin/universal-darwin/tlmgr" ]; then
+          TLMGR="/usr/local/texlive/2023/bin/universal-darwin/tlmgr"
+        else
+          TLMGR=$(which tlmgr 2>/dev/null)
+        fi
+        
+        if [ -z "$TLMGR" ] || [ ! -x "$TLMGR" ]; then
+          echo "Error: tlmgr not found. Please ensure BasicTeX is installed."
+          exit 1
+        fi
+        
+        echo "Found tlmgr at: $TLMGR"
+        sudo "$TLMGR" update --self
+        sudo "$TLMGR" install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck framed
+        echo "LaTeX packages installed"
 
   setup-latex-linux:
     internal: true
