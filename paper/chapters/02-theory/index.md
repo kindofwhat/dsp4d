@@ -1,9 +1,5 @@
 # Theory / State of Research
 
-## Large Language Models and Scaling Laws
-
-<!-- Background on LLM capabilities and how they scale with size -->
-
 ## Context Engineering Strategies
 
 ### Few-Shot Learning
@@ -13,12 +9,10 @@ examples provided in the prompt [@brown2020language].
 
 ### Retrieval-Augmented Generation
 
-<!-- RAG background -->
+Short description what it is, and why we did NOT use it.
 
-### Long-Context Approaches
 
-<!-- Long context windows background -->
+## Prior Work
 
-## Medical Document Processing and German Clinical NLP
 
 <!-- Prior work on medical NLP, specifically referencing GraSCCo -->

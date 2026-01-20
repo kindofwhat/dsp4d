@@ -1,25 +1,10 @@
 # Results
 
-## Classification Task
+## Impact of LLM Size
 
-<!-- Results of document classification experiments -->
-
-## Action Generation Task
-
-<!-- Results of clinical action generation experiments -->
-
-### Breakpoint Analysis
-
-<!-- Where do models fail? At what complexity? -->
-
-### Size vs. Accuracy Trade-offs
-
-<!-- Main findings with tables and figures -->
+Compare the metrics including latency and inference cost.
 
 ## Impact of Context Engineering
 
-<!-- How much does few-shot/RAG help smaller models? -->
+Compare the context engineering strategies for each model.
 
-## Deployment Viability
-
-<!-- Can these models run on Raspberry Pi, in browser? -->
