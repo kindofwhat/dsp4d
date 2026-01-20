@@ -1,11 +1,34 @@
 ---
+# =============================================================================
+# BFH Thesis Metadata
+# =============================================================================
 title: "Optimal LLM Size for Medical Document Classification Using Context Engineering"
 subtitle: "Data Sovereignty Procedures for Doctors (DSP4D)"
+
+# Author information
 author:
-  - name: Your Name
-    affiliation: Bern University of Applied Sciences (BFH)
-    email: your.email@bfh.ch
-date: 2025
+  - Christian Haegler
+
+# BFH-specific metadata
+thesis-type: "Semesterarbeit"
+studiengang: "CAS Generative KI"
+betreuer: "[Betreuer einfügen]"
+auftraggeber: "[Auftraggeber einfügen]"
+experte: "[Experte einfügen]"
+date: "2025"
+
+# Department shown in footer
+department: "Departement Technik und Informatik"
+
+# Assets
+logo: "assets/bfh-logo.jpg"
+# cover-image: "assets/cover.jpg"  # Optional cover image
+
+# Document options
+toc: true
+declaration: true
+
+# Abstract / Management Summary
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size
   required for reliable medical document classification and clinical action
@@ -39,13 +62,7 @@ actions?*
 2. How do different context engineering strategies affect the size-accuracy trade-off?
 3. Can sub-3B parameter models achieve clinical safety standards with appropriate context?
 
-## Contributions
-
-- A systematic evaluation framework for medical document classification with LLMs
-- Comparative analysis of context engineering strategies (few-shot, RAG, long-context)
-- Practical deployment recommendations for edge devices
-
-# Background
+# Theory / State of Research
 
 ## Large Language Models and Scaling Laws
 
@@ -66,9 +83,9 @@ examples provided in the prompt [@brown2020language].
 
 <!-- Long context windows background -->
 
-## Medical Document Processing
+## Medical Document Processing and German Clinical NLP
 
-<!-- Prior work on medical NLP -->
+<!-- Prior work on medical NLP, specifically referencing GraSCCo -->
 
 # Methodology
 
@@ -102,7 +119,7 @@ The corpus provides a diverse set of clinical scenarios, which we use to evaluat
 - **Action Appropriateness** — Clinical validity of suggested actions
 - **Latency** — Inference time on target hardware
 
-# Experiments
+# Results
 
 ## Classification Task
 
@@ -112,13 +129,11 @@ The corpus provides a diverse set of clinical scenarios, which we use to evaluat
 
 <!-- Results of clinical action generation experiments -->
 
-## Breakpoint Analysis
+### Breakpoint Analysis
 
 <!-- Where do models fail? At what complexity? -->
 
-# Results
-
-## Size vs. Accuracy Trade-offs
+### Size vs. Accuracy Trade-offs
 
 <!-- Main findings with tables and figures -->
 
@@ -130,7 +145,7 @@ The corpus provides a diverse set of clinical scenarios, which we use to evaluat
 
 <!-- Can these models run on Raspberry Pi, in browser? -->
 
-# Discussion
+# Discussion / Conclusion
 
 ## Implications for Clinical Practice
 
@@ -144,15 +159,44 @@ The corpus provides a diverse set of clinical scenarios, which we use to evaluat
 
 <!-- Next steps -->
 
-# Conclusion
+# List of Figures {.unnumbered}
 
-<!-- Summary of findings and recommendations -->
+<!-- Will be auto-generated if using proper figure captions -->
 
-# Data Availability
+# List of Tables {.unnumbered}
 
-The datasets generated and/or analyzed during the current study are available in the Zenodo repository: **Graz Synthetic Clinical text Corpus (GraSCCo) v2** [@GraSCCo_PII_V2_2025].
+<!-- Will be auto-generated if using proper table captions -->
 
-# References
+# Glossary {.unnumbered}
+
+**Context Engineering**
+: The practice of designing prompts and providing relevant information to improve LLM performance on specific tasks.
+
+**Edge Deployment**
+: Running machine learning models locally on devices rather than in the cloud.
+
+**Few-Shot Learning**
+: Providing a small number of examples in the prompt to guide model behavior.
+
+**GraSCCo**
+: Graz Synthetic Clinical text Corpus — a German clinical text corpus for NLP research.
+
+**RAG (Retrieval-Augmented Generation)**
+: A technique that combines information retrieval with text generation to improve accuracy.
+
+# References {.unnumbered}
 
 ::: {#refs}
 :::
+
+# Appendix {.unnumbered}
+
+<!-- Additional materials, detailed results, code snippets -->
+
+## A. Prompt Templates {.unnumbered}
+
+<!-- Example prompts used in experiments -->
+
+## B. Detailed Results {.unnumbered}
+
+<!-- Extended result tables -->

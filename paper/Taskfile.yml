@@ -58,7 +58,7 @@ tasks:
     internal: true
     cmds:
       - sudo /Library/TeX/texbin/tlmgr update --self
-      - sudo /Library/TeX/texbin/tlmgr install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck
+      - sudo /Library/TeX/texbin/tlmgr install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck framed
       - echo "LaTeX packages installed"
 
   setup-latex-linux:
@@ -73,31 +73,57 @@ tasks:
 
   # === Build (cross-platform) ===
   build:
-    desc: Build PDF from paper
+    desc: Build PDF from paper (BFH thesis template)
     deps: [ensure-output-dir]
     cmds:
-      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
+      - >
+        PATH="/Library/TeX/texbin:$PATH"
+        pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        {{.PAPER_DIR}}/paper.md
+        -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
       - echo "PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf"
 
   build-draft:
     desc: Build PDF without bibliography processing (faster)
     deps: [ensure-output-dir]
     cmds:
-      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --citeproc=false {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf
+      - >
+        PATH="/Library/TeX/texbin:$PATH"
+        pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --citeproc=false
+        {{.PAPER_DIR}}/paper.md
+        -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf
       - echo "Draft PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf"
 
   build-word:
-    desc: Build Word document
+    desc: Build Word document with custom reference template
     deps: [ensure-output-dir]
     cmds:
-      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
-      - echo "Word document created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx"
+      - >
+        pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        --to docx
+        --reference-doc={{.PAPER_DIR}}/reference-styles.docx
+        {{.PAPER_DIR}}/paper.md
+        {{.PAPER_DIR}}/research/existing-work/README.md
+        {{.PAPER_DIR}}/document-types/README.md
+        {{.PAPER_DIR}}/evaluation/README.md
+        {{.PAPER_DIR}}/few-shot-examples/README.md
+        -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
+      - echo "Word document created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx using template"
 
   build-html:
     desc: Build HTML version
     deps: [ensure-output-dir]
     cmds:
-      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --standalone --toc {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
+      - >
+        pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        --to html
+        --standalone --toc
+        {{.PAPER_DIR}}/paper.md
+        {{.PAPER_DIR}}/research/existing-work/README.md
+        {{.PAPER_DIR}}/document-types/README.md
+        {{.PAPER_DIR}}/evaluation/README.md
+        {{.PAPER_DIR}}/few-shot-examples/README.md
+        -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
       - echo "HTML created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html"
 
   # === Development ===
