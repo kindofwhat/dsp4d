@@ -6,25 +6,30 @@ Finding the minimum viable LLM size for classifying medical documents and genera
 
 ## Project Overview
 
-| | |
-|---|---|
-| **Duration** | 3 months (13 weeks) |
-| **Effort** | 100 hours |
-| **Institution** | Bern University of Applied Sciences (BFH) |
+**Duration:** 3 months (13 weeks)
+**Total Effort:** 100 hours
+**Institution:** Bern University of Applied Sciences (BFH)
+**Dataset:** [Graz Synthetic Clinical text Corpus (GraSCCo) v2](https://doi.org/10.5281/zenodo.15747389)
 
-### Research Question
+### Core Research Question
 
-> *"What is the smallest LLM that can reliably classify medical documents and generate appropriate clinical actions?"*
+> **"What is the smallest LLM that can reliably classify clinical findings and generate appropriate clinical actions using context engineering on the GraSCCo corpus?"**
 
-### Approach
+### The Challenge
 
-We evaluate multiple context engineering strategies:
-- **Zero-Shot** — Instructions only (baseline)
-- **Few-Shot** — 1-5 curated examples in prompt
-- **RAG** — Retrieved guidelines/similar cases
-- **Long-Context** — Full context where window permits
+Doctors are overwhelmed with clinical documentation. We use the **GraSCCo** corpus—a publicly shareable, multiply-alienated German clinical text corpus—to simulate real-world scenarios where a system must:
+1. **Identify clinical intent** and document classification.
+2. **Extract key information** (diagnosis, findings, urgency).
+3. **Generate appropriate action** (schedule surgery, order follow-up, refer to specialist).
 
-For detailed project plan, timeline, and methodology, see **[project.md](project.md)**.
+**Critical Requirements:**
+- **High accuracy** (medical correctness is critical)
+- **Data sovereignty** (on-device/local deployment, no cloud)
+- **German Language Support** (GraSCCo is in German)
+- **Fast inference** (real-time assistance)
+- **Small footprint** (edge devices, Raspberry Pi, WebLLM in browser)
+
+### Approach: Context Engineering Strategies
 
 ## Quick Start
 

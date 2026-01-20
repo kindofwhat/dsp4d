@@ -16,7 +16,7 @@ number-sections: true
 
 # Citation processing
 citeproc: true
-bibliography: paper/references.bib
+bibliography: references.bib
 # Uncomment and adjust for specific citation style:
 # csl: https://raw.githubusercontent.com/citation-style-language/styles/master/ieee.csl
 

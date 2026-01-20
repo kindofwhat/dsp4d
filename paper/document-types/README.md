@@ -1,59 +1,21 @@
-# Document Types & Workflows
+# Document Types & Workflows (GraSCCo Based)
 
-**Goal:** Define 5-10 medical document types with clear type → action workflows
+**Goal:** Map clinical narratives from the **Graz Synthetic Clinical text Corpus (GraSCCo)** to clear classification types and action workflows.
 
 ## Overview
 
-This directory contains definitions of medical document types and their associated clinical workflows. Each document type has:
-1. **Definition**: What the document is, what it contains
-2. **Workflow**: Type → Action mappings (what actions to take based on findings)
-3. **Examples**: Sample documents (anonymized/synthetic)
+This directory contains definitions of clinical document types and associated workflows as represented in the GraSCCo corpus. GraSCCo provides synthetic German clinical texts that allow for realistic evaluation of:
+1. **Clinical Findings**: Extraction of diagnoses and symptoms.
+2. **Workflow Actions**: Determining the next clinical step (e.g., follow-up, surgery).
 
-## Document Types (Target: 5-10)
+## Document Types in GraSCCo
+testtest
 
-### Confirmed Types
-
-1. **X-Ray Results** (`definitions/x-ray-results.md`)
-   - Plain radiography findings
-   - Actions: Surgery, specialist referral, follow-up imaging, no action
-
-2. **Lab Reports** (`definitions/lab-reports.md`)
-   - Blood work, urinalysis, cultures, metabolic panels
-   - Actions: Urgent hospitalization, medication adjustment, follow-up, no action
-
-3. **Medical Imaging Reports** (`definitions/imaging-reports.md`)
-   - CT, MRI, ultrasound findings
-   - Actions: Surgery, specialist referral, follow-up imaging, no action
-
-4. **Prescriptions** (`definitions/prescriptions.md`)
-   - Medication orders, renewals, changes
-   - Actions: Approve, clarify, deny/alternative, forward to specialist
-
-5. **Referrals** (`definitions/referrals.md`)
-   - Specialist consultation requests
-   - Actions: Approve, request tests first, deny/manage, redirect specialist
-
-### Potential Additional Types (expand to 10)
-
-6. **Pathology Reports**
-   - Biopsy results, tissue analysis
-   - Actions: Oncology referral, surgery, monitoring, benign/no action
-
-7. **ECG/EKG Results**
-   - Electrocardiogram findings
-   - Actions: Cardiology urgent, medication, follow-up ECG, normal
-
-8. **Consultation Notes**
-   - Specialist visit summaries
-   - Actions: Implement recommendations, schedule follow-up, order tests
-
-9. **Discharge Summaries**
-   - Hospital discharge instructions
-   - Actions: Schedule follow-up, adjust medications, order home health
-
-10. **Vaccine Records**
-    - Immunization documentation
-    - Actions: Update records, schedule boosters, no action needed
+We utilize the categorization provided by GraSCCo (or derived from its clinical narratives), focusing on:
+- **Discharge Summaries (Entlassungsbriefe)**
+- **Diagnostic Reports**
+- **Clinical Progress Notes**
+- (Additional types as extracted from the Zenodo dataset)
 
 ## Workflow Structure
 

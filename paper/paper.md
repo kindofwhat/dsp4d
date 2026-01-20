@@ -72,15 +72,11 @@ examples provided in the prompt [@brown2020language].
 
 # Methodology
 
-## Document Types
+## Data Source: GraSCCo
 
-We evaluate five medical document categories:
+Instead of generic document types, this research utilizes the **Graz Synthetic Clinical text Corpus (GraSCCo)** [@GraSCCo_PII_V2_2025; @modersohn2022grascco]. GraSCCo is the first publicly shareable, multiply-alienated German clinical text corpus, designed specifically for clinical NLP tasks without compromising patient privacy.
 
-1. **X-Ray Results** — Radiology reports with findings
-2. **Lab Reports** — Blood work, urinalysis, cultures
-3. **Medical Imaging** — CT, MRI, ultrasound reports
-4. **Prescriptions** — Medication orders
-5. **Referrals** — Specialist consultation requests
+The corpus provides a diverse set of clinical scenarios, which we use to evaluate the models' ability to classify document intent and generate appropriate clinical actions based on German-language clinical narratives.
 
 ## Experimental Setup
 
@@ -151,6 +147,10 @@ We evaluate five medical document categories:
 # Conclusion
 
 <!-- Summary of findings and recommendations -->
+
+# Data Availability
+
+The datasets generated and/or analyzed during the current study are available in the Zenodo repository: **Graz Synthetic Clinical text Corpus (GraSCCo) v2** [@GraSCCo_PII_V2_2025].
 
 # References
 

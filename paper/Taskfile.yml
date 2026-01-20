@@ -1,0 +1,195 @@
+version: '3'
+
+vars:
+  PAPER_DIR: .
+  OUTPUT_DIR: output
+  PAPER_NAME: dsp4d-paper
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  # === Setup (platform-specific) ===
+  setup:
+    desc: Install required dependencies (pandoc, LaTeX)
+    cmds:
+      - task: setup-{{OS}}
+
+  setup-darwin:
+    internal: true
+    cmds:
+      - echo "Installing pandoc..."
+      - brew install pandoc
+      - echo "Installing BasicTeX..."
+      - brew install --cask basictex
+      - echo ""
+      - echo "Open a NEW terminal, then run 'task setup-latex'"
+    status:
+      - which pandoc
+
+  setup-linux:
+    internal: true
+    cmds:
+      - echo "Installing pandoc and texlive..."
+      - sudo apt-get update
+      - sudo apt-get install -y pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+      - echo "Setup complete"
+    status:
+      - which pandoc
+
+  setup-windows:
+    internal: true
+    cmds:
+      - echo "Installing pandoc and MiKTeX via Chocolatey..."
+      - choco install pandoc miktex -y
+      - echo ""
+      - echo "Restart your terminal, then run 'task setup-latex'"
+    status:
+      - where pandoc
+
+  setup-latex:
+    desc: Install required LaTeX packages
+    cmds:
+      - task: setup-latex-{{OS}}
+
+  setup-latex-darwin:
+    internal: true
+    cmds:
+      - sudo /Library/TeX/texbin/tlmgr update --self
+      - sudo /Library/TeX/texbin/tlmgr install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck
+      - echo "LaTeX packages installed"
+
+  setup-latex-linux:
+    internal: true
+    cmds:
+      - echo "LaTeX packages already included in texlive-latex-extra"
+
+  setup-latex-windows:
+    internal: true
+    cmds:
+      - echo "MiKTeX will auto-install packages on first use"
+
+  # === Build (cross-platform) ===
+  build:
+    desc: Build PDF from paper
+    deps: [ensure-output-dir]
+    cmds:
+      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
+      - echo "PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf"
+
+  build-draft:
+    desc: Build PDF without bibliography processing (faster)
+    deps: [ensure-output-dir]
+    cmds:
+      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --citeproc=false {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf
+      - echo "Draft PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf"
+
+  build-word:
+    desc: Build Word document
+    deps: [ensure-output-dir]
+    cmds:
+      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
+      - echo "Word document created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx"
+
+  build-html:
+    desc: Build HTML version
+    deps: [ensure-output-dir]
+    cmds:
+      - pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --standalone --toc {{.PAPER_DIR}}/paper.md -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
+      - echo "HTML created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html"
+
+  # === Development ===
+  watch:
+    desc: Watch for changes and rebuild PDF
+    cmds:
+      - task: watch-{{OS}}
+
+  watch-darwin:
+    internal: true
+    cmds:
+      - echo "Watching {{.PAPER_DIR}}/ recursively... (requires 'brew install fswatch')"
+      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}} | xargs -n1 -I{} task build
+
+  watch-linux:
+    internal: true
+    cmds:
+      - echo "Watching {{.PAPER_DIR}}/ recursively... (requires 'apt install inotify-tools')"
+      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}; do task build; done
+
+  watch-windows:
+    internal: true
+    cmds:
+      - echo "File watching not directly supported on Windows."
+      - echo "Consider using VS Code with 'Run on Save' extension, or run 'task build' manually."
+
+  open:
+    desc: Open the PDF
+    cmds:
+      - task: open-{{OS}}
+
+  open-darwin:
+    internal: true
+    cmds:
+      - open {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
+
+  open-linux:
+    internal: true
+    cmds:
+      - xdg-open {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
+
+  open-windows:
+    internal: true
+    cmds:
+      - start {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
+
+  # === Utilities ===
+  clean:
+    desc: Remove generated files
+    cmds:
+      - task: clean-{{OS}}
+
+  clean-darwin:
+    internal: true
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}
+      - echo "Cleaned output directory"
+
+  clean-linux:
+    internal: true
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}
+      - echo "Cleaned output directory"
+
+  clean-windows:
+    internal: true
+    cmds:
+      - cmd /c "if exist {{.OUTPUT_DIR}} rmdir /s /q {{.OUTPUT_DIR}}"
+      - echo "Cleaned output directory"
+
+  ensure-output-dir:
+    internal: true
+    cmds:
+      - task: ensure-output-dir-{{OS}}
+
+  ensure-output-dir-darwin:
+    internal: true
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+    status:
+      - test -d {{.OUTPUT_DIR}}
+
+  ensure-output-dir-linux:
+    internal: true
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+    status:
+      - test -d {{.OUTPUT_DIR}}
+
+  ensure-output-dir-windows:
+    internal: true
+    cmds:
+      - cmd /c "if not exist {{.OUTPUT_DIR}} mkdir {{.OUTPUT_DIR}}"
+    status:
+      - cmd /c "if exist {{.OUTPUT_DIR}} exit 0"

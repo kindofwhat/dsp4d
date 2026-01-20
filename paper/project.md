@@ -32,20 +32,20 @@
 **Duration:** Weeks 4-6  
 **Effort:** ~25 hours
 
-### Week 4: Define Test Scenarios (10 hours)
-- Create 3-4 domain-specific test scenarios (e.g., medical diagnosis assistance, financial advisory, legal document analysis).
-- Define "sensitivity levels" for data classification.
-- Establish success criteria for each scenario.
+### Week 4: Dataset Analysis (10 hours)
+- Explore the **Graz Synthetic Clinical text Corpus (GraSCCo)** (Zenodo: 15747389).
+- Map GraSCCo clinical narratives to classification tasks and action generation workflows.
+- Establish success criteria for extraction and action suggestion based on the corpus structure.
 
-### Week 5-6: Golden Dataset Creation (15 hours)
-- Develop 50-100 test questions per scenario with verified answers.
-- Create relevance-graded document sets for RAG testing.
+### Week 5-6: Golden Dataset Extraction (15 hours)
+- Extract 100-200 test cases from GraSCCo with verified clinical outcomes.
+- Prepare relevance-graded document sets from the corpus for context engineering testing.
 - **Prepare Context Examples:**
-  - Curate high-quality "One-shot" and "Few-shot" examples for each domain.
+  - Curate high-quality examples from GraSCCo for Zero-shot, One-shot, and Few-shot prompting.
 - Define evaluation metrics:
   - **Accuracy metrics:** Exact match, F1, BLEU.
-  - **Context-specific:** Context relevance, answer faithfulness (RAG), adherence to examples (Few-shot).
-  - **Security:** Data leakage tests, prompt injection resistance.
+  - **Context-specific:** Context relevance, answer faithfulness, adherence to medical intent.
+  - **Security:** Data leakage tests (even on synthetic data), prompt injection resistance.
   - **Performance:** Latency, memory usage, throughput.
 
 ---
@@ -138,9 +138,8 @@
 - **Version Control**: Git for code and MLflow/Weights&Biases for experiment tracking.
 
 ### Dataset Requirements
-- Domain-specific test data (can use synthetic data for sensitive scenarios).
-- Document corpus for RAG testing (minimum 1000 documents per domain).
-- Curated set of domain-specific examples for Few-shot testing.
+- **Primary Corpus:** Graz Synthetic Clinical text Corpus (GraSCCo) (Zenodo 15747389).
+- Curated set of examples extracted from GraSCCo for Few-shot testing.
 
 ---
 
