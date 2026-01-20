@@ -1,0 +1,33 @@
+---
+title: "Optimal LLM Size for Medical Document Classification Using Context Engineering"
+subtitle: "Data Sovereignty Procedures for Doctors (DSP4D)"
+
+author:
+  - Christian Haegler
+
+thesis-type: "Semesterarbeit"
+studiengang: "CAS Generative KI"
+betreuer: "[Betreuer einfügen]"
+auftraggeber: "[Auftraggeber einfügen]"
+experte: "[Experte einfügen]"
+date: "2025"
+
+department: "Departement Technik und Informatik"
+
+logo: "assets/bfh-logo.jpg"
+
+toc: true
+declaration: true
+
+abstract: |
+  This paper investigates the minimum viable Large Language Model (LLM) size
+  required for reliable medical document classification and clinical action
+  generation. We evaluate multiple context engineering strategies—including
+  few-shot learning, retrieval-augmented generation (RAG), and long-context
+  approaches—to determine optimal trade-offs between model size, inference
+  cost, and clinical accuracy. Our experiments focus on edge deployment
+  scenarios where data sovereignty requirements mandate local processing.
+
+  **Keywords:** Large Language Models, Few-Shot Learning, Medical Document
+  Classification, Edge Deployment, Data Sovereignty
+---

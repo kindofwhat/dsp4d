@@ -79,7 +79,6 @@ tasks:
       - >
         PATH="/Library/TeX/texbin:$PATH"
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
-        {{.PAPER_DIR}}/paper.md
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
       - echo "PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf"
 
@@ -90,7 +89,6 @@ tasks:
       - >
         PATH="/Library/TeX/texbin:$PATH"
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --citeproc=false
-        {{.PAPER_DIR}}/paper.md
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf
       - echo "Draft PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf"
 
@@ -102,11 +100,6 @@ tasks:
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
         --to docx
         --reference-doc={{.PAPER_DIR}}/reference-styles.docx
-        {{.PAPER_DIR}}/paper.md
-        {{.PAPER_DIR}}/research/existing-work/README.md
-        {{.PAPER_DIR}}/document-types/README.md
-        {{.PAPER_DIR}}/evaluation/README.md
-        {{.PAPER_DIR}}/few-shot-examples/README.md
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
       - echo "Word document created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx using template"
 
@@ -118,11 +111,6 @@ tasks:
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
         --to html
         --standalone --toc
-        {{.PAPER_DIR}}/paper.md
-        {{.PAPER_DIR}}/research/existing-work/README.md
-        {{.PAPER_DIR}}/document-types/README.md
-        {{.PAPER_DIR}}/evaluation/README.md
-        {{.PAPER_DIR}}/few-shot-examples/README.md
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
       - echo "HTML created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html"
 
@@ -135,14 +123,14 @@ tasks:
   watch-darwin:
     internal: true
     cmds:
-      - echo "Watching {{.PAPER_DIR}}/ recursively... (requires 'brew install fswatch')"
-      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}} | xargs -n1 -I{} task build
+      - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'brew install fswatch')"
+      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/references.bib | xargs -n1 -I{} task build
 
   watch-linux:
     internal: true
     cmds:
-      - echo "Watching {{.PAPER_DIR}}/ recursively... (requires 'apt install inotify-tools')"
-      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}; do task build; done
+      - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'apt install inotify-tools')"
+      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}; do task build; done
 
   watch-windows:
     internal: true

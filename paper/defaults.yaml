@@ -12,6 +12,16 @@ pdf-engine: pdflatex
 # Custom BFH thesis template
 template: templates/bfh-thesis.tex
 
+# Input files (order matters - concatenated in sequence)
+input-files:
+  - chapters/00-frontmatter/metadata.yaml
+  - chapters/01-introduction/index.md
+  - chapters/02-theory/index.md
+  - chapters/03-methodology/index.md
+  - chapters/04-results/index.md
+  - chapters/05-discussion/index.md
+  - chapters/99-backmatter/index.md
+
 # Document settings
 standalone: true
 table-of-contents: true
