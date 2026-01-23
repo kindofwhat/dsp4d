@@ -34,12 +34,16 @@ tasks:
   setup-linux:
     internal: true
     cmds:
-      - echo "Installing pandoc and texlive..."
+      - echo "Installing dependencies..."
       - sudo apt-get update
-      - sudo apt-get install -y pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+      - sudo apt-get install -y wget texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-lang-german
+      - echo "Installing Pandoc 3.1.11.1..."
+      - wget -q https://github.com/jgm/pandoc/releases/download/3.1.11.1/pandoc-3.1.11.1-1-amd64.deb
+      - sudo dpkg -i pandoc-3.1.11.1-1-amd64.deb
+      - rm pandoc-3.1.11.1-1-amd64.deb
       - echo "Setup complete"
     status:
-      - which pandoc
+      - pandoc --version | grep "3.1.11.1"
 
   setup-windows:
     internal: true
