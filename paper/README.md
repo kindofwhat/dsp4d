@@ -2,66 +2,26 @@
 
 **Data Sovereignty Procedures for Doctors (DSP4D)**
 
+[📄 **Read the latest PDF**](https://kindofwhat.github.io/dsp4d/dsp4d-paper.pdf)
+
 Finding the minimum viable LLM size for classifying medical documents and generating clinical actions using context engineering strategies.
 
 ## Project Overview
-
-**Duration:** 3 months (13 weeks)
-**Total Effort:** 100 hours
-**Institution:** Bern University of Applied Sciences (BFH)
-**Dataset:** [Graz Synthetic Clinical text Corpus (GraSCCo) v2](https://doi.org/10.5281/zenodo.15747389)
-
-### Core Research Question
-
-> **"What is the smallest LLM that can reliably classify clinical findings and generate appropriate clinical actions using context engineering on the GraSCCo corpus?"**
-
-### The Challenge
-
-Doctors are overwhelmed with clinical documentation. We use the **GraSCCo** corpus—a publicly shareable, multiply-alienated German clinical text corpus—to simulate real-world scenarios where a system must:
-1. **Identify clinical intent** and document classification.
-2. **Extract key information** (diagnosis, findings, urgency).
-3. **Generate appropriate action** (schedule surgery, order follow-up, refer to specialist).
-
-**Critical Requirements:**
-- **High accuracy** (medical correctness is critical)
-- **Data sovereignty** (on-device/local deployment, no cloud)
-- **German Language Support** (GraSCCo is in German)
-- **Fast inference** (real-time assistance)
-- **Small footprint** (edge devices, Raspberry Pi, WebLLM in browser)
-
-### Approach: Context Engineering Strategies
-
-## Quick Start
-
-### Prerequisites
-
-- [Homebrew](https://brew.sh/) (macOS)
-- [Task](https://taskfile.dev/) — `brew install go-task/tap/go-task`
-
-### Setup
-
-```bash
-# Install pandoc and LaTeX
-task setup
-task setup-latex
-```
-
-### Build Paper
-
-```bash
-task build          # Build PDF
-task open           # Open PDF
-task build:word     # Build Word document
-task build:draft    # Fast build (no citations)
-task watch          # Auto-rebuild on changes
-```
-
+...
 ### Available Tasks
 
 ```bash
 task                # List all available tasks
 task clean          # Remove generated files
 ```
+
+## Continuous Integration
+
+This project uses **GitHub Actions** to automatically build the paper.
+
+- **Automatic Build:** Every push to `main` or `doc/paper` triggers a PDF build.
+- **Artifacts:** The resulting PDF is stored as a build artifact in the "Actions" tab.
+- **Deployment:** The latest version is automatically published to [GitHub Pages](https://kindofwhat.github.io/dsp4d/dsp4d-paper.pdf).
 
 ## Project Structure
 
