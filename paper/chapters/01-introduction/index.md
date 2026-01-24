@@ -1,16 +1,18 @@
 # Introduction
 
-Doctors face an increasing volume of medical documents requiring timely review
-and action. After office hours, the challenge of efficiently processing X-ray
-results, lab reports, and specialist referrals becomes critical for patient care.
+The healthcare sector is currently operating under substantial strain, compelled to enhance operational efficiency while simultaneously upholding rigorous standards of data privacy and patient safety. The workload borne by general practitioners (GPs) has intensified markedly due to the proliferation of administrative responsibilities. Following direct patient consultations, practitioners frequently dedicate hours to the scrutiny and triage of incoming documentation—ranging from laboratory reports and referrals to insurance correspondence—as well as the drafting of replies and the maintenance of patient records. This administrative burden results in significant latency and cognitive fatigue, typically accumulating during the period subsequent to clinic closure.
 
-This research addresses a fundamental question: *What is the smallest LLM that
-can reliably classify medical documents and generate appropriate clinical
-actions?*
+The core strategic challenge, therefore, lies in automating these documentation and correspondence workflows to alleviate physician workload, without compromising Data Sovereignty Procedures. Conventional cloud-based solutions present considerable regulatory complexity or are explicitly prohibited in many jurisdictions due to the acute sensitivity of medical data. Consequently, there is an explicit requirement to engineer solutions that necessitate neither reliance on external online services nor the integration of prohibitively expensive hardware infrastructure.
+
+The emergent technical opportunity to resolve this dichotomy is found within Generative Artificial Intelligence (GenAI). Through the deployment of locally hosted Large Language Models (LLMs), it becomes feasible to deliver high-performance AI functionality in a decentralised manner, entirely severed from external server connectivity. This architecture facilitates the strict implementation of Data Sovereignty Procedures directly on the physician's local workstation. This project, therefore, addresses the critical imperative to identify a resource-efficient paradigm that enables the viable deployment of GenAI on standard local hardware, bridging the gap between advanced automation and strict data governance.
   
 ## Motivation
 
-<!-- Describe the problem and why it matters -->
+The operational reality of modern general practice is increasingly characterised by a disproportionate imbalance between clinical patient care and administrative overhead. Post-consultation hours are frequently dominated by the cognitive burden of reviewing complex medical documentation and generating necessary correspondence. This systemic inefficiency does not merely represent a temporal inconvenience; it contributes significantly to physician burnout and reduces the net time available for patient interaction. Consequently, there is an urgent imperative to deploy automated systems capable of absorbing this clerical workload. However, the integration of such automation creates a complex technological dilemma regarding the ethical and legal frameworks governing medical confidentiality.
+
+The fundamental problem inhibiting the widespread adoption of Generative AI in this domain is the architectural reliance of current State-of-the-Art (SOTA) solutions on cloud infrastructure. While commercial Large Language Models (LLMs) offer the requisite reasoning capabilities to triage and summarise medical data, their deployment typically necessitates the transmission of sensitive Patient Health Information (PHI) to third-party servers. This architecture presents an unacceptable risk profile regarding Data Sovereignty Procedures. In many jurisdictions, sending unredacted medical records to external API endpoints violates strict data protection regulations. Thus, practitioners face a dichotomy: utilise powerful cloud-based tools at the risk of regulatory non-compliance, or forego AI assistance entirely. There is a distinct lack of validated frameworks that enable the deployment of effective, high-quality AI models within the secure environment of a local practice without necessitating prohibitively expensive enterprise-grade hardware.
+
+Addressing this technological and regulatory gap, this thesis centres on the critical question of how an algorithmic selection framework can be developed and validated to identify the most resource-efficient Large Language Model (LLM) capable of operating locally. The objective is to relieve physicians of documentation and correspondence tasks while strictly maintaining data sovereignty. This inquiry implies the necessity of establishing a balance between computational efficiency—specifically regarding inference speed and memory footprint—and semantic accuracy, ensuring that the shift to decentralised processing does not result in a degradation of output reliability.
 
 ## Research Questions
 
