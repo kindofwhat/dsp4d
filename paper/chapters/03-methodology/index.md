@@ -6,6 +6,8 @@ The primary objective of this study is the development of an algorithmic selecti
 
 ## Procedure
 
+![four-phase methodological approach](../../assets/03-Methodology-Overview.png)
+
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
 ### Phase I: Dataset Curation and Establishment of Ground Truth
