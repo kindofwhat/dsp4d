@@ -119,5 +119,3 @@ Recent work specifically addresses SLM deployment on resource-constrained device
 
 These developments frame the research question: given hardware constraints of on-device deployment for sensitive medical data, what is the smallest pre-trained model that can reliably perform clinical document classification? The answer depends not only on parameter count, but also on model generation and — as the following section explores — context engineering strategies that can augment smaller models at inference time.
 
-
-## Context Engineering Strategies
