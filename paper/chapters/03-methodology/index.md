@@ -69,6 +69,10 @@ TBD by Beni
 
 ## Evaluation Metrics
 
+### Test Setup
+
+Use DeepEval to evaluate the respective models responses
+
 - **Classification Accuracy** — Correct document type identification
 - **Action Appropriateness** — Clinical validity of suggested actions
 - **Latency** — Inference time on target hardware

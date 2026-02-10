@@ -3,6 +3,7 @@ import os
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from urllib.parse import urlparse
 
 BIB_FILE = 'references.bib'
@@ -73,6 +74,32 @@ def download_file(url, filepath):
         print(f"Error downloading {url}: {e}")
     return False
 
+
+def download_iospress_pdf(pdf_id, filepath):
+    try:
+        url = 'https://ebooks.iospress.nl/Download/Pdf'
+        print(f"Downloading {url} (id={pdf_id}) to {filepath}...")
+        data = urllib.parse.urlencode({'id': str(pdf_id)}).encode('ascii')
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            method='POST'
+        )
+        with urllib.request.urlopen(req) as response:
+            with open(filepath, 'wb') as out_file:
+                out_file.write(response.read())
+        print(f"Success: {filepath}")
+        return True
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error {e.code}: iospress id={pdf_id}")
+    except Exception as e:
+        print(f"Error downloading iospress id={pdf_id}: {e}")
+    return False
+
 def main():
     with open(BIB_FILE, 'r') as f:
         content = f.read()
@@ -91,15 +118,18 @@ def main():
         'fu2024gptscore': 'https://arxiv.org/pdf/2302.04166.pdf',
         'zhang2020bertscore': 'https://arxiv.org/pdf/1904.09675.pdf',
         'sellam2020bleurt': 'https://arxiv.org/pdf/2004.04696.pdf',
-        'zhao2019moverscore': 'https://arxiv.org/pdf/1909.02622.pdf',
+        'zhao2019moverscore': 'https://aclanthology.org/D19-1053.pdf',
         'papineni2002bleu': 'https://aclanthology.org/P02-1040.pdf',
         'lin2004rouge': 'https://aclanthology.org/W04-1013.pdf',
         'banerjee2005meteor': 'https://aclanthology.org/W05-0909.pdf',
-        'clark2019sentence': 'https://aclanthology.org/P19-1271.pdf',
+        'clark2019sentence': 'https://aclanthology.org/P19-1264.pdf',
         'carlini2021extracting': 'https://arxiv.org/pdf/2012.07805.pdf',
         'zhao2021calibrate': 'https://arxiv.org/pdf/2102.09690.pdf',
         'kusner2015word': 'http://proceedings.mlr.press/v37/kusnerb15.pdf',
-        'modersohn2022grascco': 'https://ebooks.iospress.nl/pdf/doi/10.3233/SHTI220805'
+        'modersohn2022grascco': {
+            'type': 'iospress',
+            'id': '60437'
+        }
     }
     
     for ref in refs:
@@ -113,10 +143,13 @@ def main():
             continue
             
         url = None
+        manual_strategy = None
         
         # Strategy 0: Manual Mapping
         if key in MANUAL_MAPPING:
-            url = MANUAL_MAPPING[key]
+            manual_strategy = MANUAL_MAPPING[key]
+            if isinstance(manual_strategy, str):
+                url = manual_strategy
         
         # Strategy 1: arXiv ID
         if 'arxiv_id' in ref:
@@ -126,10 +159,20 @@ def main():
         elif 'url' in ref:
             # Check if likely a PDF or specific repository that serves PDFs
             u = ref['url']
-            if u.lower().endswith('.pdf'):
+            parsed = urlparse(u)
+            path_lower = parsed.path.lower()
+            if path_lower.endswith('.pdf') or path_lower.endswith('/pdf'):
                 url = u
             elif 'arxiv.org' in u and 'abs' in u:
                 url = u.replace('abs', 'pdf') + '.pdf'
+
+        # Strategy 3: Manual special strategies
+        if url is None and isinstance(manual_strategy, dict):
+            if manual_strategy.get('type') == 'iospress' and manual_strategy.get('id'):
+                success = download_iospress_pdf(manual_strategy['id'], filename)
+                if success:
+                    time.sleep(1)
+                continue
         
         if url:
             success = download_file(url, filename)
