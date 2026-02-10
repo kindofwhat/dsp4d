@@ -1,5 +1,7 @@
 import re
 import os
+import platform
+import subprocess
 import time
 import urllib.request
 import urllib.error
@@ -11,6 +13,11 @@ OUT_DIR = 'references'
 
 if not os.path.exists(OUT_DIR):
     os.makedirs(OUT_DIR)
+
+def strip_quarantine(filepath):
+    """Remove macOS quarantine/provenance attributes so PDF viewers can open linked files."""
+    if platform.system() == 'Darwin':
+        subprocess.run(['xattr', '-c', filepath], capture_output=True)
 
 def get_references(bib_content):
     # simple state machine to parse bib entries
@@ -66,6 +73,7 @@ def download_file(url, filepath):
         with urllib.request.urlopen(req) as response:
             with open(filepath, 'wb') as out_file:
                 out_file.write(response.read())
+        strip_quarantine(filepath)
         print(f"Success: {filepath}")
         return True
     except urllib.error.HTTPError as e:
@@ -92,6 +100,7 @@ def download_iospress_pdf(pdf_id, filepath):
         with urllib.request.urlopen(req) as response:
             with open(filepath, 'wb') as out_file:
                 out_file.write(response.read())
+        strip_quarantine(filepath)
         print(f"Success: {filepath}")
         return True
     except urllib.error.HTTPError as e:

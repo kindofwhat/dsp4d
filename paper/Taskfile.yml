@@ -4,6 +4,8 @@ vars:
   PAPER_DIR: .
   OUTPUT_DIR: output
   PAPER_NAME: dsp4d-paper
+  WITH_LINKS: "false"
+  LINK_DEFAULTS: '{{if eq .WITH_LINKS "true"}}--defaults=defaults-with-links.yaml{{end}}'
 
 tasks:
   default:
@@ -106,6 +108,7 @@ tasks:
       - >
         PATH="/Library/TeX/texbin:$PATH"
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        {{.LINK_DEFAULTS}}
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
       - echo "PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf"
 
@@ -125,6 +128,7 @@ tasks:
     cmds:
       - >
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        {{.LINK_DEFAULTS}}
         --to docx
         --reference-doc={{.PAPER_DIR}}/reference-styles.docx
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
@@ -136,6 +140,7 @@ tasks:
     cmds:
       - >
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
+        {{.LINK_DEFAULTS}}
         --to html
         --standalone --toc
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
@@ -151,13 +156,13 @@ tasks:
     internal: true
     cmds:
       - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'brew install fswatch')"
-      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/references.bib | xargs -n1 -I{} task build
+      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/references.bib | xargs -n1 -I{} task build WITH_LINKS={{.WITH_LINKS}}
 
   watch-linux:
     internal: true
     cmds:
       - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'apt install inotify-tools')"
-      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}; do task build; done
+      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}; do task build WITH_LINKS={{.WITH_LINKS}}; done
 
   watch-windows:
     internal: true
