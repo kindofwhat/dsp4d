@@ -1,0 +1,12 @@
+# Override for WITH_LINKS mode.
+# Replaces auto-citeproc with explicit filter ordering so the
+# link-references filter can post-process citation links.
+
+citeproc: false
+
+metadata:
+  link-citations: true
+
+filters:
+  - citeproc
+  - filters/link-references.lua

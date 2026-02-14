@@ -6,6 +6,8 @@ The primary objective of this study is the development of an algorithmic selecti
 
 ## Procedure
 
+![four-phase methodological approach](assets/03-Methodology-Overview.png)
+
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
 ### Phase I: Dataset Curation and Establishment of Ground Truth
@@ -127,6 +129,10 @@ This acts as an automated **"Four-Eyes Principle"** (*Vier-Augen-Prinzip*), mimi
 
 
 ## Evaluation Metrics
+
+### Test Setup
+
+Use DeepEval to evaluate the respective models responses
 
 - **Classification Accuracy** — Correct document type identification
 - **Action Appropriateness** — Clinical validity of suggested actions
