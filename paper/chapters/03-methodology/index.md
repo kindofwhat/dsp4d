@@ -37,8 +37,46 @@ The task we give the models is to update a patients health record (HBA) based on
 
 ## Golden Answer Generation
 
-Due to lack of access to expert medical knowledge, we generate golden answers as ground truth for the models by asking a state of the art LLM to create those.
-We then validated at least a subset of those answers with a medical expert.
+Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses is undergo evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Ansers) additionally suitable for benchmarking smaller models.
+
+### Selection of Prompting Technique: Chain-of-Thought (CoT)
+To generate these Silver Answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
+- Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
+- Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
+- Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring 
+
+While techniques like Self-Consistency or Multi-Persona Prompting offer higher reliability, they were deemed less efficient for this stage due to significantly higher complexity, computational costs and latency. CoT provides the optimal balance between reasoning depth and token efficiency for clinical document classification.
+
+### Ground Truth Generation and Annotation Platform
+To facilitate the seamless generation and validation of these answers, we developed a dedicated web application. This platform serves three primary functions:
+
+- Accessibility: It allows researchers and medical experts to access the data and provide feedback from any location at any time.
+- Centralized Storage: It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
+- Data Pipeline Integration: The application is designed to automatically export these validated results into the specific input format required by our evaluation framework, ensuring a smooth transition from annotation to model benchmarking.
+
+#### Components
+**Session Framework
+The core of the platform is organized into Sessions. A Session acts as the functional container for processing input documents into "Silver Answers" and managing the subsequent expert annotation process.
+**Input Documents
+This component manages the medical corpora, specifically the GraSCCo raw text files. Users can upload or reference specific documents that require clinical document classification or data extraction.
+**Configuration & Prompt Engineering
+The platform allows for sophisticated prompt management. While it supports single-prompt execution, it is optimized for Prompt Chaining—breaking complex medical tasks into subtasks (e.g., Extraction -> Filtering -> Formatting) to isolate errors and improve reliability.
+To ensure clinical accuracy, users can fine-tune the following model parameters:
+- Temperature: Controls randomness. For medical extraction, a lower range of 0.2–0.5 is recommended to ensure deterministic, consistent, and predictable outputs.
+- Max Output Tokens: Defines the response length. We recommend 1024–2048 for concise outputs or 4096–8192 for detailed clinical extractions
+- Top-K Sampling: Limits the model to the $K$ most likely tokens. A setting of 10–40 balances consistency with the flexibility needed for medical terminology.
+- Top-P (Nucleus Sampling): Selects tokens based on a cumulative probability $P$. A value of 0.8–0.9 is ideal for maintaining clinical accuracy while allowing for varied medical phrasing.
+**Execution & Metrics
+This module provides real-time visibility into the generation process. It tracks Execution Status and critical performance metrics, including:
+- Token Consumption: Monitoring input and output volume.
+- Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "Silver Answers".
+** Results & Annotation
+Once execution is complete, the platform displays the generated answers for each input document. This interface is designed for the human-in-the-loop phase, allowing medical experts to:
+- Review execution details for each document.
+- Annotate and provide feedback to correct hallucinations or omissions.
+- Download the final validated results in a standardized exchange format for use in the study’s evaluation framework.
+**Administrative Modules
+Beyond the session workflow, the platform includes User Management to control expert access and API Configuration to query sessions and results.
 
 ## Experimental Setup
 
