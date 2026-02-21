@@ -336,7 +336,7 @@ X.4 Local Deployment and Liability. As the Software is deployed locally on Custo
 
 X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate this Agreement immediately and without notice if Customer is found to be in violation of the safety or acceptable use policies mandated by the Model Provider.
 ```
-### Results
+### Evaluation Pipeline
 
 **TBD with @kindofwhat**
 
@@ -355,21 +355,8 @@ X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate 
 Maschine von Beni, Chrigels notebook, Google cloud für Gemini, Evaluationsframeworks
 
 
-
-### Models Evaluated
-
-TBD!!
-
-| Model | Parameters | Deployment |
-|-------|------------|------------|
-| Llama 3.2 | 1B | Edge/WebLLM |
-| Llama 3.2 | 3B | Edge |
-| Phi-3 Mini | 3.8B | Edge/WebLLM |
-| Llama 3.1 | 7B | Hosted |
-
-
 ### Context Engineering Strategies
-TBD i suggest we discuss the coice of prompting technique for the LLM evaluation aswell
+TBD describe why we used only one prompt
 
 #### The 3 Most Potent Techniques for Golden Answers (for a state of the art LLM)
 
