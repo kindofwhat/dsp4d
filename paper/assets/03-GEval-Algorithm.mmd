@@ -1,0 +1,33 @@
+---
+title: G-Eval Algorithm
+---
+flowchart TD
+    subgraph EVERY ["Every test case"]
+        direction TB
+        F["Form-fill<br/>prompt template"] --> G["criteria<br/>evaluation_steps (from CoT)<br/>evaluation_data (test case)<br/>max_score"]
+        G --> H["Judge LLM"]
+        H --> I{"logprobs?"}
+        I -- yes --> J["weighted score"]
+        I -- no --> K["multi-sample avg"]
+        J --> L["normalize to 0.0 – 1.0"]
+        K --> L
+    end
+
+    subgraph ONE ["One-time (cached)"]
+        direction TB
+        A["criteria, params"] --> B["CoT generation<br/>prompt template"]
+        B --> C["Judge LLM"]
+        C --> D["<i>1. Check PII...</i><br/><i>2. Verify no...</i><br/><i>3. Assess...</i>"]
+        D --> E["Save to DB"]
+    end
+
+    A ~~~ F
+    D -. "eval steps" .-> G
+
+    style ONE fill:#f0f4ff,stroke:#7799cc,stroke-dasharray: 5 5
+    style EVERY fill:#f0f4ff,stroke:#7799cc,stroke-dasharray: 5 5
+    style A fill:#fff3e0,stroke:#333
+    style C fill:#e8f5e9,stroke:#333
+    style H fill:#e8f5e9,stroke:#333
+    style I fill:#fffde7,stroke:#333
+    style G fill:#f5f5f5,stroke:#333

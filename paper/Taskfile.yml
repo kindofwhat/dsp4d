@@ -100,10 +100,21 @@ tasks:
     cmds:
       - echo "MiKTeX will auto-install packages on first use"
 
+  # === Diagrams ===
+  diagrams:
+    desc: Generate PNG diagrams from Mermaid sources
+    cmds:
+      - mmdc -i assets/03-GEval-Algorithm.mmd -o assets/03-GEval-Algorithm.png -t neutral -b white -w 1200
+      - echo "Diagrams generated"
+    sources:
+      - assets/*.mmd
+    generates:
+      - assets/*.png
+
   # === Build (cross-platform) ===
   build:
     desc: Build PDF from paper (BFH thesis template)
-    deps: [ensure-output-dir]
+    deps: [ensure-output-dir, diagrams]
     cmds:
       - >
         PATH="/Library/TeX/texbin:$PATH"
