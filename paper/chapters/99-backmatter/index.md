@@ -27,15 +27,3 @@
 
 ::: {#refs}
 :::
-
-# Appendix {.unnumbered}
-
-<!-- Additional materials, detailed results, code snippets -->
-
-## A. Prompt Templates {.unnumbered}
-
-<!-- Example prompts used in experiments -->
-
-## B. Detailed Results {.unnumbered}
-
-<!-- Extended result tables -->

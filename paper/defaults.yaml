@@ -20,6 +20,7 @@ input-files:
   - chapters/03-methodology/index.md
   - chapters/04-results/index.md
   - chapters/05-discussion/index.md
+  - chapters/06-appendix/index.md
   - chapters/99-backmatter/index.md
 
 # Document settings
