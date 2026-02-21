@@ -39,22 +39,118 @@ The task we give the models is to update a patients health record (HBA) based on
 
 Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses is undergo evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Ansers) additionally suitable for benchmarking smaller models.
 
+### Preparation Work
+
+To ensure a structured and scientifically sound prompt engineering process, the following preparatory steps were undertaken in collaboration with medical professionals.
+
+#### Medical Context Stratification
+
+The reports from the **GraSSCCO** corpus were categorized into specific medical fields. This stratification allows for a granular comparison of model performance across different clinical contexts and enables an evaluation of the models' ability to correctly assign documents to their respective domains.
+
+The following categories were defined for this study:
+
+* Oncology
+* Neurology
+* Psychiatry
+* Cardiology
+* Internal Medicine
+* Surgery
+* Orthopedics
+* Ophthalmology
+* Dermatology
+
+#### Standardized Output Format
+
+In collaboration with a **General Practitioner (GP)**, a simplified output format was developed. This structure serves as the template for the prompt's output, allowing for the isolated evaluation of partial results and specific data extraction capabilities.
+
+The standardized format consists of the following six sections:
+
+1. **Categories:** One or more precise categories from the predefined list above.
+2. **Date and Source:** The date of the report and the issuing entity (e.g., institute, clinic, or specific physician).
+3. **Diagnosis:** The specific diagnosis as documented by the author of the original report.
+4. **Relevant Metrics:** Extraction of laboratory values, measurement data (e.g., blood pressure, BMI), and other clinical parameters.
+5. **Current or Advised Medications:** A list of medications, specifically distinguishing between the patient’s **current** medication and **recommended/prescribed** new treatments.
+6. **Follow-up:** Extraction of the next clinical steps or planned interventions mentioned in the report.
+
+#### Prompt Constraints and Data Integrity
+
+To minimize "hallucinations" and ensure clinical reliability, the prompt instructions include strict constraints:
+
+* **Evidence-Based Extraction:** The model is instructed to only output values if there is a clear and unambiguous reference within the source text.
+* **Linguistic Consistency:** The output must be generated in the **original language** of the document (German) to maintain technical accuracy and prevent translation errors during the extraction phase.
+
 ### Selection of Prompting Technique: Chain-of-Thought (CoT)
+
 To generate these Silver Answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
-- Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
-- Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
-- Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
+* Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
+* Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
+* Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
 
 [See: Comprehensive Comparison of Prompting Techniques](chapters/02-theory/index.md#comprehensive-comparison-of-prompting-techniques)
 
 While techniques like Self-Consistency or Multi-Persona Prompting offer higher reliability, they were deemed less efficient for this stage due to significantly higher complexity, computational costs and latency. CoT provides the optimal balance between reasoning depth and token efficiency for clinical document classification.
 
+| **Feature** | **Standard Prompt** | **Chain of Thought Prompt** |
+|-------------|---------------------|-----------------------------|
+| **Processing Style**	| Pattern matching & Direct Extraction	| Logical deduction & Evidence-first |
+| **Accuracy** | High for simple reports | Superior for complex, conflicting reports |
+| **Hallucination Risk** | Moderate (may guess missing values) | Lower (reasoning step identifies gaps) |
+| **Token Usage** | Low (Cost-efficient) | Higher (More verbose output) |
+| **Auditability** | Difficult (Only the result is visible) | Transparent (You see why it chose a category) |
+
+### System Prompt: Clinical Data Extraction (CoT)
+
+In a medical context, this is particularly valuable because it forces the LLM to identify the evidence in the text before committing to a category or a medication status. This reduces "lazy" extractions where a model might miss a nuance (like a medication being discontinued).
+
+**Used prompt:**
+
+```text
+Role: You are an expert Medical Registrar. Extract data into a structured JSON format.
+
+Constraints:
+1. Factuality: Extract information ONLY if explicitly stated. 
+2. Language: Content values must be in the original document language (German).
+3. Format: Output ONLY a single valid JSON object.
+
+Available Categories: You MUST choose one or more from this specific list: 
+["Onkologie", "Neurologie", "Psychiatrie", "Kardiologie", "Innere Medizin", "Chirurgie", "Orthopädie", "Ophthalmologie", "Dermatologie"]
+
+Methodology: Use the "internal_monologue" to analyze the text step-by-step before populating the final fields.
+
+Output Schema:
+{
+ "internal_monologue": {
+  "1": "Identify the documents creation date and author or institutions",
+  "2": "List diagnoses and primary reason",
+  "3": "Locate numerical metrics",
+  "4": "Distinguish current vs. advised medication",
+  "5": "Identify follow-up instructions"
+ },
+ "structured_health_record": {
+  "categories": ["Must be from the list above"],
+  "date_and_source": "YYYY-MM-DD; Institution/Doctor",
+  "diagnosis": "Documented diagnosis",
+  "relevant_metrics": "Lab values and vitals",
+  "medications": {
+      "current": "What the patient is already taking",
+      "advised": "New prescriptions or changes"
+  },
+  "follow_up": "Next steps"
+ }
+}
+
+Source Text:
+{document}
+```
+
+[Gold Standard Example (CoT Approach)](chapters/06-appendix.md#appendix-gold-standard-example-cot-approach)
+
 ### Ground Truth Generation and Annotation Platform
 To facilitate the seamless generation and validation of these answers, we developed a dedicated web application. This platform serves three primary functions:
 
-- Accessibility: It allows researchers and medical experts to access the data and provide feedback from any location at any time.
-- Centralized Storage: It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
-- Data Pipeline Integration: The application is designed to automatically export these validated results into the specific input format required by our evaluation framework, ensuring a smooth transition from annotation to model benchmarking.
+* **Accessibility:** It allows researchers and medical experts to access the data and provide feedback from any location at any time.
+* **Centralized Storage:** It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
+* **Data Pipeline Integration:** The application is designed to automatically export these validated results into the specific input format required by our evaluation framework, ensuring a smooth transition from annotation to model benchmarking.
 
 The platform consits of following Components:
 
@@ -70,23 +166,23 @@ This component manages the medical corpora, specifically the GraSCCo raw text fi
 
 The platform allows for sophisticated prompt management. While it supports single-prompt execution, it is optimized for Prompt Chaining—breaking complex medical tasks into subtasks (e.g., Extraction -> Filtering -> Formatting) to isolate errors and improve reliability.
 To ensure clinical accuracy, users can fine-tune the following model parameters:
-- Temperature: Controls randomness. For medical extraction, a lower range of 0.2–0.5 is recommended to ensure deterministic, consistent, and predictable outputs.
-- Max Output Tokens: Defines the response length. We recommend 1024–2048 for concise outputs or 4096–8192 for detailed clinical extractions
-- Top-K Sampling: Limits the model to the $K$ most likely tokens. A setting of 10–40 balances consistency with the flexibility needed for medical terminology.
-- Top-P (Nucleus Sampling): Selects tokens based on a cumulative probability $P$. A value of 0.8–0.9 is ideal for maintaining clinical accuracy while allowing for varied medical phrasing.
+* Temperature: Controls randomness. For medical extraction, a lower range of 0.2–0.5 is recommended to ensure deterministic, consistent, and predictable outputs.
+* Max Output Tokens: Defines the response length. We recommend 1024–2048 for concise outputs or 4096–8192 for detailed clinical extractions
+* Top-K Sampling: Limits the model to the $K$ most likely tokens. A setting of 10–40 balances consistency with the flexibility needed for medical terminology.
+* Top-P (Nucleus Sampling): Selects tokens based on a cumulative probability $P$. A value of 0.8–0.9 is ideal for maintaining clinical accuracy while allowing for varied medical phrasing.
 
 **Execution & Metrics**
 
 This module provides real-time visibility into the generation process. It tracks Execution Status and critical performance metrics, including:
-- Token Consumption: Monitoring input and output volume.
-- Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "Silver Answers".
+* Token Consumption: Monitoring input and output volume.
+* Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "Silver Answers".
 
 **Results & Annotation**
 
 Once execution is complete, the platform displays the generated answers for each input document. This interface is designed for the human-in-the-loop phase, allowing medical experts to:
-- Review execution details for each document.
-- Annotate and provide feedback to correct hallucinations or omissions.
-- Download the final validated results in a standardized exchange format for use in the study’s evaluation framework.
+* Review execution details for each document.
+* Annotate and provide feedback to correct hallucinations or omissions.
+* Download the final validated results in a standardized exchange format for use in the study’s evaluation framework.
 
 **Administrative Modules**
 
@@ -106,38 +202,38 @@ To filter the hundreds of available open-source models down to a manageable set,
 
 **1. Hardware-Aware Parameter Efficiency**
 
-- **Criterion:** Models must have between 7B to 20B paramters that support 4-bit or 8-bit quantization
-- **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16).
+* **Criterion:** Models must have between 7B to 20B paramters that support 4-bit or 8-bit quantization
+* **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16).
 For Example: 
-    - A 7B model requires ~16GB RAM at FP16 but only 5GB to 6GB at 4-bit quantization
-    - A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasable for profssional consumer desktops
-    - Hence a 18B model at 4-bit quantization will still meet the criterion
-- **Selection:** Exclude any models <=18B consider choosing higher bit-quantization for smaller models.
+    * A 7B model requires ~16GB RAM at FP16 but only 5GB to 6GB at 4-bit quantization
+    * A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasable for profssional consumer desktops
+    * Hence a 18B model at 4-bit quantization will still meet the criterion
+* **Selection:** Exclude any models <=18B consider choosing higher bit-quantization for smaller models.
 [LLM Model Parameters 2025](https://local-ai-zone.github.io/guides/what-is-ai-model-3b-7b-30b-parameters-guide-2025.html)
 
 **2. High Reasoning & Knwledge Benchmark Scores**
 
-- **Criterion:** Prioritize models with high scores on MMLU-Pro disciplines Biology, Chemistry, Health and Psychology
-- **Why:**  Clinical text annotation is not just text generation. It is a reasoning task. Standard benchmarks like MMLU are becoming saturated and less discriminative. MMLU-Pro better distinguish models that "understand" complex topics versus those that just guess.
-- **Selection:** Based on the MMLU-Pro Leaderboardsé: Select models that outperform in Biology, Chemistry, Health and Psychology and provide "Reasoning" or "Thinking" to reduce hallucination. See Table below.
+* **Criterion:** Prioritize models with high scores on MMLU-Pro disciplines Biology, Chemistry, Health and Psychology
+* **Why:**  Clinical text annotation is not just text generation. It is a reasoning task. Standard benchmarks like MMLU are becoming saturated and less discriminative. MMLU-Pro better distinguish models that "understand" complex topics versus those that just guess.
+* **Selection:** Based on the MMLU-Pro Leaderboardsé: Select models that outperform in Biology, Chemistry, Health and Psychology and provide "Reasoning" or "Thinking" to reduce hallucination. See Table below.
 
 **3. Instruction Following & Output Structure**
 
-- **Criterion:** Select "Instruct" or "Chat" rather than base models
-- **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine not an assistant. Base trained models lack of intent recognition.
-- **Selection:** Choose the "Instruct" or "Chat" variants
+* **Criterion:** Select "Instruct" or "Chat" rather than base models
+* **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine not an assistant. Base trained models lack of intent recognition.
+* **Selection:** Choose the "Instruct" or "Chat" variants
 
 **4. Context Window Capacity**
 
-- **Criterion:** Minimum context window of 8k tokens (preferably 32k+ or higher)
-- **Why:** Clinical notes can be lengthy. If a diagnosis or generally a peatient report exceeds the model's context window, the model will "forget" early information, leading to missed health infomration annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass
-- **Selection:** Discard models with <8k context limits
+* **Criterion:** Minimum context window of 8k tokens (preferably 32k+ or higher)
+* **Why:** Clinical notes can be lengthy. If a diagnosis or generally a peatient report exceeds the model's context window, the model will "forget" early information, leading to missed health infomration annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass
+* **Selection:** Discard models with <8k context limits
 
 **5. License & Data Sovereignity**
 
-- **Criterion:** Permissive licenses (Apache 2.0, MIT) allowing local commercial use
-- **Why:** The primary advantage of SLMs in healthcare is data sovereignty—running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.
-- **Selection:** Model is truly open source (and does not require any API calls)
+* **Criterion:** Permissive licenses (Apache 2.0, MIT) allowing local commercial use
+* **Why:** The primary advantage of SLMs in healthcare is data sovereignty—running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.
+* **Selection:** Model is truly open source (and does not require any API calls)
 
 ### Selection Steps 1. - 3.
 
