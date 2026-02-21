@@ -102,7 +102,7 @@ tasks:
 
   # === Diagrams ===
   diagrams:
-    desc: Generate PNG diagrams from Mermaid sources
+    desc: Generate PNG diagrams from Mermaid sources (requires mmdc / @mermaid-js/mermaid-cli)
     cmds:
       - mmdc -i assets/03-GEval-Algorithm.mmd -o assets/03-GEval-Algorithm.png -t neutral -b white -w 1200
       - echo "Diagrams generated"
@@ -114,7 +114,7 @@ tasks:
   # === Build (cross-platform) ===
   build:
     desc: Build PDF from paper (BFH thesis template)
-    deps: [ensure-output-dir, diagrams]
+    deps: [ensure-output-dir]
     cmds:
       - >
         PATH="/Library/TeX/texbin:$PATH"
