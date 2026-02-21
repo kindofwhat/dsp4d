@@ -34,6 +34,10 @@ bibliography: references.bib
 # APA style (BFH standard)
 # csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
 
+# Lua filters
+filters:
+  - filters/resolve-image-paths.lua
+
 # Code blocks
 highlight-style: tango
 

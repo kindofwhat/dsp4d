@@ -6,7 +6,7 @@ The primary objective of this study is the development of an algorithmic selecti
 
 ## Procedure
 
-![four-phase methodological approach](assets/03-Methodology-Overview.png)
+![four-phase methodological approach](../../assets/03-Methodology-Overview.png)
 
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
@@ -456,7 +456,7 @@ Additionally, the system supports *expert evaluation*, allowing a human reviewer
 
 <!-- TODO: Add screenshots of the llm-validator UI showing test run configuration and evaluation results -->
 
-![G-Eval algorithm: CoT evaluation steps are generated once and cached, then applied per test case with probability-weighted scoring via logprobs or multi-sample fallback.](assets/03-GEval-Algorithm.png){#fig:geval-algorithm width=75%}
+![G-Eval algorithm: CoT evaluation steps are generated once and cached, then applied per test case with probability-weighted scoring via logprobs or multi-sample fallback.](../../assets/03-GEval-Algorithm.png){#fig:geval-algorithm width=75%}
 
 #### The Logprobs Problem in G-Eval 
 
