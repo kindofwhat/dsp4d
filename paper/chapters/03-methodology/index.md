@@ -441,8 +441,48 @@ This acts as an automated **"Four-Eyes Principle"** (*Vier-Augen-Prinzip*), mimi
 
 ### Test Setup
 
-Use DeepEval to evaluate the respective models responses
+#### llm-validator
 
-- **Classification Accuracy** — Correct document type identification
-- **Action Appropriateness** — Clinical validity of suggested actions
-- **Latency** — Inference time on target hardware
+To facilitate the systematic evaluation described in Phase III and IV, a purpose-built evaluation framework — *llm-validator* — was developed as part of this research. The tool serves as the central instrumentation layer for capturing, executing, and assessing LLM interactions across multiple models and prompting strategies.
+
+**Technology Choice.** The framework is implemented in Java 21 using the Quarkus application framework, with LangChain4j for LLM integration and an Angular-based web interface for result inspection. The deliberate choice of a JVM-based stack over the more prevalent Python ecosystem in the LLM domain is motivated by the project's alignment with healthcare IT environments: Java remains the dominant technology in enterprise and clinical information systems in Switzerland and the DACH region. By building the evaluation tooling on this stack, the resulting artefact is not only a research instrument but also a reusable component that can be integrated into existing institutional infrastructure without introducing foreign runtime dependencies.
+
+**Evaluation Pipeline.** The core contribution of the tool lies in its multi-dimensional evaluation pipeline. Test cases — each comprising a clinical query, an optional system prompt, and a golden answer — are organised into *Test Runs* and executed in batch against one or more models. The framework then applies two categories of evaluation metrics:
+
+- **Statistical metrics** (no LLM required): Token-level F1 score, Levenshtein similarity, and embedding-based semantic similarity provide quantitative baselines for output comparison.
+- **G-Eval metrics** (LLM-as-a-Judge): Following the G-Eval framework, configurable judge prompts assess *answer relevancy*, *faithfulness*, *hallucination*, and *correctness* against the golden answers established in Phase II. These metrics are stored as database-backed definitions and can be extended without code changes.
+
+Additionally, the system supports *expert evaluation*, allowing a human reviewer to provide qualitative scores — closing the loop between automated assessment and domain expertise.
+
+<!-- TODO: Add screenshots of the llm-validator UI showing test run configuration and evaluation results -->
+
+![G-Eval algorithm: CoT evaluation steps are generated once and cached, then applied per test case with probability-weighted scoring via logprobs or multi-sample fallback.](assets/03-GEval-Algorithm.png){#fig:geval-algorithm width=75%}
+
+#### The Logprobs Problem in G-Eval 
+
+The central mechanism of G-Eval is probability-weighted scoring: rather than taking the LLM's generated score at face value, the token log-probabilities of the score tokens (e.g. "1" through "5") are extracted and a weighted average is computed [@liu2023geval]. This approach significantly reduces the known scoring bias of LLMs and is the primary reason for G-Eval's superior human correlation compared to naive LLM-as-a-Judge approaches.
+
+However, the `logprobs` feature that enables this weighted scoring is not uniformly supported across LLM providers. Table \ref{tab:logprobs-compat} summarises the current compatibility landscape.
+
+| Provider | Logprobs | Notes |
+|----------|----------|-------|
+| OpenAI (standard models) | Yes | gpt-4o, gpt-4.1-mini etc. via `/v1/chat/completions` |
+| OpenAI (reasoning models) | **No** | o-series, gpt-5-mini — `logprobs` not supported, `temperature` fixed at 1.0 |
+| vLLM (self-hosted) | Yes | Any HuggingFace model; logprobs reflect raw model output before post-processing |
+| Together.ai | Yes | Open-weight models via OpenAI-compatible API |
+| Ollama | **No** | Logprobs only on native `/api/generate`, not on OpenAI-compatible `/v1/chat/completions` |
+| LM Studio | **Partial** | Accepts `top_logprobs` on `/v1/responses` (since v0.3.26, Jan 2026) but returns empty arrays in practice |
+| llama.cpp server | **No** | Returns `null` for logprobs on `/v1/chat/completions` |
+
+: Logprobs compatibility by LLM provider (as of February 2026) {#tab:logprobs-compat}
+
+Particularly problematic is the incompatibility with reasoning models (OpenAI o-series, gpt-5-mini, gpt-5-nano). These models employ an internal reasoning phase that consumes tokens from the `max_completion_tokens` budget before any visible output is produced. For a task that merely requires a single integer score, reasoning models are architecturally unsuitable: they spend hundreds of tokens on internal deliberation for a trivial decision — while supporting neither `logprobs` nor configurable `temperature` values.
+
+This problem also affects existing reference implementations. DeepEval, the most widely used Python implementation of G-Eval, works around the issue with a hardcoded list of reasoning models for which it falls back to plain JSON extraction without probability weighting — which de facto is no longer G-Eval but a simple LLM-as-a-Judge approach. Several open issues document this limitation: reasoning models break G-Eval entirely^[<https://github.com/confident-ai/deepeval/issues/1358>], custom (non-OpenAI) models never receive weighted summation^[<https://github.com/confident-ai/deepeval/issues/1831>], and the fallback from weighted to unweighted scoring occurs silently without warning^[<https://github.com/confident-ai/deepeval/issues/1029>].
+
+A promising alternative for local execution is vLLM, a high-throughput self-hosted inference engine that provides full logprobs support on its OpenAI-compatible API for any HuggingFace model. While vLLM returns logprobs from the model's raw output (before temperature scaling or penalty adjustments), this is sufficient for G-Eval scoring where the probability distribution over score tokens is the quantity of interest.
+
+**Fallback strategy.** For providers without logprobs support, the G-Eval paper defines an alternative method: *multi-sample estimation* with $n=20$ independent calls at `temperature=1.0`, where each response is parsed for an integer score and the results are averaged [@liu2023geval]. This procedure approximates the probability distribution through sampling and thus remains faithful to the G-Eval algorithm — albeit at significantly higher cost (factor 20 compared to the logprobs variant).
+
+**Consequence for judge model selection.** The choice of judge model for G-Eval evaluation is therefore constrained: either a non-reasoning cloud model with logprobs support is used (e.g. gpt-4o-mini), a self-hosted vLLM instance serves as judge, or the cost-intensive multi-sample fallback is required. For this study, an auto-detection strategy is implemented that first attempts the logprobs path and automatically falls back to multi-sample upon failure — enabling both cloud APIs and local models to serve as judges.
+
