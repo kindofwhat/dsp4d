@@ -51,9 +51,14 @@
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{pdflscape}
 
 % Longtable configuration for Pandoc
 \usepackage{calc}  % for calculating minipage widths
+
+% Reduce font size for all longtables (Pandoc tables) to prevent column overflow
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize}
 
 % Fix for Pandoc tables without captions (uses LTcaptype=none)
 \newcounter{none}
