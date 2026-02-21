@@ -12,7 +12,6 @@ node_modules/*
 *.fls
 *.synctex.gz
 golden-ansers-engine/frontend/package-lock.json
-.gitignore
-.gitignore
 ~$emenantrag Gen KI 1.0 HS25-Sprecher-Haegler.docx
 paper/output/
+/paper/.task/checksum/diagrams
