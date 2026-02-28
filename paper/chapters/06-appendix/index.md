@@ -136,3 +136,166 @@ Context windows >=8k
 | DeepSeek | DeepSeek Model License | No (Open Weights) | Permitted | No (Local weights available) | Allows modifications and derivative works, including model distillation. |
 | EXAONE | EXAONE Non-Commercial (NC) | No | Prohibited | No | Strictly restricted to research and experimental purposes only. |
 | Mistral | Mistral AI Non-Production / Commercial | No | Restricted / Tiered | Optional (API vs local) | Smaller models are often Apache 2.0; flagship models require commercial agreements. |
+
+
+<!-- #A-JSON-SIM — AI-generated (Claude, Feb 2026) — algorithm from JsonSimilarityMetric.java + JsonFlattener.java -->
+
+## Appendix: JSON Structural Similarity Algorithm {#appendix-json-sim}
+
+A custom metric was developed to assess how well a model's JSON output conforms to the expected schema, independent of content correctness. Unlike lexical metrics (BLEU, ROUGE) that treat the output as flat text, this metric operates on the JSON structure itself.
+
+The algorithm proceeds in four steps:
+
+1. **JSON extraction and flattening.** Both the model output and the Silver Answer are preprocessed: markdown code fences are stripped, and the JSON content is extracted by bracket-matching. The resulting JSON objects are then recursively flattened into leaf-path maps using dot notation for objects and bracket notation for arrays (e.g., `structured_health_record.medications.current` or `structured_health_record.categories[0]`). Configurable paths (e.g., `internal_monologue`) can be excluded from comparison.
+
+2. **Array alignment.** JSON arrays pose a challenge because the model may output the same elements in a different order. The algorithm identifies array base paths, groups their children by index, and performs greedy best-match alignment: for each element in the Silver Answer's array, the response element with the highest average Levenshtein similarity across shared sub-fields is selected as the match.
+
+3. **Leaf-by-leaf comparison.** For each aligned path, the leaf values are compared using normalised Levenshtein similarity ($1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$). Missing fields in the response score 0.0; matching `null` values on both sides score 1.0.
+
+4. **Aggregation.** The overall score is the arithmetic mean across all leaf-pair similarities. Sub-scores are also computed per top-level key, enabling inspection of which sections (e.g., `diagnosis` vs. `medications`) the model handles well or poorly.
+
+A score of 0.0 indicates either that the model output could not be parsed as JSON at all, or that none of the expected paths were present. A score of 1.0 indicates perfect structural and content match at every leaf.
+
+### Core Implementation
+
+**JSON flattening** (recursive leaf-path extraction):
+
+```java
+private static void flattenNode(String prefix, JsonNode node,
+        Map<String, String> result, int depth) {
+    if (node.isObject()) {
+        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+        while (fields.hasNext()) {
+            var entry = fields.next();
+            String childPrefix = prefix.isEmpty()
+                ? entry.getKey() : prefix + "." + entry.getKey();
+            flattenNode(childPrefix, entry.getValue(), result, depth + 1);
+        }
+    } else if (node.isArray()) {
+        for (int i = 0; i < node.size(); i++) {
+            flattenNode(prefix + "[" + i + "]", node.get(i), result, depth + 1);
+        }
+    } else if (node.isNull()) {
+        result.put(prefix, null);
+    } else {
+        result.put(prefix, node.asText());
+    }
+}
+```
+
+**Leaf comparison and aggregation** (per-path Levenshtein similarity):
+
+```java
+for (var entry : alignedGolden.entrySet()) {
+    String path = entry.getKey();
+    String goldenValue = entry.getValue();
+    String responseValue = alignedResponse.get(path);
+
+    if (responseValue == null && goldenValue == null) {
+        leafScores.put(path, 1.0);
+    } else if (responseValue == null) {
+        leafScores.put(path, 0.0);
+        missingInResponse.add(path);
+    } else {
+        leafScores.put(path,
+            levenshteinSimilarity(goldenValue, responseValue));
+    }
+}
+
+double overallScore = leafScores.values().stream()
+        .mapToDouble(Double::doubleValue)
+        .average().orElse(0.0);
+```
+
+<!-- #A-DAG — AI-generated (Claude, Feb 2026) — algorithm from DAG engine + medical_extraction_quality graph -->
+
+## Appendix: DAG-Based Medical Extraction Quality Algorithm {#appendix-dag}
+
+To evaluate the clinical quality of model outputs beyond what statistical metrics can capture, a Directed Acyclic Graph (DAG) evaluation metric was developed. Unlike single-prompt LLM-as-a-Judge approaches that ask one broad question, the DAG metric decomposes the evaluation into multiple specialised assessment tasks — each executed by the judge LLM — and aggregates their results through a graph of conditional judgements.
+
+### DAG Execution Engine
+
+The DAG execution engine traverses a graph of four node types:
+
+- **Task nodes** present the judge LLM with specific evaluation instructions and a subset of the evaluation context (actual output, expected output, original input). The LLM's response is stored as accumulated context for downstream nodes.
+- **Binary judgement nodes** ask the judge LLM a yes/no question based on accumulated context. The result determines which branch (true/false child) is followed — enabling conditional evaluation paths.
+- **Non-binary judgement nodes** present the judge LLM with multiple verdict options (e.g., "fully compliant", "minor issues", "significant issues"). The LLM selects the most appropriate verdict, routing to the corresponding child node.
+- **Verdict nodes** are terminal leaves that carry a predefined numeric score (0.0–1.0).
+
+When a graph has multiple root nodes, their branches are executed in parallel (using virtual threads) and the final score is the arithmetic mean of all branch scores. A short-circuit mechanism terminates evaluation early if any branch returns 0.0.
+
+### Medical Extraction Quality Graph
+
+The specific DAG graph used for the `dag_medical_extraction_quality` metric evaluates four parallel dimensions:
+
+1. **Format compliance** (structural branch): A task node analyses the output for JSON validity, presence of required top-level keys (`internal_monologue`, `structured_health_record`), and schema conformance. A binary judgement then splits:
+   - If valid JSON: a non-binary judgement rates schema compliance as *fully compliant* (1.0), *minor issues* (0.7), or *significant issues* (0.3).
+   - If invalid JSON: a non-binary judgement classifies the output as *recoverable* (0.15) or *garbage* (0.0).
+
+2. **Factual accuracy** (content branch): A task node performs field-by-field comparison against the Silver Answer, marking each field as CORRECT, PARTIALLY_CORRECT, MISSING, or HALLUCINATED. A non-binary judgement then rates overall accuracy as *highly accurate* (1.0), *mostly accurate* (0.75), *partially accurate* (0.4), or *inaccurate* (0.1). Hallucinations are penalised most severely.
+
+3. **Completeness** (coverage branch): A task node counts populated vs. expected fields. A non-binary judgement rates completeness as *complete* (1.0), *mostly complete* (0.7), or *incomplete* (0.3).
+
+4. **Medical terminology** (language branch): A task node evaluates whether the output uses professional medical shorthand, standard abbreviations, and maintains language consistency with the input document. A non-binary judgement rates terminology as *excellent* (1.0), *adequate* (0.6), or *poor* (0.2).
+
+The final score is the average of all four branch scores, yielding a value between 0.0 and 1.0 that captures format compliance, factual fidelity, extraction completeness, and domain-appropriate language in a single metric.
+
+### Core Implementation
+
+**Node dispatch** (sealed interface with pattern matching):
+
+```java
+private DAGExecutionResult executeNode(DAGNode node,
+        EvaluationContext context,
+        Map<String, String> accumulatedContext,
+        List<TraceEntry> trace) {
+    return switch (node) {
+        case TaskNode task ->
+            executeTask(task, context, accumulatedContext, trace);
+        case BinaryJudgementNode binary ->
+            executeBinaryJudgement(binary, context,
+                accumulatedContext, trace);
+        case NonBinaryJudgementNode nonBinary ->
+            executeNonBinaryJudgement(nonBinary, context,
+                accumulatedContext, trace);
+        case VerdictNode verdict ->
+            executeVerdict(verdict, context,
+                accumulatedContext, trace);
+    };
+}
+```
+
+**Parallel branch execution** (virtual threads with short-circuit on zero score):
+
+```java
+private DAGExecutionResult executeParallelBranches(
+        List<DAGNode> branches, EvaluationContext context,
+        Map<String, String> accumulatedContext,
+        List<TraceEntry> trace) {
+    var executor = Executors.newVirtualThreadPerTaskExecutor();
+    List<CompletableFuture<DAGExecutionResult>> futures =
+        branches.stream()
+            .map(branch -> CompletableFuture.supplyAsync(() ->
+                executeNode(branch, context,
+                    new HashMap<>(accumulatedContext),
+                    new ArrayList<>()), executor))
+            .toList();
+
+    CompletableFuture.allOf(
+        futures.toArray(new CompletableFuture[0])).join();
+
+    double totalScore = 0.0;
+    int count = 0;
+    for (var future : futures) {
+        DAGExecutionResult result = future.join();
+        trace.addAll(result.trace());
+        if (result.score() == 0.0) {
+            return new DAGExecutionResult(0.0, trace, true);
+        }
+        totalScore += result.score();
+        count++;
+    }
+    return new DAGExecutionResult(
+        count > 0 ? totalScore / count : 0.0, trace, false);
+}
+```

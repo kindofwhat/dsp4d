@@ -1,0 +1,172 @@
+{
+  "rootNodes": [
+    {
+      "instructions": "Analyze the ACTUAL_OUTPUT for JSON format compliance. Check: (1) Is it a single valid JSON object (not fragments, no markdown wrapping)? (2) Does it contain internal_monologue as a top-level key with sub-keys 1 through 5? (3) Does it contain structured_health_record with ALL required fields: categories (array), date_and_source (string), diagnosis (string), relevant_metrics (string), medications (object with current and advised), follow_up (string)? (4) Are categories values strictly from: Onkologie, Neurologie, Psychiatrie, Kardiologie, Innere Medizin, Chirurgie, Orthopaedie, Ophthalmologie, Dermatologie? Report each check as PASS or FAIL with brief details.",
+      "outputLabel": "format_analysis",
+      "evaluationParams": [
+        "ACTUAL_OUTPUT"
+      ],
+      "children": [
+        {
+          "criteria": "Based on the format_analysis: Is the output a single valid, parseable JSON object that contains both internal_monologue and structured_health_record as top-level keys? Answer true only if the entire output is valid JSON (not mixed text and JSON fragments).",
+          "trueChild": {
+            "criteria": "Based on the format_analysis: How well does the JSON structure match the required schema? Consider: all nested fields present and correctly named, categories from the allowed list only, correct data types (array for categories, object for medications with current and advised sub-keys), all 5 internal_monologue steps present.",
+            "verdicts": {
+              "fully_compliant": {
+                "verdict": "Schema fully matches all requirements",
+                "score": 1,
+                "child": null,
+                "type": "verdict"
+              },
+              "minor_issues": {
+                "verdict": "Minor deviations such as 1-2 missing subfields",
+                "score": 0.7,
+                "child": null,
+                "type": "verdict"
+              },
+              "significant_issues": {
+                "verdict": "Significant schema issues like missing required fields or wrong nesting",
+                "score": 0.3,
+                "child": null,
+                "type": "verdict"
+              }
+            },
+            "type": "non_binary_judgement"
+          },
+          "falseChild": {
+            "criteria": "The output is not valid JSON. Does it contain recognizable structured content that resembles the expected schema?",
+            "verdicts": {
+              "recoverable": {
+                "verdict": "Output has recognizable structure but is not valid JSON",
+                "score": 0.15,
+                "child": null,
+                "type": "verdict"
+              },
+              "garbage": {
+                "verdict": "Output is completely unstructured",
+                "score": 0,
+                "child": null,
+                "type": "verdict"
+              }
+            },
+            "type": "non_binary_judgement"
+          },
+          "type": "binary_judgement"
+        }
+      ],
+      "type": "task"
+    },
+    {
+      "instructions": "Compare the ACTUAL_OUTPUT against the EXPECTED_OUTPUT field by field. For each field in structured_health_record determine: categories - same categories listed? date_and_source - date and institution correct? diagnosis - all diagnoses mentioned, any hallucinated? relevant_metrics - clinical findings accurate? medications.current - correct? medications.advised - correct with dosages? follow_up - accurate? Also check internal_monologue for errors. Mark each field as CORRECT, PARTIALLY_CORRECT, MISSING, or HALLUCINATED.",
+      "outputLabel": "factual_comparison",
+      "evaluationParams": [
+        "ACTUAL_OUTPUT",
+        "EXPECTED_OUTPUT"
+      ],
+      "children": [
+        {
+          "criteria": "Based on the factual_comparison: Rate overall factual accuracy. Hallucinated information is the most severe error. Missing information is less severe. Minor wording differences are acceptable.",
+          "verdicts": {
+            "highly_accurate": {
+              "verdict": "All key facts match, no hallucinations",
+              "score": 1,
+              "child": null,
+              "type": "verdict"
+            },
+            "mostly_accurate": {
+              "verdict": "Most facts correct, minor omissions, no hallucinations",
+              "score": 0.75,
+              "child": null,
+              "type": "verdict"
+            },
+            "partially_accurate": {
+              "verdict": "Some facts correct but significant omissions or minor hallucinations",
+              "score": 0.4,
+              "child": null,
+              "type": "verdict"
+            },
+            "inaccurate": {
+              "verdict": "Major factual errors or multiple hallucinations",
+              "score": 0.1,
+              "child": null,
+              "type": "verdict"
+            }
+          },
+          "type": "non_binary_judgement"
+        }
+      ],
+      "type": "task"
+    },
+    {
+      "instructions": "Compare ACTUAL_OUTPUT against EXPECTED_OUTPUT for completeness. Check: internal_monologue has all 5 steps with meaningful content? categories populated with all relevant values? date_and_source present? diagnosis present? relevant_metrics present and not null? medications.current present? medications.advised present? follow_up present? Count total fields expected vs fields with content vs fields null or missing.",
+      "outputLabel": "completeness_analysis",
+      "evaluationParams": [
+        "ACTUAL_OUTPUT",
+        "EXPECTED_OUTPUT"
+      ],
+      "children": [
+        {
+          "criteria": "Based on the completeness_analysis: How complete is the output? Fields with null or missing when expected output has content count as incomplete.",
+          "verdicts": {
+            "complete": {
+              "verdict": "All fields populated with meaningful content",
+              "score": 1,
+              "child": null,
+              "type": "verdict"
+            },
+            "mostly_complete": {
+              "verdict": "1-2 fields missing or null where expected",
+              "score": 0.7,
+              "child": null,
+              "type": "verdict"
+            },
+            "incomplete": {
+              "verdict": "3 or more important fields missing or empty",
+              "score": 0.3,
+              "child": null,
+              "type": "verdict"
+            }
+          },
+          "type": "non_binary_judgement"
+        }
+      ],
+      "type": "task"
+    },
+    {
+      "instructions": "Evaluate whether ACTUAL_OUTPUT uses proper medical shorthand and abbreviations. Compare against EXPECTED_OUTPUT. Check: (1) Long medical phrases condensed into abbreviations? (2) Output language consistent with input language? German input should produce German terms. (3) Standard medical abbreviations used? (4) Professional clinical shorthand rather than verbose patient-facing language? List specific examples of good and bad terminology usage.",
+      "outputLabel": "terminology_analysis",
+      "evaluationParams": [
+        "ACTUAL_OUTPUT",
+        "EXPECTED_OUTPUT",
+        "INPUT"
+      ],
+      "children": [
+        {
+          "criteria": "Based on the terminology_analysis: How well does the output use professional medical shorthand and maintain language consistency?",
+          "verdicts": {
+            "excellent": {
+              "verdict": "Proper medical abbreviations throughout, correct language",
+              "score": 1,
+              "child": null,
+              "type": "verdict"
+            },
+            "adequate": {
+              "verdict": "Some medical shorthand but inconsistent or mixed language",
+              "score": 0.6,
+              "child": null,
+              "type": "verdict"
+            },
+            "poor": {
+              "verdict": "No shorthand, verbose descriptions, wrong language",
+              "score": 0.2,
+              "child": null,
+              "type": "verdict"
+            }
+          },
+          "type": "non_binary_judgement"
+        }
+      ],
+      "type": "task"
+    }
+  ]
+}

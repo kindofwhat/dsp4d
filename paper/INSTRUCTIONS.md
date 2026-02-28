@@ -86,6 +86,33 @@ Interpretive text referencing the numbers from Chapter 04. Sections:
 
 **When data changes:** Update all numbers in the discussion that reference specific scores. Search for decimal numbers like `0.470`, `0.390`, etc.
 
+### Chapter 03 — Methodology (`paper/chapters/03-methodology/index.md`)
+
+Two brief summaries were added to the "Evaluation Metrics" section, each referencing the corresponding appendix:
+
+- **JSON Structural Similarity** — one-paragraph summary, links to `#appendix-json-sim`
+- **DAG-Based Medical Extraction Quality** — one-paragraph summary, links to `#appendix-dag`
+
+These summaries are static — only update if the algorithm itself changes.
+
+### Chapter 06 — Appendix (`paper/chapters/06-appendix/index.md`)
+
+Two new appendix sections with algorithm descriptions and code excerpts:
+
+| Marker | Section | Source code files |
+|--------|---------|-------------------|
+| `#A-JSON-SIM` | JSON Structural Similarity Algorithm | `llm-validator/.../statistical/JsonSimilarityMetric.java`, `llm-validator/.../util/JsonFlattener.java` |
+| `#A-DAG` | DAG-Based Medical Extraction Quality Algorithm | `llm-validator/.../dag/DAGExecutionEngine.java`, `llm-validator/.../dag/DAGMetric.java`, `llm-validator/.../dag/model/*.java` |
+
+**Code excerpts included:**
+
+- `#A-JSON-SIM`: `flattenNode()` (recursive JSON flattening) and leaf comparison/aggregation loop
+- `#A-DAG`: `executeNode()` (sealed interface pattern matching dispatch) and `executeParallelBranches()` (virtual threads with short-circuit)
+
+**DAG graph definition:** The specific `medical_extraction_quality` graph is exported from the llm-validator UI and stored at `paper/assets/dag-medical-extraction-quality.json`. The appendix text describes its 4 parallel branches with all verdict scores. If the graph changes, re-export from the UI and update the branch descriptions + score values in `#A-DAG`.
+
+**When to update:** Only when the algorithm implementation or the DAG graph definition changes — these sections are independent of the evaluation JSON data.
+
 ## Scripts Used to Extract Data
 
 All scripts were run as inline Python via `cat JSON | python3 -c "..."`. The Python venv at `/Users/chrigel/Documents/workspace/bfh/venv/` has matplotlib/numpy.
@@ -256,7 +283,7 @@ PYEOF
 
 ## Section Markers
 
-Both markdown files contain HTML comment markers (`<!-- #ID -->`) that identify AI-generated sections and their data dependencies. Use `grep -n '#R-\|#D-' paper/chapters/04-results/index.md paper/chapters/05-discussion/index.md` to locate all markers.
+The markdown files contain HTML comment markers (`<!-- #ID -->`) that identify AI-generated sections and their data dependencies. Use `grep -rn '#R-\|#D-\|#A-\|#M-' paper/chapters/` to locate all markers.
 
 ### Results chapter (`04-results/index.md`)
 
@@ -285,6 +312,19 @@ Both markdown files contain HTML comment markers (`<!-- #ID -->`) that identify 
 | `#D-LIMITS` | Limitations | Methodology | Mostly static — update only if methodology changes |
 | `#D-FUTURE` | Future Work | — | Static |
 
+### Methodology chapter (`03-methodology/index.md`)
+
+Brief summaries linking to the appendix — no markers needed, static unless algorithm changes.
+
+### Appendix chapter (`06-appendix/index.md`)
+
+| Marker | Section | Source | When to update |
+|--------|---------|--------|----------------|
+| `#A-JSON-SIM` | JSON Structural Similarity Algorithm | `llm-validator/.../statistical/JsonSimilarityMetric.java`, `.../util/JsonFlattener.java` | Algorithm implementation changes |
+| `#A-DAG` | DAG Medical Extraction Quality Algorithm | `llm-validator/.../dag/DAGExecutionEngine.java`, `.../dag/model/*.java`, `paper/assets/dag-medical-extraction-quality.json` | Engine code or DAG graph definition changes |
+
+**To update the DAG graph description:** Re-export from the llm-validator UI to `paper/assets/dag-medical-extraction-quality.json`, then update the branch descriptions and verdict scores in `#A-DAG`.
+
 ## Reproduction Checklist
 
 When `questions_complete_evaluated.json` changes:
@@ -311,6 +351,8 @@ When `questions_complete_evaluated.json` changes:
 | `paper/assets/04-metric-correlation.png` | Heatmap script (matplotlib) | JSON input changes |
 | `paper/chapters/04-results/index.md` | Manual text + aggregation script output | JSON input changes |
 | `paper/chapters/05-discussion/index.md` | Manual interpretive text | Numbers change significantly |
+| `paper/chapters/06-appendix/index.md` (`#A-*`) | Algorithm descriptions + code from llm-validator | Algorithm implementation or DAG graph changes |
+| `paper/assets/dag-medical-extraction-quality.json` | Exported from llm-validator UI | DAG graph definition changes |
 
 ## Dependencies
 
