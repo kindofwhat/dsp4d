@@ -92,7 +92,7 @@ Guluzade et al. (2024) showed that fine-tuned smaller models can outperform larg
 The Graz Synthetic Clinical text Corpus (GraSCCo) remains a cornerstone for this research area. As a multiply-alienated German clinical corpus, it allows researchers to benchmark models on realistic medical narratives without the legal and ethical risks associated with real patient data [@modersohn2022grascco; @GraSCCo_PII_V2_2025].
 
 
-## Scaling Laws and Model Efficiency TODO BNI proofread 
+## Scaling Laws and Model Efficiency
 
 A central question for deploying LLMs in privacy-sensitive environments is: how small can a model be while maintaining acceptable performance? Early scaling laws suggested a straightforward trade-off, but recent developments in Small Language Models (SLMs) have significantly shifted expectations.
 
@@ -142,32 +142,116 @@ Prompt engineering is the systematic practice of designing, refining, and optimi
 
 The following sections detail specific prompt engineering techniques and their application to medical text processing, with particular emphasis on methods that enable reliable extraction of structured information from clinical narratives.
 
-### Comprehensive Comparison of Prompting Techniques TODO CHS Referenzen / BNI Formatierung Tabelle
+### Comprehensive Comparison of Prompting Techniques
 This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Silver Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
 
-| Technique | Description | Application to Medical Silver Answers | Pros for Medical Records | Cons / Risks | References |
-|-----------|-------------|---------------------------------------|--------------------------|--------------|------------|
-| Zero-Shot Prompting | Asking the model to perform a task without examples. | "Extract all diagnoses from this text." | Fast and low token cost. Useful for checking the baseline capability of a model. | High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. | [Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Few-Shot Prompting | Providing examples (input-output pairs) within the prompt. | "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "Silver Answer" format.<br>(possible after first supervision session)" | Essential for enforcing the specific syntax and brevity required for the Silver Answers. | The model may overfit to the examples and ignore the nuance of the new input. | [Language Models are Few-Shot Learners (NeurIPS)](https://proceedings.neurips.cc/paper/2020/file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Chain-of-Thought (CoT) | Instructing the model to generate intermediate reasoning steps. | Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list." | Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details. | Increases token usage. Requires parsing to separate the "thought" from the "silver answer." | [Chain of Thought Prompting Elicits reasoning (arXiv)](https://arxiv.org/pdf/2201.11903)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Self-Consistency | Generating multiple outputs for the same prompt and selecting the most frequent one. | Validation: Generate the summary 5 times. If "Diabetes Type 2" appears in 5/5, keep it. If "Hypertension" appears in 1/5, discard it. | The best statistical defense against hallucinations. Essential for creating a robust "Gold Standard". | Computationally expensive (requires N times the inference cost). | [Self-Consistency Improves Chain of Thought (arXiv)](https://arxiv.org/pdf/2203.11171)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Skeleton-of-Thought (SoT) | Generating a skeleton/outline first, then expanding points in parallel. | Structure Planning: 1. Generate list of headers (Dx, Rx). 2. Fill sections in parallel. | Accelerates generation speed (up to 2.39x). Good for long, structured discharge summaries. | Suited for writing new content, less proven for extracting specific facts from existing chaos. | [Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation](https://arxiv.org/pdf/2307.15337)<br>[[ICLR 2024] Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation (GitHub)](https://github.com/imagination-research/sot) |
-| Prompt Chaining | Breaking a task into subtasks where output A becomes input B. | Workflow: 1. Extraction Prompt -> 2. Filtering Prompt -> 3. Formatting Prompt. | High reliability. Isolates errors. Allows for intermediate transformation (e.g., cleaning citations). | Requires building a controller application (state management) between prompts. | [Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb)<br>[PromptChainer Paper (arXiv)](https://arxiv.org/pdf/2203.06566) |
-| Role / Persona Prompting | Assigning a specific role/profession to the AI. | Context Setting: "You are a Senior Chief Physician at a Swiss hospital..." | Drastically improves tone and handling of medical abbreviations/jargon. | Can lead to verbosity if the persona is too "chatty." | [Prompt Engineering: Part 2 - Best Practices for Software Developers in Digital Industries](https://blogs.sw.siemens.com/thought-leadership/prompt-engineering-part-2-best-practices-for-software-developers-in-digital-industries/)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Multi-Persona Prompting | Simulating a discussion between multiple agents (e.g., Drafter & Reviewer). | Quality Assurance: Agent A extracts data; Agent B reviews it for missing info; Agent C finalizes. | Simulates a "four-eyes principle" (peer review), reducing errors through internal debate. | High latency and token cost; complex to orchestrate. | [Exploring Multi-Persona Prompting for Better Outputs](https://www.prompthub.us/blog/exploring-multi-persona-prompting-for-better-outputs) |
-| Tree of Thoughts (ToT) | Exploring multiple reasoning paths and backtracking. | Complex Triage: Exploring different diagnostic possibilities before committing to one. | Useful for complex differential diagnosis problems. | Likely overkill for extraction tasks where the answer is explicitly in the text. | [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/pdf/2305.10601)<br>[[NeurIPS 2023] Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://github.com/princeton-nlp/tree-of-thought-llm) |
-| Retrieval Augmented Generation (RAG) | Retrieving external data to ground the generation. | Fact Checking: Using a vector DB to validate if an extracted drug name exists in RxNorm. | Prevents hallucination of non-existent drugs; ensures terminology standardization. | Requires external database infrastructure. And a document base. | [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/)<br>[Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
-| Automatic Prompt Engineer (APE) | Using an LLM to generate and optimize prompts. | Asking GPT-4 to write the optimal prompt for analyzing GraSCCo texts. | Saves time on trial-and-error. | The resulting prompt might be obscure/hard to interpret. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| Generated Knowledge Prompting | Asking the model to generate relevant knowledge before answering. | "List common side effects of Ibuprofen, then summarize the patient's complaints regarding medication." | Can help if the medical text is ambiguous (e.g., vague symptoms), providing context for the summary. | Risk of generating false knowledge (hallucinated medical facts) which then contaminates the summary. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| Automatic Reasoning and Tool-use | Allowing the LLM to use external tools (calculators, APIs). | Calculating cumulative dosage or converting units (e.g., mg to g) found in the text. | Ensures mathematical accuracy in the medical record (e.g., total radiation dose). | Adds complexity; the model might fail to invoke the tool correctly. | [Toolformer: Language Models Can Teach Themselves to Use Tools (arXiv)](https://arxiv.org/pdf/2302.04761) |
-| Active-Prompt | Selecting the most uncertain examples for human annotation to teach the model. | Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the Silver Answer. | Maximizes the value of human expert time (efficient annotation). | Requires a human-in-the-loop workflow. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| Directional Stimulus Prompting | Using a separate small model to generate "hints" or keywords to guide the main LLM. | Extracting keywords (e.g., "Heart", "Attack") first, then feeding them to the LLM to generate the summary. | Can focus the model on specific medical sections (e.g., "Focus only on cardiac events"). | Requires training or prompting an auxiliary policy model. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| Program-Aided Language Models (PAL) | Generating code to solve reasoning steps. | Writing a Python script to extract and sort dates of admission from the text. | Extremely precise for structured data extraction (dates, dosages). | Fails if the medical text is too unstructured or uses ambiguous natural language. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| ReAct (Reasoning + Acting) | Interleaving reasoning traces with action execution. | "Thought: I need to check if this drug interacts with... Action: Search drug database." | Good for clinical decision support agents. | Overly complex for the specific task of generating static Silver Answers from text. | [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS (arXiv)](https://arxiv.org/pdf/2210.03629)<br>[Prompt Engineering Guide: ReAct Prompting (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
-| Reflexion | An agent reflecting on past mistakes to improve future responses. | The model generates a summary, checks it against rules, critiques itself ("I missed the date"), and rewrites. | Improves quality iteratively without human intervention. | Can get stuck in loops if the self-critique is flawed. | [Reflexion: Language Agents with Verbal Reinforcement Learning](https://arxiv.org/pdf/2303.11366)<br>[Prompt Engineering: Part 2 - Best Practices for Software Developers in Digital Industries](https://blogs.sw.siemens.com/thought-leadership/prompt-engineering-part-2-best-practices-for-software-developers-in-digital-industries/) |
-| Multimodal CoT | Chain-of-Thought with images and text. | Analyzing X-rays alongside the radiology report. | Essential if the GraSCCo corpus contained images (it does not, it is text-based). | Not applicable to text-only medical corpora. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| Graph-Prompting | Representing data as a graph structure within the prompt. | Mapping patient symptoms to a knowledge graph of diseases. | Good for understanding relationships (Symptom A -> Disease B). | Text-to-Graph conversion is difficult and error-prone. | [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/pdf/2308.09687) |
-| Meta-Prompting | Asking the model to assume a persona or higher-level view. | "Act as a senior medical consultant reviewing a junior doctor's note." | Can improve the tone and professionality of the output. | Mostly affects style, less impact on factual extraction accuracy. | [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Technique |                                                                               |
+|-----------|-------------------------------------------------------------------------------|
+| Zero-Shot Prompting | **Description:** Asking the model to perform a task without examples|
+||**Application to Medical Silver Answers:** "Extract all diagnoses from this text."|
+||**Pros for Medical Records:** Fast and low token cost. Useful for checking the baseline capability of a model.|
+||**Cons / Risks:** High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. |
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Few-Shot Prompting | **Description:** Providing examples (input-output pairs) within the prompt.
+||**Application to Medical Silver Answers:** "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "Silver Answer" format. (possible after first supervision session)"|
+||**Pros for Medical Records:** Essential for enforcing the specific syntax and brevity required for the Silver Answers.|
+||**Cons / Risks:** The model may overfit to the examples and ignore the nuance of the new input.|
+||**References:** [Language Models are Few-Shot Learners (NeurIPS)](https://proceedings.neurips.cc/paper/2020/file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf), [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Chain-of-Thought (CoT) | **Description:** Instructing the model to generate intermediate reasoning steps.
+||**Application to Medical Silver Answers:** Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list."|
+||**Pros for Medical Records:** Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details.|
+||**Cons / Risks:** Increases token usage. Requires parsing to separate the "thought" from the "silver answer."|
+||**References:** [Chain of Thought Prompting Elicits reasoning (arXiv)](https://arxiv.org/pdf/2201.11903), [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Self-Consistency | **Description:** Generating multiple outputs for the same prompt and selecting the most frequent one.|
+||**Application to Medical Silver Answers:** Validation: Generate the summary 5 times. If "Diabetes Type 2" appears in 5/5, keep it. If "Hypertension" appears in 1/5, discard it.|
+||**Pros for Medical Records:** The best statistical defense against hallucinations. Essential for creating a robust "Gold Standard".|
+||**Cons / Risks:** Computationally expensive (requires N times the inference cost).|
+||**References:** [Self-Consistency Improves Chain of Thought (arXiv)](https://arxiv.org/pdf/2203.11171), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Skeleton-of-Thought (SoT) | **Description:** Generating a skeleton/outline first, then expanding points in parallel.|
+||**Application to Medical Silver Answers:** Structure Planning: 1. Generate list of headers (Dx, Rx). 2. Fill sections in parallel.|
+||**Pros for Medical Records:** Accelerates generation speed (up to 2.39x). Good for long, structured discharge summaries.|
+||**Cons / Risks:** Suited for writing new content, less proven for extracting specific facts from existing chaos.|
+||**References:** [Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation](https://arxiv.org/pdf/2307.15337), [[ICLR 2024] Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation (GitHub)](https://github.com/imagination-research/sot) |
+| Prompt Chaining | **Description:** Breaking a task into subtasks where output A becomes input B.|
+||**Application to Medical Silver Answers:** Workflow: 1. Extraction Prompt -> 2. Filtering Prompt -> 3. Formatting Prompt.|
+||**Pros for Medical Records:** High reliability. Isolates errors. Allows for intermediate transformation (e.g., cleaning citations).|
+||**Cons / Risks:** Requires building a controller application (state management) between prompts.|
+||**References:** [Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb), [PromptChainer Paper (arXiv)](https://arxiv.org/pdf/2203.06566) |
+| Role / Persona Prompting | **Description:** Assigning a specific role/profession to the AI.|
+||**Application to Medical Silver Answers:** Context Setting: "You are a Senior Chief Physician at a Swiss hospital..."|
+||**Pros for Medical Records:** Drastically improves tone and handling of medical abbreviations/jargon.|
+||**Cons / Risks:** Can lead to verbosity if the persona is too "chatty."|
+||**References:** [Prompt Engineering: Part 2 - Best Practices for Software Developers in Digital Industries](https://blogs.sw.siemens.com/thought-leadership/prompt-engineering-part-2-best-practices-for-software-developers-in-digital-industries/), [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Multi-Persona Prompting | **Description:** Simulating a discussion between multiple agents (e.g., Drafter & Reviewer).|
+||**Application to Medical Silver Answers:** Quality Assurance: Agent A extracts data; Agent B reviews it for missing info; Agent C finalizes.|
+||**Pros for Medical Records:** Simulates a "four-eyes principle" (peer review), reducing errors through internal debate.|
+||**Cons / Risks:** High latency and token cost; complex to orchestrate.|
+||**References:** [Exploring Multi-Persona Prompting for Better Outputs](https://www.prompthub.us/blog/exploring-multi-persona-prompting-for-better-outputs) |
+| Tree of Thoughts (ToT) | **Description:** Exploring multiple reasoning paths and backtracking.|
+||**Application to Medical Silver Answers:** Complex Triage: Exploring different diagnostic possibilities before committing to one.|
+||**Pros for Medical Records:** Useful for complex differential diagnosis problems.|
+||**Cons / Risks:** Likely overkill for extraction tasks where the answer is explicitly in the text.|
+||**References:** [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/pdf/2305.10601), [[NeurIPS 2023] Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://github.com/princeton-nlp/tree-of-thought-llm) |
+| Retrieval Augmented Generation (RAG) | **Description:** Retrieving external data to ground the generation.|
+||**Application to Medical Silver Answers:** Fact Checking: Using a vector DB to validate if an extracted drug name exists in RxNorm.|
+||**Pros for Medical Records:** Prevents hallucination of non-existent drugs; ensures terminology standardization.|
+||**Cons / Risks:** Requires external database infrastructure. And a document base.|
+||**References:** [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/), [Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
+| Automatic Prompt Engineer (APE) | **Description:** Using an LLM to generate and optimize prompts.|
+||**Application to Medical Silver Answers:** Asking GPT-4 to write the optimal prompt for analyzing GraSCCo texts.|
+||**Pros for Medical Records:** Saves time on trial-and-error.|
+||**Cons / Risks:** The resulting prompt might be obscure/hard to interpret.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Generated Knowledge Prompting | **Description:** Asking the model to generate relevant knowledge before answering.|
+||**Application to Medical Silver Answers:** "List common side effects of Ibuprofen, then summarize the patient's complaints regarding medication."|
+||**Pros for Medical Records:** Can help if the medical text is ambiguous (e.g., vague symptoms), providing context for the summary.|
+||**Cons / Risks:** Risk of generating false knowledge (hallucinated medical facts) which then contaminates the summary.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Automatic Reasoning and Tool-use | **Description:** Allowing the LLM to use external tools (calculators, APIs).|
+||**Application to Medical Silver Answers:** Calculating cumulative dosage or converting units (e.g., mg to g) found in the text.|
+||**Pros for Medical Records:** Ensures mathematical accuracy in the medical record (e.g., total radiation dose).|
+||**Cons / Risks:** Adds complexity; the model might fail to invoke the tool correctly.|
+||**References:** [Toolformer: Language Models Can Teach Themselves to Use Tools (arXiv)](https://arxiv.org/pdf/2302.04761) |
+| Active-Prompt | **Description:** Selecting the most uncertain examples for human annotation to teach the model.|
+||**Application to Medical Silver Answers:** Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the Silver Answer.|
+||**Pros for Medical Records:** Maximizes the value of human expert time (efficient annotation).|
+||**Cons / Risks:** Requires a human-in-the-loop workflow.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Directional Stimulus Prompting | **Description:** Using a separate small model to generate "hints" or keywords to guide the main LLM.|
+||**Application to Medical Silver Answers:** Extracting keywords (e.g., "Heart", "Attack") first, then feeding them to the LLM to generate the summary.|
+||**Pros for Medical Records:** Can focus the model on specific medical sections (e.g., "Focus only on cardiac events").|
+||**Cons / Risks:** Requires training or prompting an auxiliary policy model.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Program-Aided Language Models (PAL) | **Description:** Generating code to solve reasoning steps.|
+||**Application to Medical Silver Answers:** Writing a Python script to extract and sort dates of admission from the text.|
+||**Pros for Medical Records:** Extremely precise for structured data extraction (dates, dosages).|
+||**Cons / Risks:** Fails if the medical text is too unstructured or uses ambiguous natural language.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| ReAct (Reasoning + Acting) | **Description:** Interleaving reasoning traces with action execution.|
+||**Application to Medical Silver Answers:** "Thought: I need to check if this drug interacts with... Action: Search drug database."|
+||**Pros for Medical Records:** Good for clinical decision support agents.|
+||**Cons / Risks:** Overly complex for the specific task of generating static Silver Answers from text.|
+||**References:** [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS (arXiv)](https://arxiv.org/pdf/2210.03629), [Prompt Engineering Guide: ReAct Prompting (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
+| Reflexion | **Description:** An agent reflecting on past mistakes to improve future responses.|
+||**Application to Medical Silver Answers:** The model generates a summary, checks it against rules, critiques itself ("I missed the date"), and rewrites.|
+||**Pros for Medical Records:** Improves quality iteratively without human intervention.|
+||**Cons / Risks:** Can get stuck in loops if the self-critique is flawed.|
+||**References:** [Reflexion: Language Agents with Verbal Reinforcement Learning](https://arxiv.org/pdf/2303.11366), [Prompt Engineering: Part 2 - Best Practices for Software Developers in Digital Industries](https://blogs.sw.siemens.com/thought-leadership/prompt-engineering-part-2-best-practices-for-software-developers-in-digital-industries/) |
+| Multimodal CoT | **Description:** Chain-of-Thought with images and text.|
+||**Application to Medical Silver Answers:** Analyzing X-rays alongside the radiology report.|
+||**Pros for Medical Records:** Essential if the GraSCCo corpus contained images (it does not, it is text-based).|
+||**Cons / Risks:** Not applicable to text-only medical corpora.|
+||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Graph-Prompting | **Description:** Representing data as a graph structure within the prompt.|
+||**Application to Medical Silver Answers:** Mapping patient symptoms to a knowledge graph of diseases.|
+||**Pros for Medical Records:** Good for understanding relationships (Symptom A -> Disease B).|
+||**Cons / Risks:** Text-to-Graph conversion is difficult and error-prone.|
+||**References:** [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/pdf/2308.09687) |
+| Meta-Prompting | **Description:** Asking the model to assume a persona or higher-level view.|
+||**Application to Medical Silver Answers:** "Act as a senior medical consultant reviewing a junior doctor's note."|
+||**Pros for Medical Records:** Can improve the tone and professionality of the output.|
+||**Cons / Risks:** Mostly affects style, less impact on factual extraction accuracy.|
+||**References:** [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/), [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 
 ### Chain-of-Thought: The Optimal Technique for Generating Silver Answers
 
