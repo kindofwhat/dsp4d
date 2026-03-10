@@ -296,10 +296,24 @@ X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate 
 TODO BNI Maschine von Beni, Google cloud für Gemini 
 TODO CHS Chrigels notebook, Evaluationsframeworks
 
-
-
 ## Evaluation Metrics
-TODO CHS Text bitte
+
+The following metrics are used to evaluate LLM outputs, divided into statistical metrics (no LLM call required) and generative metrics (LLM-as-a-Judge):
+
+**Statistical Metrics:**
+
+- **BLEU** (*Bilingual Evaluation Understudy*): Measures n-gram overlap between generated and expected output. Reports brevity penalty and 1- to 4-gram precision.
+- **ROUGE** (*Recall-Oriented Understudy for Gisting Evaluation*): Evaluates overlap based on ROUGE-1 (unigram), ROUGE-2 (bigram), and ROUGE-L (longest common subsequence).
+- **Token F1**: Computes precision, recall, and F1 score at the token level between generated and expected output.
+- **Levenshtein Similarity**: Determines character-level similarity via normalised edit distance.
+- **Semantic Similarity**: Compares semantic similarity using embedding vectors (model: `text-embedding-3-small`).
+- **JSON Structural Similarity**: Evaluates structural correspondence of JSON output by matching paths and their contents.
+
+**Generative Metrics (LLM-as-a-Judge):**
+
+- **Medical Field Comparision**: An LLM evaluates the factual correctness of the generated output against the golden answer on a scale from 0 to 1. It is defined as one shot as close as possible to the DAG metric with the goal tom make them comparable.
+- **Medical Semantic Field Comparision**: A multi-step, graph-based evaluation (Directed Acyclic Graph) that assesses format validity, factual accuracy, completeness, and medical terminology in separate steps, aggregating them into an overall score.
+
 ### Test Setup
 TODO CHS Text bitte
 #### llm-validator
