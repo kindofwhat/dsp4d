@@ -87,7 +87,7 @@ tasks:
         
         echo "Found tlmgr at: $TLMGR"
         sudo "$TLMGR" update --self
-        sudo "$TLMGR" install collection-fontsrecommended bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck framed
+        sudo "$TLMGR" install collection-fontsrecommended tex-gyre bookmark xcolor mdwtools etoolbox infwarerr kvoptions pdftexcmds hycolor letltxmacro auxhook intcalc rerunfilecheck framed
         echo "LaTeX packages installed"
 
   setup-latex-linux:
