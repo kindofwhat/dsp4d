@@ -102,41 +102,5 @@ A critical finding concerns the models' ability to produce valid, structurally c
 Llama3:8b scores 0.000 across all 62 test cases, indicating a complete failure to produce parseable JSON matching the required schema. Mistral-Nemo and Phi3.5 also exhibit high variance with many zero-score cases. In contrast, Gemini 2.5 Pro and Gemma3:27b produce consistently structured output with no zero-score cases.
 
 
-<!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
-## Metric Correlation Analysis
-
-To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all 558 model-document interactions (9 models x 62 test cases).
-
-![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
-
-Several patterns emerge from the correlation analysis:
-
-**Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.54–0.89). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.36), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
-
-**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical extraction quality shows near-zero correlation with the lexical metrics (r = -0.02 to 0.15), and LLM-Judge correctness similarly exhibits weak correlations (r = 0.12–0.23). This confirms that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate.
-
-**Semantic similarity occupies a middle ground.** While embedding-based semantic similarity correlates weakly with the lexical cluster (r = 0.14–0.33), it also shows only modest correlation with the LLM-as-a-Judge metrics (r = 0.15–0.17). This supports its categorisation as a distinct metric tier: it measures meaning preservation without assessing clinical correctness or structural compliance.
-
-**JSON structural similarity is the most independent structural metric.** It correlates moderately with the lexical group (r = 0.34–0.40) but also shows the highest correlation with semantic similarity (r = 0.39) among the statistical metrics. This suggests that models producing well-structured JSON also tend to generate more semantically accurate content — format compliance and content quality are not independent.
-
-<!-- #R-TAB-LATENCY — regenerate from JSON, see INSTRUCTIONS.md -->
-## Latency
-
-Average inference latency varies considerably across models. The fastest models are Qwen2:7b (15'730 ms) and Granite 3.3:2b (16'506 ms), while Gemma3:27b is the slowest at 69'136 ms per test case. The cloud-based Gemini 2.5 Pro achieves competitive latency (22'259 ms) despite being the largest model, benefiting from optimised cloud infrastructure.
-
-| Model | Mean Latency (ms) | Size |
-|-------|-------------------|------|
-| qwen2:7b | 15'730 | 7B |
-| granite3.3:2b | 16'506 | 2B |
-| llama3:8b | 17'002 | 8B |
-| phi3.5:3.8b | 20'197 | 3.8B |
-| glm4:9b | 20'237 | 9B |
-| gemini-2.5-pro | 22'259 | Large (Cloud) |
-| mistral-nemo | 24'556 | 12B |
-| gpt-5-nano | 44'443 | Small (Cloud) |
-| gemma3:27b | 69'136 | 27B |
-
-: Mean inference latency per test case in milliseconds. {#tab:latency}
-
 <!-- END AI-GENERATED CONTENT -->
 

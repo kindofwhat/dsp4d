@@ -77,7 +77,26 @@ Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity
 
 6. **Metric thresholds:** The near-zero pass rates on lexical metrics (BLEU, ROUGE, Token F1) across all models — including the reference Gemini model — suggest that the pass thresholds for these metrics may be miscalibrated for this extraction task, where semantically equivalent but lexically diverse outputs are expected.
 
-## Discussion of Metric Quality TODO CHS: weak correlations etc
+<!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
+## Metric Correlation Analysis
+
+To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all  model-document interactions .
+
+![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
+
+Several patterns emerge from the correlation analysis:
+
+**Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.54–0.89). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.36), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
+
+**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical extraction quality shows near-zero correlation with the lexical metrics (r = -0.02 to 0.15), and LLM-Judge correctness similarly exhibits weak correlations (r = 0.12–0.23). We interpret this as a confirmation that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate, with a little caveat, which follows
+
+**No correlation between LLM-as-a-Judge metrics .** The two metrics which use an LLM have a disappointingly low correlation. Our interpretation is that the used prompt fo the simpler direct judge is too simplistic.
+
+**JSON structural similarity is the most independent structural metric.** It correlates moderately with the lexical group (r = 0.34–0.40) but also shows the highest correlation with semantic similarity (r = 0.39) among the statistical metrics. This suggests that models producing well-structured JSON also tend to generate more semantically accurate content — format compliance and content quality are not independent.
+
+**The self-preference bias seems to be real**. Some smaller experiments lead to this conclusion.
+
+
 
 <!-- #D-FUTURE — static -->
 ## Future Work
