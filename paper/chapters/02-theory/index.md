@@ -38,7 +38,7 @@ To overcome the limitations of exact n-gram matching, semantic metrics utilize w
 *   **BERTScore** computes a similarity score for each token in the candidate sentence with each token in the reference sentence using contextual embeddings (e.g., from BERT). This allows for a more robust evaluation of paraphrases and synonyms [@zhang2020bertscore].
 *   **Word Mover's Distance (WMD)** and its variants (like MoverScore) measure the minimum "distance" required to move the embedded words of one document to the other. This approach captures semantic distance effectively, even when no words overlap [@kusner2015word; @zhao2019moverscore].
 
-### LLM-Based Evaluation (LLM-as-a-Judge)
+### LLM-Based Evaluation (LLM-as-a-Judge) TODO CHS: DAG 
 
 Recent advances have shifted towards using Large Language Models themselves as evaluators, a paradigm known as "LLM-as-a-Judge". This approach uses the reasoning capabilities of capable models (such as GPT-5) to assess the quality of generated text based on complex criteria such as helpfulness, safety, and coherence, often achieving higher correlation with human judgment than traditional metrics.
 
@@ -47,7 +47,7 @@ Recent advances have shifted towards using Large Language Models themselves as e
 *   **Prometheus** is an open-source LLM specifically fine-tuned for evaluation purposes. It allows for custom evaluation criteria and feedback generation, offering a cost-effective alternative to using proprietary models like GPT-4 as judges [@kim2024prometheus2].
 *   **Ragas** (Retrieval Augmented Generation Assessment) is a framework specifically designed for evaluating RAG pipelines. It defines metrics such as *context precision*, *faithfulness*, and *answer relevancy*, using an LLM to verify if the generated answer is grounded in the retrieved documents and if it actually answers the user's question [@es2024ragas].
 
-TODO CHS: DAG
+
 ### Evaluation Challenges
 
 Despite the proliferation of evaluation frameworks, assessing LLM quality remains a central limitation in the field. The metrics described above each carry inherent weaknesses that complicate reproducible benchmarking.
@@ -63,7 +63,7 @@ These challenges underscore the need for multi-faceted evaluation approaches tha
 For the present study, these limitations are partially mitigated by our reliance on relative rather than absolute metric comparisons; nevertheless, they remain relevant considerations when interpreting results.
 
 
-## LLM in the Context of Medical Science
+## LLM in the Context of Medical Science TODO BNI proofread 
 
 The application of Large Language Models (LLMs) in medicine is an evolution of clinical Natural Language Processing (NLP), which gained significant momentum with the release of specialized models like ClinicalBERT [@alsentzer2019publicly]. While early models focused on entity recognition and extraction, modern LLMs offer the potential to summarize charts and suggest clinical actions. However, their integration into clinical workflows is constrained by critical requirements for accuracy, data privacy, and data sovereignty.
 
@@ -92,7 +92,7 @@ Guluzade et al. (2024) showed that fine-tuned smaller models can outperform larg
 The Graz Synthetic Clinical text Corpus (GraSCCo) remains a cornerstone for this research area. As a multiply-alienated German clinical corpus, it allows researchers to benchmark models on realistic medical narratives without the legal and ethical risks associated with real patient data [@modersohn2022grascco; @GraSCCo_PII_V2_2025].
 
 
-## Scaling Laws and Model Efficiency
+## Scaling Laws and Model Efficiency TODO BNI proofread 
 
 A central question for deploying LLMs in privacy-sensitive environments is: how small can a model be while maintaining acceptable performance? Early scaling laws suggested a straightforward trade-off, but recent developments in Small Language Models (SLMs) have significantly shifted expectations.
 
@@ -123,9 +123,73 @@ These developments frame the research question: given hardware constraints of on
 
 ## Context Engineering Strategies
 
-TBD what else do we discuss here?
+TODO BNI Importance of PE --> Description CoT as
+#### The 3 Most Potent Techniques for Golden Answers (for a state of the art LLM)
 
-### Comprehensive Comparison of Prompting Techniques
+While Role Prompting and Skeleton-of-Thought are valuable, they are "modifiers" or "accelerators." The three techniques below are architectural necessities for ensuring the accuracy required for a scientific Gold Standard.
+
+##### 1. Prompt Chaining (The Architecture)
+
+**Source Evidence:** The Prompt Engineering Guide highlights that chaining is essential for "Document QA" where extraction and synthesis are separate logical steps.
+
+**Why it wins**
+
+Medical documentation in GraSCCo is unstructured and "messy." Trying to extract, clean, standardize, and format data in a single shot leads to cognitive overload for the model.
+
+**Application**
+
+You must split the generation of Golden Answers into a pipeline:
+
+* **Step 1 (Extraction):** "Extract all medical entities." (Raw list).
+* **Step 2 (Grounding):** "Match these entities to ICD-10/RxNorm codes." (Standardization).
+* **Step 3 (Formatting):** "Convert this standardized list into the final JSON schema."
+
+**Value**
+
+If the JSON is broken, you only debug Step 3. If a drug is missed, you debug Step 1. This traceability is vital for a thesis.
+
+---
+
+##### 2. Self-Consistency (The Validator)
+
+**Source Evidence:** The paper *Self-Consistency Improves Chain of Thought Reasoning* proves that replacing greedy decoding with "sample-and-marginalize" (majority voting) improves performance on complex reasoning tasks by significant margins (e.g., +17.9% on GSM8K).
+
+**Why it wins**
+
+You are creating a "Gold Standard" using AI, which is inherently risky. A single pass of GPT-4 might hallucinate a symptom.
+
+**Application**
+
+For every GraSCCo document, run your extraction prompt 5 to 10 times.
+
+* **Mechanism:** If 8/10 runs extract "Hypertension," accept it as Truth. If only 2/10 extract "Diabetes," discard it as noise/hallucination.
+
+**Value**
+
+This statistically "purifies" your Golden Answers, making them a defensible ground truth for your scientific evaluation.
+
+---
+
+##### 3. Multi-Persona / Role Prompting (The Expert Layer)
+
+**Source Evidence:** New sources from Reddit and K2View emphasize that telling the model who to be ("You are a skeptical expert") drastically changes the quality of output compared to generic prompts.
+
+**Why it wins**
+
+GraSCCo contains specific Swiss-German medical shorthand. A generic model might miss context.
+
+**Application**
+
+Instead of just "Summarize this," you combine Role Prompting with a Multi-Persona loop:
+
+* **Pass 1 (Persona A - The Scribe):** "You are a medical scribe. Transcribe the key facts."
+* **Pass 2 (Persona B - The Senior Consultant):** "You are a Senior Physician. Review the scribe's notes against the original text. Point out missing diagnoses or errors."
+
+**Value**
+
+This acts as an automated **"Four-Eyes Principle"** (*Vier-Augen-Prinzip*), mimicking the real-world medical workflow where a senior doctor signs off on a junior doctor's note.
+
+### Comprehensive Comparison of Prompting Techniques TODO CHS Referenzen / BNI Formatierung Tabelle
 This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Golden Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
 
 | Technique | Description | Application to Medical Golden Answers | Pros for Medical Records | Cons / Risks | References |

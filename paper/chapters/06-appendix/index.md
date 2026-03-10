@@ -10,7 +10,7 @@ This "Gold Standard" example now includes the **Internal Monologue**, which is t
 
 ---
 
-## Appendix: Gold Standard Example (CoT Approach)
+## Appendix: Gold Standard Example (CoT Approach) TODO BNI überprüfen
 
 Below is the processing of the same kardiologische report, but utilizing the **Klinische Analyse** to ensure clinical accuracy.
 

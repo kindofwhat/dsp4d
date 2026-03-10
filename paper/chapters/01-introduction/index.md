@@ -1,4 +1,4 @@
-# Introduction
+# Introduction TODO BNI
 
 The healthcare sector is currently operating under substantial strain, compelled to enhance operational efficiency while simultaneously upholding rigorous standards of data privacy and patient safety. The workload borne by general practitioners (GPs) has intensified markedly due to the proliferation of administrative responsibilities. Following direct patient consultations, practitioners frequently dedicate hours to the scrutiny and triage of incoming documentation—ranging from laboratory reports and referrals to insurance correspondence—as well as the drafting of replies and the maintenance of patient records. This administrative burden results in significant latency and cognitive fatigue, typically accumulating during the period subsequent to clinic closure.
 

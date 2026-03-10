@@ -4,7 +4,9 @@
 
 This chapter presents the empirical findings of the Zero-Shot evaluation run across all nine models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories.
 
-## Overview of Models and Evaluation Metrics
+## Why silver answers are good enough TODO CHS / BNI
+
+## Overview of Models and Evaluation Metrics TODO CHS: update metrics
 
 Nine models were evaluated: one large cloud model (Gemini 2.5 Pro via Vertex AI), one small cloud model (GPT-5-nano via OpenAI), and seven locally executable SLMs ranging from 2B to 27B parameters. All models received the identical system prompt and clinical input documents in a Zero-Shot configuration — no few-shot examples or retrieval augmentation was applied.
 
@@ -57,7 +59,7 @@ The following three tables present the mean scores grouped by metric category.
 : Mean embedding and LLM-as-a-Judge scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-judge}
 
 <!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
-### Composite Scores by Metric Category
+### Composite Scores by Metric Category TODO CHS Lesbarkeit Tabelle
 
 To provide a consolidated view, Table \ref{tab:composite} aggregates the metric averages into three categories and an overall composite score.
 
@@ -77,31 +79,11 @@ To provide a consolidated view, Table \ref{tab:composite} aggregates the metric 
 
 Gemini 2.5 Pro achieves the highest overall composite score (0.470), followed by GPT-5-nano (0.419) and Gemma3:27b (0.416). Among the locally executable SLMs, Granite 3.3 (2B) ranks surprisingly high at 0.390 — outperforming several models four to six times its size.
 
-<!-- #R-TAB-PASS — regenerate from JSON, see INSTRUCTIONS.md -->
-### Pass Rates
-
-Table \ref{tab:pass-rates} reports the percentage of test cases where each model met or exceeded the metric-specific pass threshold.
-
-| Model | Size | DAG | LLM-Judge | Sem. Sim. | Overall |
-|-------|------|-----|-----------|-----------|---------|
-| gemini-2.5-pro | Large | 82.3% | 90.3% | 93.5% | 34.3% |
-| gpt-5-nano | Small | 83.9% | 85.5% | 100.0% | 33.7% |
-| gemma3:27b | 27B | 56.5% | 77.4% | 90.3% | 28.4% |
-| granite3.3:2b | 2B | 59.7% | 58.1% | 100.0% | 27.4% |
-| phi3.5:3.8b | 3.8B | 50.0% | 48.4% | 85.5% | 23.2% |
-| qwen2:7b | 7B | 54.8% | 64.5% | 62.9% | 22.8% |
-| mistral-nemo | 12B | 24.2% | 58.1% | 74.2% | 19.6% |
-| glm4:9b | 9B | 35.5% | 56.5% | 37.1% | 16.1% |
-| llama3:8b | 8B | 50.0% | 50.0% | 8.1% | 13.9% |
-
-: Pass rates for embedding and LLM-as-a-Judge metrics (%). Statistical lexical metrics (BLEU, ROUGE, Levenshtein, Token F1, JSON structural similarity) are omitted as all models achieve near-0% pass rates on these. Overall includes all 8 metrics. {#tab:pass-rates}
-
-The statistical lexical metrics (BLEU, ROUGE, Levenshtein, Token F1) yield near-zero pass rates across all models — including Gemini 2.5 Pro. This indicates that these thresholds are either too strict for the task or that the extraction task inherently permits semantically equivalent but lexically diverse outputs.
 
 <!-- #R-TAB-JSON — regenerate from JSON, see INSTRUCTIONS.md -->
-## JSON Structural Compliance
+## JSON Structural Similarity
 
-A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema. The `json_structural_similarity` metric directly measures this capability.
+A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema and the respective content. The `json_structural_similarity` metric directly measures this capability.
 
 | Model | Mean | Std | Min | Max |
 |-------|------|-----|-----|-----|
@@ -119,26 +101,6 @@ A critical finding concerns the models' ability to produce valid, structurally c
 
 Llama3:8b scores 0.000 across all 62 test cases, indicating a complete failure to produce parseable JSON matching the required schema. Mistral-Nemo and Phi3.5 also exhibit high variance with many zero-score cases. In contrast, Gemini 2.5 Pro and Gemma3:27b produce consistently structured output with no zero-score cases.
 
-<!-- #R-TAB-SEMANTIC — regenerate from JSON, see INSTRUCTIONS.md -->
-## Semantic Understanding vs. Format Compliance
-
-A notable divergence emerges between metrics measuring semantic understanding and those measuring structural compliance. Table \ref{tab:semantic-vs-struct} contrasts the two dimensions.
-
-| Model | Semantic Sim. | LLM-Judge | JSON Sim. | BLEU |
-|-------|--------------|-----------|-----------|------|
-| gpt-5-nano | 0.861 | 0.707 | 0.272 | 0.085 |
-| granite3.3:2b | 0.843 | 0.659 | 0.254 | 0.085 |
-| gemini-2.5-pro | 0.835 | 0.730 | 0.440 | 0.122 |
-| phi3.5:3.8b | 0.797 | 0.628 | 0.103 | 0.077 |
-| mistral-nemo | 0.794 | 0.643 | 0.059 | 0.080 |
-| gemma3:27b | 0.790 | 0.702 | 0.372 | 0.080 |
-| qwen2:7b | 0.765 | 0.675 | 0.160 | 0.054 |
-| glm4:9b | 0.732 | 0.660 | 0.255 | 0.072 |
-| llama3:8b | 0.650 | 0.636 | 0.000 | 0.077 |
-
-: Semantic understanding metrics (left) vs. structural compliance metrics (right). {#tab:semantic-vs-struct}
-
-Most models achieve semantic similarity scores above 0.75, indicating that the extracted medical content is semantically close to the Silver Answers. However, the same models frequently fail to structure this content according to the prescribed JSON schema. This gap is most pronounced for GPT-5-nano (semantic similarity 0.861 vs. JSON similarity 0.272) and Granite 3.3 (0.843 vs. 0.254).
 
 <!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
 ## Metric Correlation Analysis

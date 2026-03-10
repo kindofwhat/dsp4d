@@ -77,6 +77,8 @@ Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity
 
 6. **Metric thresholds:** The near-zero pass rates on lexical metrics (BLEU, ROUGE, Token F1) across all models — including the reference Gemini model — suggest that the pass thresholds for these metrics may be miscalibrated for this extraction task, where semantically equivalent but lexically diverse outputs are expected.
 
+## Discussion of Metric Quality TODO CHS: weak correlations etc
+
 <!-- #D-FUTURE — static -->
 ## Future Work
 
