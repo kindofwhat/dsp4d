@@ -27,8 +27,8 @@ The following three tables present the mean scores grouped by metric category.
 
 **Statistical Metrics** (deterministic, no model required):
 
-| Model | Size | BLEU | ROUGE | Levenshtein | Token F1 | JSON Sim. |
-|-------|------|------|-------|-------------|----------|-----------|
+| Model              | Size | BLEU | ROUGE | Levenshtein | Token F1 | JSON Sim. |
+|--------------------|------|------|-------|-------------|----------|-----------|
 | gemini-2.5-pro | Large | 0.122 | 0.254 | 0.377 | 0.380 | 0.440 |
 | gemma3:27b | 27B | 0.080 | 0.210 | 0.343 | 0.309 | 0.372 |
 | gpt-5-nano | Small | 0.085 | 0.201 | 0.318 | 0.313 | 0.272 |
@@ -44,8 +44,8 @@ The following three tables present the mean scores grouped by metric category.
 <!-- #R-TAB-JUDGE — regenerate from JSON, see INSTRUCTIONS.md -->
 **Embedding-Based Metric** (requires embedding model) and **LLM-as-a-Judge Metrics** (require generative LLM as evaluator):
 
-| Model | Size | Sem. Sim. | DAG | LLM-Judge |
-|-------|------|-----------|-----|-----------|
+| Model              | Size | Sem. Sim. | DAG | LLM-Judge |
+|--------------------|------|-----------|-----|-----------|
 | gemini-2.5-pro | Large | 0.835 | 0.619 | 0.730 |
 | gpt-5-nano | Small | 0.861 | 0.593 | 0.707 |
 | gemma3:27b | 27B | 0.790 | 0.520 | 0.702 |
@@ -59,12 +59,12 @@ The following three tables present the mean scores grouped by metric category.
 : Mean embedding and LLM-as-a-Judge scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-judge}
 
 <!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
-### Composite Scores by Metric Category TODO CHS Lesbarkeit Tabelle
+### Composite Scores by Metric Category
 
 To provide a consolidated view, Table \ref{tab:composite} aggregates the metric averages into three categories and an overall composite score.
 
-| Model | Size | Statistical | Embedding | LLM-as-a-Judge | Overall | Avg. Latency (ms) |
-|-------|------|-------------|-----------|----------------|---------|-------------------|
+| Model              | Size | Statistical | Embedding | LLM-as-a-Judge | Overall | Avg. Latency (ms) |
+|--------------------|------|-------------|-----------|----------------|---------|-------------------|
 | gemini-2.5-pro | Large (Cloud) | 0.315 | 0.835 | 0.675 | 0.470 | 22'259 |
 | gpt-5-nano | Small (Cloud) | 0.238 | 0.861 | 0.650 | 0.419 | 44'443 |
 | gemma3:27b | 27B | 0.263 | 0.790 | 0.611 | 0.416 | 69'136 |
@@ -85,8 +85,8 @@ Gemini 2.5 Pro achieves the highest overall composite score (0.470), followed by
 
 A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema and the respective content. The `json_structural_similarity` metric directly measures this capability.
 
-| Model | Mean | Std | Min | Max |
-|-------|------|-----|-----|-----|
+| Model              | Mean | Std | Min | Max |
+|--------------------|------|-----|-----|-----|
 | gemini-2.5-pro | 0.440 | 0.078 | 0.272 | 0.658 |
 | gemma3:27b | 0.372 | 0.067 | 0.193 | 0.553 |
 | glm4:9b | 0.255 | 0.061 | 0.000 | 0.386 |
