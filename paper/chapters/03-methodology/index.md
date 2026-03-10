@@ -86,7 +86,7 @@ To generate these Silver Answers, we have selected Chain-of-Thought (CoT) prompt
 * Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
 * Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
 
-[See: Comprehensive Comparison of Prompting Techniques](chapters/02-theory/index.md#comprehensive-comparison-of-prompting-techniques)
+[See: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
 
 While techniques like Self-Consistency or Multi-Persona Prompting offer higher reliability, they were deemed less efficient for this stage due to significantly higher complexity, computational costs and latency. CoT provides the optimal balance between reasoning depth and token efficiency for clinical document classification.
 
@@ -146,7 +146,7 @@ Source Text:
 {document}
 ```
 
-[Gold Standard Example (CoT Approach)](../06-appendix/index.md#appendix-gold-standard-example-cot-approach)
+[Gold Standard Example (CoT Approach)](#appendix-gold-standard)
 
 ### Ground Truth Generation and Annotation Platform
 To facilitate the seamless generation and validation of these answers, we developed a dedicated web application. This platform serves three primary functions:
