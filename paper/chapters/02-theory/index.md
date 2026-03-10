@@ -38,7 +38,7 @@ To overcome the limitations of exact n-gram matching, semantic metrics utilize w
 *   **BERTScore** computes a similarity score for each token in the candidate sentence with each token in the reference sentence using contextual embeddings (e.g., from BERT). This allows for a more robust evaluation of paraphrases and synonyms [@zhang2020bertscore].
 *   **Word Mover's Distance (WMD)** and its variants (like MoverScore) measure the minimum "distance" required to move the embedded words of one document to the other. This approach captures semantic distance effectively, even when no words overlap [@kusner2015word; @zhao2019moverscore].
 
-### LLM-Based Evaluation (LLM-as-a-Judge) TODO CHS: DAG 
+### LLM-Based Evaluation (LLM-as-a-Judge)
 
 Recent advances have shifted towards using Large Language Models themselves as evaluators, a paradigm known as "LLM-as-a-Judge". This approach uses the reasoning capabilities of capable models (such as GPT-5) to assess the quality of generated text based on complex criteria such as helpfulness, safety, and coherence, often achieving higher correlation with human judgment than traditional metrics.
 
@@ -46,7 +46,7 @@ Recent advances have shifted towards using Large Language Models themselves as e
 *   **GPTScore** evaluates texts by calculating the probability of the generated text given a specific instruction or context, using the model's own likelihood scores as a proxy for quality [@fu2024gptscore].
 *   **Prometheus** is an open-source LLM specifically fine-tuned for evaluation purposes. It allows for custom evaluation criteria and feedback generation, offering a cost-effective alternative to using proprietary models like GPT-4 as judges [@kim2024prometheus2].
 *   **Ragas** (Retrieval Augmented Generation Assessment) is a framework specifically designed for evaluating RAG pipelines. It defines metrics such as *context precision*, *faithfulness*, and *answer relevancy*, using an LLM to verify if the generated answer is grounded in the retrieved documents and if it actually answers the user's question [@es2024ragas].
-
+*    **DAG** (Deep Acyclical Graph) metric evaluates according to a graph with different answer types (yes/no, nummerical) which implies a COT approach. It is based on the ideas of DeepEval framework but has been implemented from scratch. 
 
 ### Evaluation Challenges
 
