@@ -138,83 +138,18 @@ Prompt engineering is the systematic practice of designing, refining, and optimi
 
 4. **Maximizing Limited Resources:** For SLMs deployed on edge devices, prompt engineering becomes even more critical. Since these models have fewer parameters and potentially less training data than frontier models, carefully designed prompts can compensate for architectural limitations by providing explicit reasoning frameworks and domain-specific context.
 
-5. **Creating Defensible Ground Truth:** When using LLMs to generate reference answers (golden answers) for evaluation purposes — as in this study — prompt engineering is essential for ensuring that these references are accurate, complete, and scientifically defensible. Techniques like multi-persona prompting and self-consistency validation provide statistical confidence in the quality of generated ground truth.
+5. **Enabling Transparent Reasoning:** When using LLMs to generate reference answers (silver answers) for evaluation purposes — as in this study — prompt engineering is essential for ensuring that these references are accurate, complete, and scientifically defensible. Chain-of-Thought (CoT) prompting, in particular, allows models to expose their reasoning process, making it possible to verify the logical steps that led to a conclusion. This transparency is crucial for scientific validation: rather than accepting a model's output as a black box, researchers can inspect the intermediate reasoning steps to identify potential errors, biases, or hallucinations. Zero-shot CoT, which requires no task-specific examples, offers the additional advantage of generalizability across diverse medical documents without the need for manual example curation.
 
 The following sections detail specific prompt engineering techniques and their application to medical text processing, with particular emphasis on methods that enable reliable extraction of structured information from clinical narratives.
 
-#### The 3 Most Potent Techniques for Golden Answers (for a state of the art LLM)
-
-While Role Prompting and Skeleton-of-Thought are valuable, they are "modifiers" or "accelerators." The three techniques below are architectural necessities for ensuring the accuracy required for a scientific Gold Standard.
-
-##### 1. Prompt Chaining (The Architecture)
-
-**Source Evidence:** The Prompt Engineering Guide highlights that chaining is essential for "Document QA" where extraction and synthesis are separate logical steps.
-
-**Why it wins**
-
-Medical documentation in GraSCCo is unstructured and "messy." Trying to extract, clean, standardize, and format data in a single shot leads to cognitive overload for the model.
-
-**Application**
-
-You must split the generation of Golden Answers into a pipeline:
-
-* **Step 1 (Extraction):** "Extract all medical entities." (Raw list).
-* **Step 2 (Grounding):** "Match these entities to ICD-10/RxNorm codes." (Standardization).
-* **Step 3 (Formatting):** "Convert this standardized list into the final JSON schema."
-
-**Value**
-
-If the JSON is broken, you only debug Step 3. If a drug is missed, you debug Step 1. This traceability is vital for a thesis.
-
----
-
-##### 2. Self-Consistency (The Validator)
-
-**Source Evidence:** The paper *Self-Consistency Improves Chain of Thought Reasoning* proves that replacing greedy decoding with "sample-and-marginalize" (majority voting) improves performance on complex reasoning tasks by significant margins (e.g., +17.9% on GSM8K).
-
-**Why it wins**
-
-You are creating a "Gold Standard" using AI, which is inherently risky. A single pass of GPT-4 might hallucinate a symptom.
-
-**Application**
-
-For every GraSCCo document, run your extraction prompt 5 to 10 times.
-
-* **Mechanism:** If 8/10 runs extract "Hypertension," accept it as Truth. If only 2/10 extract "Diabetes," discard it as noise/hallucination.
-
-**Value**
-
-This statistically "purifies" your Golden Answers, making them a defensible ground truth for your scientific evaluation.
-
----
-
-##### 3. Multi-Persona / Role Prompting (The Expert Layer)
-
-**Source Evidence:** New sources from Reddit and K2View emphasize that telling the model who to be ("You are a skeptical expert") drastically changes the quality of output compared to generic prompts.
-
-**Why it wins**
-
-GraSCCo contains specific Swiss-German medical shorthand. A generic model might miss context.
-
-**Application**
-
-Instead of just "Summarize this," you combine Role Prompting with a Multi-Persona loop:
-
-* **Pass 1 (Persona A - The Scribe):** "You are a medical scribe. Transcribe the key facts."
-* **Pass 2 (Persona B - The Senior Consultant):** "You are a Senior Physician. Review the scribe's notes against the original text. Point out missing diagnoses or errors."
-
-**Value**
-
-This acts as an automated **"Four-Eyes Principle"** (*Vier-Augen-Prinzip*), mimicking the real-world medical workflow where a senior doctor signs off on a junior doctor's note.
-
 ### Comprehensive Comparison of Prompting Techniques TODO CHS Referenzen / BNI Formatierung Tabelle
-This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Golden Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
+This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Silver Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
 
-| Technique | Description | Application to Medical Golden Answers | Pros for Medical Records | Cons / Risks | References |
+| Technique | Description | Application to Medical Silver Answers | Pros for Medical Records | Cons / Risks | References |
 |-----------|-------------|---------------------------------------|--------------------------|--------------|------------|
 | Zero-Shot Prompting | Asking the model to perform a task without examples. | "Extract all diagnoses from this text." | Fast and low token cost. Useful for checking the baseline capability of a model. | High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. | [Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Few-Shot Prompting | Providing examples (input-output pairs) within the prompt. | "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "Golden Answer" format.<br>(possible after first supervision session)" | Essential for enforcing the specific syntax and brevity required for the Golden Answers. | The model may overfit to the examples and ignore the nuance of the new input. | [Language Models are Few-Shot Learners (NeurIPS)](https://proceedings.neurips.cc/paper/2020/file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
-| Chain-of-Thought (CoT) | Instructing the model to generate intermediate reasoning steps. | Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list." | Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details. | Increases token usage. Requires parsing to separate the "thought" from the "golden answer." | [Chain of Thought Prompting Elicits reasoning (arXiv)](https://arxiv.org/pdf/2201.11903)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Few-Shot Prompting | Providing examples (input-output pairs) within the prompt. | "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "Silver Answer" format.<br>(possible after first supervision session)" | Essential for enforcing the specific syntax and brevity required for the Silver Answers. | The model may overfit to the examples and ignore the nuance of the new input. | [Language Models are Few-Shot Learners (NeurIPS)](https://proceedings.neurips.cc/paper/2020/file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+| Chain-of-Thought (CoT) | Instructing the model to generate intermediate reasoning steps. | Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list." | Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details. | Increases token usage. Requires parsing to separate the "thought" from the "silver answer." | [Chain of Thought Prompting Elicits reasoning (arXiv)](https://arxiv.org/pdf/2201.11903)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
 | Self-Consistency | Generating multiple outputs for the same prompt and selecting the most frequent one. | Validation: Generate the summary 5 times. If "Diabetes Type 2" appears in 5/5, keep it. If "Hypertension" appears in 1/5, discard it. | The best statistical defense against hallucinations. Essential for creating a robust "Gold Standard". | Computationally expensive (requires N times the inference cost). | [Self-Consistency Improves Chain of Thought (arXiv)](https://arxiv.org/pdf/2203.11171)<br>[Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
 | Skeleton-of-Thought (SoT) | Generating a skeleton/outline first, then expanding points in parallel. | Structure Planning: 1. Generate list of headers (Dx, Rx). 2. Fill sections in parallel. | Accelerates generation speed (up to 2.39x). Good for long, structured discharge summaries. | Suited for writing new content, less proven for extracting specific facts from existing chaos. | [Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation](https://arxiv.org/pdf/2307.15337)<br>[[ICLR 2024] Skeleton-of-Thought: Prompting LLMs for Efficient Parallel Generation (GitHub)](https://github.com/imagination-research/sot) |
 | Prompt Chaining | Breaking a task into subtasks where output A becomes input B. | Workflow: 1. Extraction Prompt -> 2. Filtering Prompt -> 3. Formatting Prompt. | High reliability. Isolates errors. Allows for intermediate transformation (e.g., cleaning citations). | Requires building a controller application (state management) between prompts. | [Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb)<br>[PromptChainer Paper (arXiv)](https://arxiv.org/pdf/2203.06566) |
@@ -225,11 +160,77 @@ This table evaluates techniques based on their ability to extract accurate, stru
 | Automatic Prompt Engineer (APE) | Using an LLM to generate and optimize prompts. | Asking GPT-4 to write the optimal prompt for analyzing GraSCCo texts. | Saves time on trial-and-error. | The resulting prompt might be obscure/hard to interpret. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 | Generated Knowledge Prompting | Asking the model to generate relevant knowledge before answering. | "List common side effects of Ibuprofen, then summarize the patient's complaints regarding medication." | Can help if the medical text is ambiguous (e.g., vague symptoms), providing context for the summary. | Risk of generating false knowledge (hallucinated medical facts) which then contaminates the summary. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 | Automatic Reasoning and Tool-use | Allowing the LLM to use external tools (calculators, APIs). | Calculating cumulative dosage or converting units (e.g., mg to g) found in the text. | Ensures mathematical accuracy in the medical record (e.g., total radiation dose). | Adds complexity; the model might fail to invoke the tool correctly. | [Toolformer: Language Models Can Teach Themselves to Use Tools (arXiv)](https://arxiv.org/pdf/2302.04761) |
-| Active-Prompt | Selecting the most uncertain examples for human annotation to teach the model. | Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the Golden Answer. | Maximizes the value of human expert time (efficient annotation). | Requires a human-in-the-loop workflow. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
+| Active-Prompt | Selecting the most uncertain examples for human annotation to teach the model. | Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the Silver Answer. | Maximizes the value of human expert time (efficient annotation). | Requires a human-in-the-loop workflow. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 | Directional Stimulus Prompting | Using a separate small model to generate "hints" or keywords to guide the main LLM. | Extracting keywords (e.g., "Heart", "Attack") first, then feeding them to the LLM to generate the summary. | Can focus the model on specific medical sections (e.g., "Focus only on cardiac events"). | Requires training or prompting an auxiliary policy model. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 | Program-Aided Language Models (PAL) | Generating code to solve reasoning steps. | Writing a Python script to extract and sort dates of admission from the text. | Extremely precise for structured data extraction (dates, dosages). | Fails if the medical text is too unstructured or uses ambiguous natural language. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
-| ReAct (Reasoning + Acting) | Interleaving reasoning traces with action execution. | "Thought: I need to check if this drug interacts with... Action: Search drug database." | Good for clinical decision support agents. | Overly complex for the specific task of generating static Golden Answers from text. | [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS (arXiv)](https://arxiv.org/pdf/2210.03629)<br>[Prompt Engineering Guide: ReAct Prompting (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
+| ReAct (Reasoning + Acting) | Interleaving reasoning traces with action execution. | "Thought: I need to check if this drug interacts with... Action: Search drug database." | Good for clinical decision support agents. | Overly complex for the specific task of generating static Silver Answers from text. | [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS (arXiv)](https://arxiv.org/pdf/2210.03629)<br>[Prompt Engineering Guide: ReAct Prompting (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb) |
 | Reflexion | An agent reflecting on past mistakes to improve future responses. | The model generates a summary, checks it against rules, critiques itself ("I missed the date"), and rewrites. | Improves quality iteratively without human intervention. | Can get stuck in loops if the self-critique is flawed. | [Reflexion: Language Agents with Verbal Reinforcement Learning](https://arxiv.org/pdf/2303.11366)<br>[Prompt Engineering: Part 2 - Best Practices for Software Developers in Digital Industries](https://blogs.sw.siemens.com/thought-leadership/prompt-engineering-part-2-best-practices-for-software-developers-in-digital-industries/) |
 | Multimodal CoT | Chain-of-Thought with images and text. | Analyzing X-rays alongside the radiology report. | Essential if the GraSCCo corpus contained images (it does not, it is text-based). | Not applicable to text-only medical corpora. | [Prompt Engineering Guide](https://www.promptingguide.ai/) |
 | Graph-Prompting | Representing data as a graph structure within the prompt. | Mapping patient symptoms to a knowledge graph of diseases. | Good for understanding relationships (Symptom A -> Disease B). | Text-to-Graph conversion is difficult and error-prone. | [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/pdf/2308.09687) |
 | Meta-Prompting | Asking the model to assume a persona or higher-level view. | "Act as a senior medical consultant reviewing a junior doctor's note." | Can improve the tone and professionality of the output. | Mostly affects style, less impact on factual extraction accuracy. | [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/)<br>[Prompt Engineering Guide](https://www.promptingguide.ai/) |
+
+### Chain-of-Thought: The Optimal Technique for Generating Silver Answers
+
+Among the diverse landscape of prompt engineering techniques, **Chain-of-Thought (CoT) prompting** emerges as the optimal choice for generating scientifically defensible silver answers from medical documents. While other techniques offer valuable capabilities, CoT uniquely balances transparency, generalizability, and accuracy — making it the technique of choice for this study.
+
+#### Why Chain-of-Thought Wins
+
+**1. Transparent Reasoning Process**
+
+Unlike black-box approaches that produce direct answers, CoT explicitly exposes the model's reasoning steps. This transparency is essential for scientific validation: researchers can inspect the intermediate logic to verify correctness, identify potential errors, and understand how the model arrived at its conclusion. For medical text extraction, this means being able to trace how the model connected symptoms to diagnoses or medications to treatment plans.
+
+**Source Evidence:** The foundational work on Chain-of-Thought prompting demonstrates that instructing models to generate intermediate reasoning steps dramatically improves performance on complex reasoning tasks [@wei2022chain]. G-Eval further validates this approach by using CoT reasoning to decompose evaluation tasks into verifiable steps [@liu2023geval].
+
+**2. Zero-Shot Generalizability**
+
+The breakthrough of **Zero-Shot CoT** — achieved simply by adding "Let's think step by step" to prompts — eliminates the need for task-specific examples. This is particularly valuable when working with diverse medical documents where manually curating representative examples for few-shot prompting would be impractical and potentially introduce selection bias. Zero-shot CoT allows the same prompt structure to generalize across different document types, medical specialties, and clinical scenarios without requiring domain-specific example curation.
+
+**Source Evidence:** Research on zero-shot CoT shows that this simple prompting strategy enables large language models to perform complex reasoning without any task-specific demonstrations, achieving performance comparable to or exceeding few-shot approaches [@kojima2022large].
+
+**3. Reduced Hallucination Through Explicit Reasoning**
+
+By forcing the model to articulate its reasoning process, CoT naturally reduces hallucinations. The model must justify each step, making it more difficult to fabricate information. When extracting medical entities, the model must explicitly state where in the text it found each piece of information, creating an audit trail that can be verified against the source document.
+
+**4. Simplicity and Reproducibility**
+
+Unlike complex multi-stage pipelines (prompt chaining) or computationally expensive validation methods (self-consistency with multiple runs), CoT requires only a single inference pass with a straightforward prompt modification. This simplicity enhances reproducibility — a critical requirement for scientific research — and reduces computational costs, making it feasible even when working with resource-constrained SLMs.
+
+**5. Compatibility with Other Techniques**
+
+CoT serves as a foundational technique that can be combined with complementary approaches when needed. Role prompting can specify the medical expertise level, while self-consistency can validate CoT outputs through majority voting. However, CoT alone provides sufficient reasoning structure for most medical extraction tasks.
+
+#### Application to Medical Silver Answers
+
+For generating silver answers from GraSCCo medical documents, zero-shot CoT is applied as follows:
+
+**Prompt Structure:**
+```
+You are analyzing a clinical document. Extract all relevant medical information.
+Let's think step by step:
+
+1. First, identify all mentioned diagnoses and their supporting evidence in the text
+2. Second, list all medications with their dosages and administration routes
+3. Third, note any procedures or treatments described
+4. Finally, structure this information in the required JSON format
+
+[Clinical document text]
+```
+
+**Value for This Study:**
+
+* **Scientific Defensibility:** The exposed reasoning allows verification of extraction accuracy
+* **Generalizability:** Works across diverse medical documents without example curation
+* **Efficiency:** Single-pass inference suitable for both large LLMs and smaller SLMs
+* **Transparency:** Enables identification of model limitations and systematic errors
+* **Reproducibility:** Simple, well-documented approach that other researchers can replicate
+
+#### Comparison with Alternative Techniques
+
+**Prompt Chaining** offers modularity but introduces complexity through multi-stage orchestration and error propagation between stages. For medical extraction, the overhead of managing state between prompts outweighs the benefits when CoT can achieve similar decomposition within a single prompt.
+
+**Self-Consistency** provides statistical validation through multiple sampling runs but multiplies computational costs by 5-10×. While valuable for critical applications, it is better positioned as an optional validation layer on top of CoT rather than a primary technique.
+
+**Multi-Persona Prompting** simulates expert review but requires complex orchestration of multiple model calls and personas. The "four-eyes principle" it provides can be approximated more efficiently through careful CoT prompt design that instructs the model to verify its own reasoning.
+
+**Conclusion:** Chain-of-Thought prompting, particularly in its zero-shot form, represents the optimal balance of transparency, efficiency, and accuracy for generating silver answers from medical documents. Its ability to expose reasoning while maintaining generalizability makes it the technique of choice for this study's evaluation framework.
+
