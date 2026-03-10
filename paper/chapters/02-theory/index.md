@@ -63,7 +63,7 @@ These challenges underscore the need for multi-faceted evaluation approaches tha
 For the present study, these limitations are partially mitigated by our reliance on relative rather than absolute metric comparisons; nevertheless, they remain relevant considerations when interpreting results.
 
 
-## LLM in the Context of Medical Science TODO BNI proofread 
+## LLM in the Context of Medical Science
 
 The application of Large Language Models (LLMs) in medicine is an evolution of clinical Natural Language Processing (NLP), which gained significant momentum with the release of specialized models like ClinicalBERT [@alsentzer2019publicly]. While early models focused on entity recognition and extraction, modern LLMs offer the potential to summarize charts and suggest clinical actions. However, their integration into clinical workflows is constrained by critical requirements for accuracy, data privacy, and data sovereignty.
 
@@ -120,10 +120,28 @@ Recent work specifically addresses SLM deployment on resource-constrained device
 
 These developments frame the research question: given hardware constraints of on-device deployment for sensitive medical data, what is the smallest pre-trained model that can reliably perform clinical document classification? The answer depends not only on parameter count, but also on model generation and — as the following section explores — context engineering strategies that can augment smaller models at inference time.
 
-
 ## Context Engineering Strategies
 
-TODO BNI Importance of PE --> Description CoT as
+The performance of language models — whether large frontier models or compact SLMs — is not determined solely by parameter count or training data. The quality of model outputs depends critically on how tasks are formulated and presented at inference time. This principle, known as **prompt engineering** or **context engineering**, has emerged as a fundamental discipline for extracting reliable, accurate responses from language models.
+
+### The Importance of Prompt Engineering for High-Quality Answers
+
+Prompt engineering is the systematic practice of designing, refining, and optimizing the instructions and context provided to a language model to elicit desired outputs. In medical applications where accuracy is paramount, effective prompt engineering can mean the difference between a model producing clinically useful summaries and generating unreliable or hallucinated content.
+
+**Why Prompt Engineering Matters:**
+
+1. **Bridging the Capability Gap:** Even state-of-the-art models require carefully structured prompts to consistently produce high-quality outputs. A poorly formulated prompt can cause a capable model to underperform, while a well-engineered prompt can enable even smaller models to achieve surprisingly strong results. This is particularly relevant when deploying SLMs in resource-constrained environments where model size is limited by hardware constraints.
+
+2. **Reducing Hallucinations:** Language models are prone to generating plausible-sounding but factually incorrect information — a phenomenon known as hallucination. In medical contexts, where errors can have serious consequences, prompt engineering techniques such as self-consistency checking and chain-of-thought reasoning help ground model outputs in verifiable facts and reduce the risk of fabricated content.
+
+3. **Ensuring Consistency and Reproducibility:** Medical documentation requires standardized formats and terminology. Without explicit guidance through prompts, models may produce outputs in inconsistent formats, use non-standard terminology, or omit critical information. Structured prompting techniques ensure that outputs conform to required schemas and clinical standards.
+
+4. **Maximizing Limited Resources:** For SLMs deployed on edge devices, prompt engineering becomes even more critical. Since these models have fewer parameters and potentially less training data than frontier models, carefully designed prompts can compensate for architectural limitations by providing explicit reasoning frameworks and domain-specific context.
+
+5. **Creating Defensible Ground Truth:** When using LLMs to generate reference answers (golden answers) for evaluation purposes — as in this study — prompt engineering is essential for ensuring that these references are accurate, complete, and scientifically defensible. Techniques like multi-persona prompting and self-consistency validation provide statistical confidence in the quality of generated ground truth.
+
+The following sections detail specific prompt engineering techniques and their application to medical text processing, with particular emphasis on methods that enable reliable extraction of structured information from clinical narratives.
+
 #### The 3 Most Potent Techniques for Golden Answers (for a state of the art LLM)
 
 While Role Prompting and Skeleton-of-Thought are valuable, they are "modifiers" or "accelerators." The three techniques below are architectural necessities for ensuring the accuracy required for a scientific Gold Standard.
