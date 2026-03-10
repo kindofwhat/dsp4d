@@ -105,6 +105,7 @@ tasks:
     desc: Generate PNG diagrams from Mermaid sources (requires mmdc / @mermaid-js/mermaid-cli)
     cmds:
       - mmdc -i assets/03-GEval-Algorithm.mmd -o assets/03-GEval-Algorithm.png -t neutral -b white -w 1200
+      - mmdc -i assets/03-test-setup.mmd -o assets/03-test-setup.png -t neutral -b white -w 1200
       - echo "Diagrams generated"
     sources:
       - assets/*.mmd
@@ -167,13 +168,13 @@ tasks:
     internal: true
     cmds:
       - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'brew install fswatch')"
-      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/references.bib | xargs -n1 -I{} task build WITH_LINKS={{.WITH_LINKS}}
+      - fswatch -r -e ".*" -i "\\.md$" -i "\\.yaml$" -i "\\.bib$" -i "\\.mmd$" {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}/defaults.yaml {{.PAPER_DIR}}/references.bib {{.PAPER_DIR}}/assets | xargs -n1 -I{} task build WITH_LINKS={{.WITH_LINKS}}
 
   watch-linux:
     internal: true
     cmds:
       - echo "Watching {{.PAPER_DIR}}/chapters/ recursively... (requires 'apt install inotify-tools')"
-      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib)$' {{.PAPER_DIR}}/chapters {{.PAPER_DIR}}; do task build WITH_LINKS={{.WITH_LINKS}}; done
+      - while inotifywait -r -e modify,create,delete --include '\.(md|yaml|bib|mmd)$' {{.PAPER_DIR}}/chapters {{.PAPER_DIR}} {{.PAPER_DIR}}/assets; do task build WITH_LINKS={{.WITH_LINKS}}; done
 
   watch-windows:
     internal: true

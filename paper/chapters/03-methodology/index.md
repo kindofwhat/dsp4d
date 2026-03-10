@@ -277,24 +277,11 @@ X.4 Local Deployment and Liability. As the Software is deployed locally on Custo
 X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate this Agreement immediately and without notice if Customer is found to be in violation of the safety or acceptable use policies mandated by the Model Provider.
 ```
 
-### Evaluation Pipeline
-
-**TBD with @kindofwhat**
-
-
-
-
-
-
-
-
-
 
 ## Experimental Setup
 
 ### Architecture
 TODO BNI Maschine von Beni, Google cloud für Gemini 
-TODO CHS Chrigels notebook, Evaluationsframeworks
 
 ## Evaluation Metrics
 
@@ -315,7 +302,10 @@ The following metrics are used to evaluate LLM outputs, divided into statistical
 - **Medical Semantic Field Comparision**: A multi-step, graph-based evaluation (Directed Acyclic Graph) that assesses format validity, factual accuracy, completeness, and medical terminology in separate steps, aggregating them into an overall score.
 
 ### Test Setup
-TODO CHS Text bitte
+
+![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against golden answers.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
+
+
 #### llm-validator
 
 To facilitate the systematic evaluation described in Phase III and IV, a purpose-built evaluation framework — *llm-validator* — was developed as part of this research. The tool serves as the central instrumentation layer for capturing, executing, and assessing LLM interactions across multiple models and prompting strategies.
@@ -325,11 +315,10 @@ To facilitate the systematic evaluation described in Phase III and IV, a purpose
 **Evaluation Pipeline.** The core contribution of the tool lies in its multi-dimensional evaluation pipeline. Test cases — each comprising a clinical query, an optional system prompt, and a golden answer — are organised into *Test Runs* and executed in batch against one or more models. The framework then applies two categories of evaluation metrics:
 
 - **Statistical metrics** (no LLM required): Token-level F1 score, Levenshtein similarity, and embedding-based semantic similarity provide quantitative baselines for output comparison.
-- **G-Eval metrics** (LLM-as-a-Judge): Following the G-Eval framework, configurable judge prompts assess *answer relevancy*, *faithfulness*, *hallucination*, and *correctness* against the golden answers established in Phase II. These metrics are stored as database-backed definitions and can be extended without code changes.
+- *LLM-as-a-Judge metrics** (): both a "simple" one shot and a more sophisticated DAG metric are calculated.
 
-Additionally, the system supports *expert evaluation*, allowing a human reviewer to provide qualitative scores — closing the loop between automated assessment and domain expertise.
 
-<!-- TODO: Add screenshots of the llm-validator UI showing test run configuration and evaluation results -->
+![llm-validator Interface](../../assets/sceen_llm-validator.png){#fig:llm-validator width=75%}
 
 #### JSON Structural Similarity
 

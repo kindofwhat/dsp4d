@@ -20,6 +20,10 @@ logo: "assets/bfh-logo.jpg"
 toc: true
 declaration: true
 
+header-includes: |
+  \usepackage{float}
+  \floatplacement{figure}{H}
+
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size
   required for reliable medical document classification and clinical action

@@ -6,7 +6,7 @@ This chapter presents the empirical findings of the Zero-Shot evaluation run acr
 
 ## Why silver answers are good enough TODO CHS / BNI
 
-## Overview of Models and Evaluation Metrics TODO CHS: update metrics
+## Overview of Models and Evaluation Metrics
 
 Nine models were evaluated: one large cloud model (Gemini 2.5 Pro via Vertex AI), one small cloud model (GPT-5-nano via OpenAI), and seven locally executable SLMs ranging from 2B to 27B parameters. All models received the identical system prompt and clinical input documents in a Zero-Shot configuration — no few-shot examples or retrieval augmentation was applied.
 
