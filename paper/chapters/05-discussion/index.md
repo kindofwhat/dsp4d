@@ -50,17 +50,19 @@ The results carry several implications for the deployment of local LLMs in clini
 <!-- #D-RQ — update numbers from #R-TAB-PASS when JSON changes -->
 ## Addressing the Research Questions
 
-**RQ1: What is the minimum model size for reliable document classification (>95% accuracy)?**
+**RQ1: What is the minimum model size for reliable clinical document classification in a Zero-Shot setting?**
 
-No model — including Gemini 2.5 Pro — achieves a 95% pass rate across all metrics. However, when focusing on the clinically most relevant metrics (LLM-Judge correctness and semantic similarity), Gemini 2.5 Pro reaches 90.3% and 93.5% respectively. Among local SLMs, Granite 3.3:2b achieves 100% pass rate on semantic similarity but only 58.1% on LLM-Judge correctness. The 95% threshold is not met by any local model in a Zero-Shot configuration. Context engineering strategies (Few-Shot, RAG) remain to be evaluated.
+No model — including Gemini 2.5 Pro — achieves a 95% pass rate across all metrics. However, when focusing on the clinically most relevant metrics (LLM-Judge correctness and semantic similarity), Gemini 2.5 Pro reaches 90.3% and 93.5% respectively. Among local SLMs, Granite 3.3:2b achieves 100% pass rate on semantic similarity but only 58.1% on LLM-Judge correctness. Notably, model size alone is not predictive: Granite 3.3 (2B) outperforms several models four to six times its size, while Mistral-Nemo (12B) ranks second-to-last overall. In a Zero-Shot configuration, reliable classification across all quality dimensions requires at least a 27B model (Gemma3) or cloud-tier inference. Future work should investigate whether Few-Shot or RAG strategies can lower this threshold for smaller models.
 
-**RQ2: How do different context engineering strategies affect the size-accuracy trade-off?**
+**RQ2: Which context engineering strategy is most effective for generating high-quality reference answers, and how does it influence downstream evaluation?**
 
-This evaluation presents the Zero-Shot baseline only. The impact of Few-Shot learning, RAG, and Long-Context strategies on the size-accuracy trade-off is subject to subsequent evaluation phases.
+This study applied context engineering at two distinct levels. In Phase II, Chain-of-Thought (CoT) prompting was selected over 15 alternative strategies following a systematic comparison. CoT was chosen for its transparent reasoning process, zero-shot generalizability, and reduced hallucination risk — properties that are particularly valuable for medical text extraction where auditability is essential. The structured CoT prompt with an explicit internal monologue proved effective for generating clinically defensible silver answers from the GraSCCo corpus: the reasoning trace allowed verification that the model correctly distinguished current from discontinued medications, identified implicit diagnoses, and avoided fabricating clinical details.
 
-**RQ3: Can sub-3B parameter models achieve clinical safety standards with appropriate context?**
+In Phase III, the SLMs were evaluated in a Zero-Shot configuration to establish an unaugmented baseline. This deliberate separation allows the impact of context engineering to be measured in subsequent phases: the Zero-Shot results reported here serve as the control condition against which Few-Shot, RAG, and Long-Context strategies can be compared. Early indications — particularly the severe format compliance failures of smaller models — suggest that context engineering at the SLM evaluation level (e.g., Few-Shot examples demonstrating the expected JSON schema) may yield disproportionate improvements for structural quality.
 
-Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity, 100% pass rate) but falls short on structural compliance (0.254 JSON similarity). In a Zero-Shot setting, sub-3B models cannot yet meet clinical safety standards across all dimensions. Whether Few-Shot examples can close this gap — particularly for format compliance — is a key question for subsequent phases.
+**RQ3: Can sub-3B parameter models achieve clinically acceptable extraction quality on standard consumer hardware?**
+
+Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity, 100% pass rate) but falls short on structural compliance (0.254 JSON similarity). In a Zero-Shot setting, sub-3B models capture the medical content but cannot reliably produce structured output that would be programmatically processable in a clinical pipeline. The bottleneck is not comprehension but instruction following — a capability that is known to improve significantly with Few-Shot examples and explicit format demonstrations. Whether targeted context engineering can close this gap is a key question for subsequent phases.
 
 <!-- #D-LIMITS — mostly static, update only if methodology changes -->
 ## Limitations

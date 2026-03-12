@@ -30,8 +30,8 @@ The primary barrier to adopting GenAI in healthcare is the architectural relianc
 
 To bridge this gap, this thesis develops and validates an algorithmic selection framework designed to identify the most resource-efficient LLMs for local deployment. The objective is to automate documentation and correspondence tasks while ensuring absolute data sovereignty. This research establishes a necessary balance between computational efficiency—specifically inference speed and memory footprint—and semantic accuracy, ensuring that decentralized processing does not compromise the reliability of medical outputs.
 
-## Research Questions TODO both
+## Research Questions
 
-1. What is the minimum model size for reliable document classification (>95% accuracy)?
-2. How do different context engineering strategies affect the size-accuracy trade-off?
-3. Can sub-3B parameter models achieve clinical safety standards with appropriate context?
+1. What is the minimum model size for reliable clinical document classification in a Zero-Shot setting?
+2. Which context engineering strategy is most effective for generating high-quality reference answers from medical documents, and how does the choice of strategy influence downstream evaluation?
+3. Can sub-3B parameter models achieve clinically acceptable extraction quality on standard consumer hardware?
