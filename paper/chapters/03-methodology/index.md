@@ -37,7 +37,7 @@ The task we give the models is to update a patients health record (HBA) based on
 
 ## Golden Answer Generation
 
-Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses is undergo evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Ansers) additionally suitable for benchmarking smaller models.
+Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses undergoes evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Answers) additionally suitable for benchmarking smaller models.
 
 ### Preparation Work
 
@@ -45,7 +45,7 @@ To ensure a structured and scientifically sound prompt engineering process, the 
 
 #### Medical Context Stratification
 
-The reports from the **GraSSCCO** corpus were categorized into specific medical fields. This stratification allows for a granular comparison of model performance across different clinical contexts and enables an evaluation of the models' ability to correctly assign documents to their respective domains.
+The reports from the **GraSCCo** corpus were categorized into specific medical fields. This stratification allows for a granular comparison of model performance across different clinical contexts and enables an evaluation of the models' ability to correctly assign documents to their respective domains.
 
 The following categories were defined for this study:
 
@@ -155,7 +155,7 @@ To facilitate the seamless generation and validation of these answers, we develo
 * **Centralized Storage:** It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
 * **Data Pipeline Integration:** The application is designed to automatically export these validated results into the specific input format required by our evaluation framework, ensuring a smooth transition from annotation to model benchmarking.
 
-The platform consits of following Components:
+The platform consists of the following components:
 
 **Session Framework**
 
@@ -205,34 +205,34 @@ To filter the hundreds of available open-source models down to a manageable set,
 
 **1. Hardware-Aware Parameter Efficiency**
 
-* **Criterion:** Models must have between 7B to 20B paramters that support 4-bit or 8-bit quantization
+* **Criterion:** Models must have between 7B to 20B parameters that support 4-bit or 8-bit quantization
 * **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16).
 For Example: 
     * A 7B model requires ~16GB RAM at FP16 but only 5GB to 6GB at 4-bit quantization
-    * A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasable for profssional consumer desktops
+    * A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasible for professional consumer desktops
     * Hence a 18B model at 4-bit quantization will still meet the criterion
 * **Selection:** Exclude any models <=18B consider choosing higher bit-quantization for smaller models.
 [LLM Model Parameters 2025](https://local-ai-zone.github.io/guides/what-is-ai-model-3b-7b-30b-parameters-guide-2025.html)
 
-**2. High Reasoning & Knwledge Benchmark Scores**
+**2. High Reasoning & Knowledge Benchmark Scores**
 
 * **Criterion:** Prioritize models with high scores on MMLU-Pro disciplines Biology, Chemistry, Health and Psychology
-* **Why:**  Clinical text annotation is not just text generation. It is a reasoning task. Standard benchmarks like MMLU are becoming saturated and less discriminative. MMLU-Pro better distinguish models that "understand" complex topics versus those that just guess.
-* **Selection:** Based on the MMLU-Pro Leaderboardsé: Select models that outperform in Biology, Chemistry, Health and Psychology and provide "Reasoning" or "Thinking" to reduce hallucination. See Table below.
+* **Why:**  Clinical text annotation is not just text generation. It is a reasoning task. Standard benchmarks like MMLU are becoming saturated and less discriminative. MMLU-Pro better distinguishes models that "understand" complex topics versus those that just guess.
+* **Selection:** Based on the MMLU-Pro Leaderboards: Select models that outperform in Biology, Chemistry, Health and Psychology and provide "Reasoning" or "Thinking" to reduce hallucination. See Table below.
 
 **3. Instruction Following & Output Structure**
 
 * **Criterion:** Select "Instruct" or "Chat" rather than base models
-* **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine not an assistant. Base trained models lack of intent recognition.
+* **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine" not an assistant. Base trained models lack intent recognition.
 * **Selection:** Choose the "Instruct" or "Chat" variants
 
 **4. Context Window Capacity**
 
 * **Criterion:** Minimum context window of 8k tokens (preferably 32k+ or higher)
-* **Why:** Clinical notes can be lengthy. If a diagnosis or generally a peatient report exceeds the model's context window, the model will "forget" early information, leading to missed health infomration annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass
+* **Why:** Clinical notes can be lengthy. If a diagnosis or generally a patient report exceeds the model's context window, the model will "forget" early information, leading to missed health information annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass
 * **Selection:** Discard models with <8k context limits
 
-**5. License & Data Sovereignity**
+**5. License & Data Sovereignty**
 
 * **Criterion:** Permissive licenses (Apache 2.0, MIT) allowing local commercial use
 * **Why:** The primary advantage of SLMs in healthcare is data sovereignty—running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.

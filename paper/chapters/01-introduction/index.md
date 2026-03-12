@@ -1,11 +1,20 @@
 # Introduction
 
-*A Note on the Craft: TODO CHS*
+*A Note on the Craft*
 ```Text
-Because we value the precision, structure, and flawless tone that modern technology provides, you may safely assume that the bulk of this text was meticulously woven by frontline AI.
+
+Because we value the precision, structure, and flawless tone that modern 
+technology provides, you may safely assume that the bulk of this text was 
+meticulously woven by frontline AI.
+
+However, we do maintain a strict "Human in the Loop" policy for brilliance.
+Should you encounter a particularly extraordinary insight, a wicked bit
+of wit, or a statement of profound cleverness, you may tip your hat to
+us—the authors. We’ll take the credit for the soul; the machine can 
+have the grammar.
+
 ```
 
-However, we do maintain a strict "Human in the Loop" policy for brilliance. Should you encounter a particularly extraordinary insight, a wicked bit of wit, or a statement of profound cleverness, you may tip your hat to us—the authors. We’ll take the credit for the soul; the machine can have the grammar.
 
 The healthcare sector currently faces a dual mandate: increasing operational efficiency while upholding rigorous standards for patient safety and data privacy. For general practitioners (GPs), this pressure manifests as an intensified administrative workload. Beyond direct patient consultations, GPs frequently spend hours triaging laboratory reports, managing insurance correspondence, and updating patient records. This administrative tail—often managed after clinic hours—leads to significant cognitive fatigue and systemic latency in patient care.
 
