@@ -4,7 +4,7 @@ This file documents how the content in `paper/chapters/04-results/index.md` and 
 
 ## Input File
 
-**`paper/assets/questions_complete_evaluated.json`**
+**`paper/assets/questions_complete_inkl_kimi_qwen_judge_openai.json`**
 
 Structure:
 ```
@@ -44,11 +44,13 @@ Structure:
 
 ### Key dimensions
 - **62 test cases** (GraSCCo clinical documents)
-- **9 models** per test case (same set for all): gemini-2.5-pro, gpt-5-nano, gemma3:27b, granite3.3:2b, glm4:9b, llama3:8b, mistral-nemo:latest, phi3.5:3.8b, qwen2:7b-instruct
-- **8 evaluation metrics** per interaction (as of Feb 2026 — G-Eval was removed):
-  - Statistical (5): `bleu`, `rouge`, `levenshtein_similarity`, `token_f1`, `json_structural_similarity`
+- **12 models** per test case: gemini-2.5-pro, gpt-5-nano, gpt-4o-mini (judge only, no evaluations), gemma3:27b, granite3.3:2b, glm4:9b, llama3:8b, mistral-nemo:latest, phi3.5:3.8b, qwen2:7b-instruct, moonshotai/Kimi-K2.5, qwen3.5-35b-a3b
+- **11 evaluated models** (gpt-4o-mini is the judge model and has no evaluations)
+- **8 evaluation metrics** per interaction:
+  - Statistical (5): `bleu`, `rouge`, `levenshtein_similarity`, `token_f1`, `json_similarity_dsp4d_record`
   - Embedding (1): `semantic_similarity`
-  - LLM-as-a-Judge (2): `dag_medical_extraction_quality`, `llmjudge_correctness`
+  - LLM-as-a-Judge (2): `dag_med_sem_field`, `llmjudge_med_field_comp` (judged by GPT-4o-mini)
+- **Note:** moonshotai/Kimi-K2.5 has no `latencyMs` field in some/all interactions
 
 **If the metric set changes** (metrics added/removed), update the metric categorisation in both chapters and all tables.
 
@@ -65,7 +67,7 @@ All content is data-driven. Sections and their data sources:
 | Embedding + LLM-as-a-Judge table | Mean score per model per embedding/judge metric | Aggregated from JSON |
 | Composite Scores by Metric Category | Mean of metric averages grouped into Statistical/Embedding/Judge/Overall + latency | Aggregated from JSON |
 | Pass Rates | % of test cases where `passed: true` per model per metric | Aggregated from JSON |
-| JSON Structural Compliance | Mean/std/min/max of `json_structural_similarity` per model | Aggregated from JSON |
+| JSON Structural Compliance | Mean/std/min/max of `json_similarity_dsp4d_record` per model | Aggregated from JSON |
 | Semantic Understanding vs. Format Compliance | Side-by-side of semantic sim vs. JSON sim vs. BLEU | Subset of aggregated data |
 | Metric Correlation Analysis | Pearson correlation matrix + heatmap figure | Computed from all 558 data points (see image generation below) |
 | Latency | Mean latencyMs per model | Aggregated from JSON |
@@ -122,15 +124,15 @@ All scripts were run as inline Python via `cat JSON | python3 -c "..."`. The Pyt
 Run from the `dsp4d` project root:
 
 ```bash
-cat paper/assets/questions_complete_evaluated.json | python3 -c "
+cat paper/assets/questions_complete_inkl_kimi_qwen_judge_openai.json | python3 -c "
 import json, sys
 from collections import defaultdict
 
 data = json.load(sys.stdin)
 
-stat_metrics = ['bleu', 'json_structural_similarity', 'levenshtein_similarity', 'rouge', 'token_f1']
+stat_metrics = ['bleu', 'json_similarity_dsp4d_record', 'levenshtein_similarity', 'rouge', 'token_f1']
 embedding_metrics = ['semantic_similarity']
-judge_metrics = ['dag_medical_extraction_quality', 'llmjudge_correctness']
+judge_metrics = ['dag_med_sem_field', 'llmjudge_med_field_comp']
 
 scores = defaultdict(lambda: defaultdict(list))
 latencies = defaultdict(list)
@@ -150,8 +152,14 @@ size_map = {
     'gemini-2.5-pro': 'Large (Cloud)', 'gpt-5-nano': 'Small (Cloud)',
     'gemma3:27b': '27B', 'glm4:9b': '9B', 'granite3.3:2b': '2B',
     'llama3:8b': '8B', 'mistral-nemo:latest': '12B',
-    'phi3.5:3.8b': '3.8B', 'qwen2:7b-instruct': '7B'
+    'phi3.5:3.8b': '3.8B', 'qwen2:7b-instruct': '7B',
+    'moonshotai/Kimi-K2.5': 'Large (Cloud)',
+    'qwen3.5-35b-a3b': '35B (MoE 3B)'
 }
+
+# Skip judge model
+for tc in data['testCases']:
+    tc['interactions'] = [i for i in tc['interactions'] if i['model'] != 'gpt-4o-mini']
 
 # Sort by overall composite
 results = []
@@ -173,13 +181,13 @@ print('\n=== STATISTICAL METRICS TABLE ===')
 for model, size, stat, emb, judge, overall, lat in results:
     name = model.replace(':latest','').replace('-instruct','')
     s = scores[model]
-    print(f'| {name} | {size.split()[0]} | {sum(s[\"bleu\"])/len(s[\"bleu\"]):.3f} | {sum(s[\"rouge\"])/len(s[\"rouge\"]):.3f} | {sum(s[\"levenshtein_similarity\"])/len(s[\"levenshtein_similarity\"]):.3f} | {sum(s[\"token_f1\"])/len(s[\"token_f1\"]):.3f} | {sum(s[\"json_structural_similarity\"])/len(s[\"json_structural_similarity\"]):.3f} |')
+    print(f'| {name} | {size.split()[0]} | {sum(s[\"bleu\"])/len(s[\"bleu\"]):.3f} | {sum(s[\"rouge\"])/len(s[\"rouge\"]):.3f} | {sum(s[\"levenshtein_similarity\"])/len(s[\"levenshtein_similarity\"]):.3f} | {sum(s[\"token_f1\"])/len(s[\"token_f1\"]):.3f} | {sum(s[\"json_similarity_dsp4d_record\"])/len(s[\"json_similarity_dsp4d_record\"]):.3f} |')
 
 print('\n=== EMBEDDING + JUDGE TABLE ===')
 for model, size, stat, emb, judge, overall, lat in results:
     name = model.replace(':latest','').replace('-instruct','')
     s = scores[model]
-    print(f'| {name} | {size.split()[0]} | {sum(s[\"semantic_similarity\"])/len(s[\"semantic_similarity\"]):.3f} | {sum(s[\"dag_medical_extraction_quality\"])/len(s[\"dag_medical_extraction_quality\"]):.3f} | {sum(s[\"llmjudge_correctness\"])/len(s[\"llmjudge_correctness\"]):.3f} |')
+    print(f'| {name} | {size.split()[0]} | {sum(s[\"semantic_similarity\"])/len(s[\"semantic_similarity\"]):.3f} | {sum(s[\"dag_med_sem_field\"])/len(s[\"dag_med_sem_field\"]):.3f} | {sum(s[\"llmjudge_med_field_comp\"])/len(s[\"llmjudge_med_field_comp\"]):.3f} |')
 
 print('\n=== PASS RATES TABLE ===')
 for model, size, stat, emb, judge, overall, lat in results:
@@ -187,8 +195,8 @@ for model, size, stat, emb, judge, overall, lat in results:
     pr = pass_rates[model]
     total_p = sum(pr[m][0] for m in pr)
     total_t = sum(pr[m][1] for m in pr)
-    dag_p = pr['dag_medical_extraction_quality'][0]/pr['dag_medical_extraction_quality'][1]*100
-    llm_p = pr['llmjudge_correctness'][0]/pr['llmjudge_correctness'][1]*100
+    dag_p = pr['dag_med_sem_field'][0]/pr['dag_med_sem_field'][1]*100
+    llm_p = pr['llmjudge_med_field_comp'][0]/pr['llmjudge_med_field_comp'][1]*100
     sem_p = pr['semantic_similarity'][0]/pr['semantic_similarity'][1]*100
     ov = total_p/total_t*100
     print(f'| {name} | {size.split()[0]} | {dag_p:.1f}% | {llm_p:.1f}% | {sem_p:.1f}% | {ov:.1f}% |')
@@ -203,7 +211,7 @@ print('\n=== JSON STRUCTURAL SIMILARITY DISTRIBUTION ===')
 import statistics
 for model, size, stat, emb, judge, overall, lat in results:
     name = model.replace(':latest','').replace('-instruct','')
-    vals = scores[model]['json_structural_similarity']
+    vals = scores[model]['json_similarity_dsp4d_record']
     avg = statistics.mean(vals)
     sd = statistics.stdev(vals) if len(vals) > 1 else 0
     mn, mx = min(vals), max(vals)
@@ -224,28 +232,28 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-with open('/Users/chrigel/Documents/workspace/bfh/dsp4d/paper/assets/questions_complete_evaluated.json') as f:
+with open('/Users/chrigel/Documents/workspace/bfh/dsp4d/paper/assets/questions_complete_inkl_kimi_qwen_judge_openai.json') as f:
     data = json.load(f)
 
 metric_names_order = [
-    'dag_medical_extraction_quality',
-    'llmjudge_correctness',
+    'dag_med_sem_field',
+    'llmjudge_med_field_comp',
     'bleu',
     'levenshtein_similarity',
     'rouge',
     'semantic_similarity',
     'token_f1',
-    'json_structural_similarity'
+    'json_similarity_dsp4d_record'
 ]
 display_names = [
-    'DAG Medical Extraction',
-    'LLM-Judge Correctness',
+    'DAG Med. Sem. Field',
+    'LLM-Judge Field Comp.',
     'BLEU',
     'Levenshtein Similarity',
     'ROUGE',
     'Semantic Similarity',
     'Token F1',
-    'JSON Structural Sim.'
+    'JSON Similarity'
 ]
 
 scores = {m: [] for m in metric_names_order}
@@ -303,12 +311,12 @@ The markdown files contain HTML comment markers (`<!-- #ID -->`) that identify A
 
 | Marker | Section | Depends on | Numbers to update |
 |--------|---------|-----------|-------------------|
-| `#D-SIZE` | Model Size vs. Performance | `#R-TAB-COMPOSITE` | Composite scores (0.470, 0.390, 0.363, etc.) |
-| `#D-CLOUD` | Cloud Models Advantage | `#R-TAB-COMPOSITE` | Semantic sim (0.861), composites (0.419/0.416), gap % |
-| `#D-FORMAT` | Format Compliance Problem | `#R-TAB-JSON` | JSON sim scores (0.000, 0.059, 0.103, 0.372, 0.440) |
+| `#D-SIZE` | Model Size vs. Performance | `#R-TAB-COMPOSITE` | Composite scores (0.468, 0.344, 0.335, etc.) |
+| `#D-CLOUD` | Cloud Models Advantage | `#R-TAB-COMPOSITE` | Semantic sim (0.861), composites (0.468/0.409), gap % |
+| `#D-FORMAT` | Format Compliance Problem | `#R-TAB-JSON` | JSON sim scores (0.065, 0.098, 0.129, 0.362, 0.457) |
 | `#D-SEMANTIC` | Semantic Understanding | `#R-TAB-SEMANTIC` | Semantic sim range (0.650–0.861), individual scores |
-| `#D-MISTRAL` | Mistral-Nemo Outlier | `#R-TAB-JUDGE` | DAG score (0.261 vs 0.528), JSON sim (0.059) |
-| `#D-RQ` | Research Questions | `#R-TAB-PASS` | Pass rates (90.3%, 93.5%, 100%, 58.1%) |
+| `#D-MISTRAL` | Mistral-Nemo Outlier | `#R-TAB-JUDGE` | DAG score (0.424 vs 0.407), JSON sim (0.065) |
+| `#D-RQ` | Research Questions | `#R-TAB-PASS` | Pass rates (75.8%, 93.5%, 100%, 30.8%) |
 | `#D-LIMITS` | Limitations | Methodology | Mostly static — update only if methodology changes |
 | `#D-FUTURE` | Future Work | — | Static |
 

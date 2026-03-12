@@ -7,35 +7,35 @@
 <!-- #D-SIZE — update numbers from #R-TAB-COMPOSITE when JSON changes -->
 ### Model Size Does Not Linearly Predict Performance
 
-The results challenge the assumption that larger models necessarily produce better outputs for clinical extraction tasks. While Gemini 2.5 Pro — the largest model — achieves the highest composite score (0.470), the ranking among SLMs reveals no consistent correlation between parameter count and output quality. Granite 3.3 with only 2B parameters (composite: 0.390) outperforms GLM4:9b (0.363), Qwen2:7b (0.360), and Phi3.5:3.8b (0.338) — models with two to four times as many parameters. Similarly, Mistral-Nemo at 12B parameters (0.330) ranks second-to-last, performing below the 2B Granite model on both statistical and LLM-as-a-Judge metrics.
+The results challenge the assumption that larger models necessarily produce better outputs for clinical extraction tasks. While Gemini 2.5 Pro — the largest model — achieves the highest composite score (0.468), the ranking among SLMs reveals no consistent correlation between parameter count and output quality. Granite 3.3 with only 2B parameters (composite: 0.344) outperforms GLM4:9b (0.335), Qwen2:7b (0.315), Phi3.5:3.8b (0.303), and Llama3:8b (0.300) — models with two to four times as many parameters. Similarly, Mistral-Nemo at 12B parameters (0.339) performs only marginally better than the 2B Granite model. Notably, Qwen3.5-35B-A3B — a MoE model with only 3B active parameters — achieves 0.390, ranking ahead of all dense SLMs and closely matching GPT-5-nano (0.395).
 
-This finding suggests that architecture, training data composition, and instruction-tuning quality matter more than raw parameter count for structured medical extraction tasks.
+This finding suggests that architecture, training data composition, and instruction-tuning quality matter more than raw parameter count for structured medical extraction tasks. The MoE architecture in particular demonstrates that efficient parameter utilisation can compensate for a smaller active parameter budget.
 
 <!-- #D-CLOUD — update numbers from #R-TAB-COMPOSITE when JSON changes -->
 ### Cloud Models Retain an Advantage — But the Gap Is Narrower Than Expected
 
-GPT-5-nano, despite being marketed as a "nano" model, achieves the highest semantic similarity across all models (0.861) and a 100% pass rate on this metric. It closely matches the 27B Gemma3 model on the overall composite score (0.419 vs. 0.416). This indicates that recent cloud-optimised small models benefit from distillation techniques and training data quality that local open-weight models have not yet matched.
+GPT-5-nano, despite being marketed as a "nano" model, achieves the highest semantic similarity across all models (0.861) and a 100% pass rate on this metric. However, its LLM-as-a-Judge scores (DAG: 0.510, LLM-Judge: 0.537) place it below Gemma3:27b (0.510/0.671) and Kimi-K2.5 (0.576/0.597) on clinical extraction quality, resulting in an overall composite of 0.395. Kimi-K2.5, hosted at the Swiss provider Infomaniak, achieves 0.398 — demonstrating that data-sovereign cloud deployment with comparable performance is feasible.
 
-However, the gap between the best cloud model (Gemini: 0.470) and the best local SLM (Gemma3:27b: 0.416) is only 13% — a margin that may be bridgeable through context engineering strategies such as Few-Shot prompting or RAG, which were not applied in this Zero-Shot evaluation.
+The gap between the best cloud model (Gemini: 0.468) and the best local SLM (Gemma3:27b: 0.409) is only 14% — a margin that may be bridgeable through context engineering strategies such as Few-Shot prompting or RAG, which were not applied in this Zero-Shot evaluation.
 
 <!-- #D-FORMAT — update numbers from #R-TAB-JSON when JSON changes -->
 ### The Format Compliance Problem
 
-The most critical practical finding is the systematic failure of smaller models to produce structurally valid JSON output. Llama3:8b scores 0.000 on JSON structural similarity across all 62 test cases — it never produces output matching the expected schema. Mistral-Nemo (0.059) and Phi3.5 (0.103) also exhibit severe structural compliance issues.
+The most critical practical finding is the systematic difficulty of smaller models to produce structurally valid JSON output. Mistral-Nemo (0.065), Phi3.5 (0.098), and Llama3 (0.129) exhibit severe structural compliance issues with high variance and frequent zero-score cases.
 
 This has direct implications for clinical deployment: even when a model semantically "understands" the content (as evidenced by high semantic similarity scores), the output cannot be programmatically processed if it does not conform to the expected structure. In a production system, this would require either post-processing heuristics or a format-correction layer — both of which add complexity and potential failure modes.
 
-Notably, Gemma3:27b (0.372) and Gemini 2.5 Pro (0.440) are the only models that consistently produce structured output, suggesting that reliable JSON generation in a Zero-Shot setting may require either larger model capacity or explicit format training.
+Gemini 2.5 Pro (0.457) is the only model with no zero-score cases. Kimi-K2.5 (0.374), Qwen3.5-35B-A3B (0.371), and Gemma3:27b (0.362) also achieve strong mean scores, suggesting that reliable JSON generation in a Zero-Shot setting requires either large model capacity, MoE architectures, or explicit format training.
 
 <!-- #D-SEMANTIC — update numbers from #R-TAB-SEMANTIC when JSON changes -->
 ### Semantic Understanding Is Preserved Across Model Sizes
 
-Despite the structural compliance issues, semantic similarity scores remain relatively high across all models (0.650–0.861), with the exception of Llama3:8b. This indicates that even small models (Granite 2B: 0.843, Phi3.5: 0.797) capture the medical content and its meaning to a reasonable degree. The bottleneck is not comprehension but instruction following — specifically, the ability to adhere to a prescribed output format while simultaneously extracting and condensing clinical information.
+Despite the structural compliance issues, semantic similarity scores remain relatively high across all models (0.650–0.861). This indicates that even small models (Granite 2B: 0.843, Qwen3.5-35B-A3B: 0.829, Phi3.5: 0.795) capture the medical content and its meaning to a reasonable degree. The bottleneck is not comprehension but instruction following — specifically, the ability to adhere to a prescribed output format while simultaneously extracting and condensing clinical information.
 
 <!-- #D-MISTRAL — update numbers from #R-TAB-JUDGE when JSON changes -->
 ### Mistral-Nemo: An Outlier
 
-Mistral-Nemo (12B) underperforms its parameter class significantly. Its DAG medical extraction quality score (0.261) is the lowest of all models — worse than Granite at 2B (0.528). Combined with its near-zero JSON structural similarity (0.059), this suggests that the model's instruction-following capability for structured extraction in German clinical texts is inadequate despite its size. This reinforces the observation that model selection for domain-specific tasks cannot rely on parameter count alone.
+Mistral-Nemo (12B) underperforms its parameter class significantly. Its JSON similarity score (0.065) is the second-lowest of all models, and its DAG score (0.424) remains below that of the 2B Granite model (0.407) despite having six times more parameters. While its LLM-Judge score (0.553) is mid-range, the overall composite (0.339) places it below Granite 3.3:2b (0.344). This suggests that the model's instruction-following capability for structured extraction in German clinical texts is inadequate despite its size, reinforcing the observation that model selection for domain-specific tasks cannot rely on parameter count alone.
 
 ## Implications for Clinical Practice
 
@@ -43,7 +43,7 @@ The results carry several implications for the deployment of local LLMs in clini
 
 1. **Viability of local deployment:** The semantic understanding scores (>0.75 for most models) demonstrate that local SLMs can extract medically relevant content from clinical documents. This validates the fundamental premise of the DSP4D project — that data-sovereign AI processing on local hardware is feasible.
 
-2. **Format compliance as gating criterion:** For automated pipeline integration (e.g., updating patient records), JSON structural validity is a non-negotiable requirement. Based on the Zero-Shot results, only Gemma3:27b among the local SLMs achieves acceptable structural compliance. Smaller models would require either Few-Shot examples demonstrating the exact output format or a dedicated format-correction step.
+2. **Format compliance as gating criterion:** For automated pipeline integration (e.g., updating patient records), JSON structural validity is a non-negotiable requirement. Based on the Zero-Shot results, Gemma3:27b and Qwen3.5-35B-A3B among the local models achieve acceptable structural compliance. Smaller dense models would require either Few-Shot examples demonstrating the exact output format or a dedicated format-correction step.
 
 3. **Model selection should be task-driven:** The wide variance in performance across models of similar size (e.g., Granite 2B outperforming Mistral-Nemo 12B) indicates that model selection for clinical use cases must be empirically validated rather than inferred from benchmarks or parameter counts.
 
@@ -52,7 +52,7 @@ The results carry several implications for the deployment of local LLMs in clini
 
 **RQ1: What is the minimum model size for reliable clinical document classification in a Zero-Shot setting?**
 
-No model — including Gemini 2.5 Pro — achieves a 95% pass rate across all metrics. However, when focusing on the clinically most relevant metrics (LLM-Judge correctness and semantic similarity), Gemini 2.5 Pro reaches 90.3% and 93.5% respectively. Among local SLMs, Granite 3.3:2b achieves 100% pass rate on semantic similarity but only 58.1% on LLM-Judge correctness. Notably, model size alone is not predictive: Granite 3.3 (2B) outperforms several models four to six times its size, while Mistral-Nemo (12B) ranks second-to-last overall. In a Zero-Shot configuration, reliable classification across all quality dimensions requires at least a 27B model (Gemma3) or cloud-tier inference. Future work should investigate whether Few-Shot or RAG strategies can lower this threshold for smaller models.
+No model — including Gemini 2.5 Pro — achieves a 95% pass rate across all metrics. When focusing on semantic similarity, GPT-5-nano and Granite 3.3:2b both achieve 100% pass rates, while Gemini 2.5 Pro reaches 93.5%. On the LLM-Judge metric, Gemini 2.5 Pro leads with 75.8%, followed by Gemma3:27b at 66.1%. The overall pass rates are notably lower than in previous evaluation runs due to the stricter GPT-4o-mini-based judge metrics: Gemini 2.5 Pro achieves 30.8% overall, Gemma3:27b 26.8%, and Kimi-K2.5 25.0%. Among local SLMs, Granite 3.3:2b reaches only 19.2% overall despite its 100% semantic similarity pass rate, highlighting the gap between semantic comprehension and structural/clinical extraction quality. In a Zero-Shot configuration, reliable classification across all quality dimensions requires at least a 27B model (Gemma3) or cloud-tier inference. Future work should investigate whether Few-Shot or RAG strategies can lower this threshold for smaller models.
 
 **RQ2: Which context engineering strategy is most effective for generating high-quality reference answers, and how does it influence downstream evaluation?**
 
@@ -62,7 +62,7 @@ In Phase III, the SLMs were evaluated in a Zero-Shot configuration to establish 
 
 **RQ3: Can sub-3B parameter models achieve clinically acceptable extraction quality on standard consumer hardware?**
 
-Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity, 100% pass rate) but falls short on structural compliance (0.254 JSON similarity). In a Zero-Shot setting, sub-3B models capture the medical content but cannot reliably produce structured output that would be programmatically processable in a clinical pipeline. The bottleneck is not comprehension but instruction following — a capability that is known to improve significantly with Few-Shot examples and explicit format demonstrations. Whether targeted context engineering can close this gap is a key question for subsequent phases.
+Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity, 100% pass rate) but falls short on structural compliance (0.258 JSON similarity). Interestingly, Qwen3.5-35B-A3B with only 3B active parameters (MoE architecture) achieves 0.371 JSON similarity and 0.390 overall composite — demonstrating that efficient architectures can significantly outperform dense models of similar active parameter count. In a Zero-Shot setting, dense sub-3B models capture the medical content but cannot reliably produce structured output that would be programmatically processable in a clinical pipeline. The bottleneck is not comprehension but instruction following — a capability that is known to improve significantly with Few-Shot examples and explicit format demonstrations. Whether targeted context engineering can close this gap is a key question for subsequent phases.
 
 <!-- #D-LIMITS — mostly static, update only if methodology changes -->
 ## Limitations
@@ -77,7 +77,7 @@ Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity
 
 5. **German clinical text:** The evaluation is specific to German-language clinical documents from the GraSCCo corpus. Generalisability to other languages or clinical text types is not established.
 
-6. **Metric thresholds:** The near-zero pass rates on lexical metrics (BLEU, ROUGE, Token F1) across all models — including the reference Gemini model — suggest that the pass thresholds for these metrics may be miscalibrated for this extraction task, where semantically equivalent but lexically diverse outputs are expected.
+6. **Metric thresholds:** The overall pass rates are notably low even for top-performing models (Gemini: 30.8%), partly because the stricter GPT-4o-mini-based judge metrics and lexical metrics apply thresholds that may be overly demanding for this extraction task, where semantically equivalent but lexically diverse outputs are expected.
 
 <!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
 ## Metric Correlation Analysis
@@ -88,15 +88,13 @@ To understand the relationships between evaluation metrics, Figure \ref{fig:metr
 
 Several patterns emerge from the correlation analysis:
 
-**Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.54–0.89). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.36), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
+**Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.53–0.88). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.23–0.34), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
 
-**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical extraction quality shows near-zero correlation with the lexical metrics (r = -0.02 to 0.15), and LLM-Judge correctness similarly exhibits weak correlations (r = 0.12–0.23). We interpret this as a confirmation that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate, with a little caveat, which follows
+**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical semantic field extraction shows weak correlation with the lexical metrics (r = 0.13–0.27), and LLM-Judge field comparison similarly exhibits weak correlations (r = 0.10–0.20). This confirms that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate.
 
-**No correlation between LLM-as-a-Judge metrics .** The two metrics which use an LLM have a disappointingly low correlation. Our interpretation is that the used prompt fo the simpler direct judge is too simplistic.
+**Moderate correlation between LLM-as-a-Judge metrics.** The two judge metrics now show a meaningful positive correlation (r = 0.35), a significant improvement over the previous evaluation run where they were nearly uncorrelated. This suggests that the refined judge prompts (using GPT-4o-mini) achieve better alignment between the DAG-based and direct judge approaches.
 
-**JSON structural similarity is the most independent structural metric.** It correlates moderately with the lexical group (r = 0.34–0.40) but also shows the highest correlation with semantic similarity (r = 0.39) among the statistical metrics. This suggests that models producing well-structured JSON also tend to generate more semantically accurate content — format compliance and content quality are not independent.
-
-**The self-preference bias seems to be real**. Some smaller experiments lead to this conclusion.
+**JSON similarity correlates with judge metrics.** JSON similarity shows the highest cross-category correlation with the DAG metric (r = 0.45) and LLM-Judge (r = 0.31), stronger than its correlation with the lexical group (r = 0.17–0.42). This suggests that models producing well-structured JSON also tend to generate clinically more accurate content — format compliance and content quality are not independent.
 
 
 

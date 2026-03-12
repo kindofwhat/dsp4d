@@ -2,7 +2,7 @@
 
 # Results
 
-This chapter presents the empirical findings of the Zero-Shot evaluation run across all nine models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories.
+This chapter presents the empirical findings of the Zero-Shot evaluation run across all eleven models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
 
 ## Why silver answers are good enough TODO CHS
 
@@ -12,36 +12,36 @@ Silver answers have values when used in a relative manner, i.e. when comparing d
 
 ## Overview of Models and Evaluation Metrics
 
-Nine models were evaluated: one large cloud model (Gemini 2.5 Pro via Vertex AI), one small cloud model (GPT-5-nano via OpenAI), and seven locally executable SLMs ranging from 2B to 27B parameters. All models received the identical system prompt and clinical input documents in a Zero-Shot configuration — no few-shot examples or retrieval augmentation was applied.
+Eleven models were evaluated: two large cloud models (Gemini 2.5 Pro via Vertex AI, Kimi-K2.5 via Infomaniak), one small cloud model (GPT-5-nano via OpenAI), one MoE model (Qwen3.5-35B-A3B with 3B active parameters, run locally via MLX on Apple M3), and seven locally executable SLMs ranging from 2B to 27B parameters run via Ollama. All models received the identical system prompt and clinical input documents in a Zero-Shot configuration — no few-shot examples or retrieval augmentation was applied.
 
 The evaluation framework applied eight metrics per interaction, categorised into three groups:
 
-- **Statistical metrics** (deterministic, no model required): BLEU, ROUGE, Levenshtein similarity, Token F1, and JSON structural similarity. These measure lexical overlap and structural conformance between the model output and the Silver Answer.
+- **Statistical metrics** (deterministic, no model required): BLEU, ROUGE, Levenshtein similarity, Token F1, and JSON similarity. These measure lexical overlap and structural conformance between the model output and the Silver Answer.
 - **Embedding-based metric** (requires an embedding model, but no generative LLM): Semantic similarity, computed via cosine distance on text-embedding-3-small vectors. This metric captures whether the output conveys the same meaning as the Silver Answer, independent of exact wording.
-- **LLM-as-a-Judge metrics** (require a generative LLM as evaluator): DAG medical extraction quality and LLM-Judge correctness. These employ an LLM to assess the clinical quality and overall correctness of the extracted content against the Silver Answer.
+- **LLM-as-a-Judge metrics** (require a generative LLM as evaluator): DAG medical semantic field extraction and LLM-Judge medical field comparison. These employ GPT-4o-mini to assess the clinical quality and field-level correctness of the extracted content against the Silver Answer.
 
 ## Impact of LLM Size
 
 ### Aggregate Performance
 
 <!-- #R-TAB-STAT — regenerate from JSON, see INSTRUCTIONS.md -->
-Table \ref{tab:avg-scores} presents the mean scores across all 62 test cases per model and metric.
-
-The following three tables present the mean scores grouped by metric category.
+The following three tables present the mean scores across all 62 test cases per model, grouped by metric category.
 
 **Statistical Metrics** (deterministic, no model required):
 
 | Model              | Size | BLEU | ROUGE | Levenshtein | Token F1 | JSON Sim. |
 |--------------------|------|------|-------|-------------|----------|-----------|
-| gemini-2.5-pro | Large | 0.122 | 0.254 | 0.377 | 0.380 | 0.440 |
-| gemma3:27b | 27B | 0.080 | 0.210 | 0.343 | 0.309 | 0.372 |
-| gpt-5-nano | Small | 0.085 | 0.201 | 0.318 | 0.313 | 0.272 |
-| granite3.3:2b | 2B | 0.085 | 0.165 | 0.317 | 0.266 | 0.254 |
-| mistral-nemo | 12B | 0.080 | 0.189 | 0.336 | 0.275 | 0.059 |
-| glm4:9b | 9B | 0.072 | 0.170 | 0.322 | 0.259 | 0.255 |
-| qwen2:7b | 7B | 0.054 | 0.159 | 0.291 | 0.270 | 0.160 |
-| phi3.5:3.8b | 3.8B | 0.077 | 0.115 | 0.287 | 0.218 | 0.103 |
-| llama3:8b | 8B | 0.077 | 0.160 | 0.314 | 0.245 | 0.000 |
+| gemini-2.5-pro | Large | 0.122 | 0.254 | 0.377 | 0.380 | 0.457 |
+| gemma3:27b | 27B | 0.080 | 0.210 | 0.343 | 0.309 | 0.362 |
+| Kimi-K2.5 | Large | 0.071 | 0.170 | 0.311 | 0.270 | 0.374 |
+| gpt-5-nano | Small | 0.085 | 0.201 | 0.318 | 0.313 | 0.335 |
+| qwen3.5-35b-a3b | 35B | 0.057 | 0.204 | 0.368 | 0.273 | 0.371 |
+| granite3.3:2b | 2B | 0.085 | 0.165 | 0.317 | 0.266 | 0.258 |
+| mistral-nemo | 12B | 0.080 | 0.189 | 0.336 | 0.275 | 0.065 |
+| glm4:9b | 9B | 0.072 | 0.170 | 0.322 | 0.259 | 0.231 |
+| qwen2:7b | 7B | 0.054 | 0.159 | 0.291 | 0.270 | 0.178 |
+| phi3.5:3.8b | 3.8B | 0.077 | 0.115 | 0.287 | 0.218 | 0.098 |
+| llama3:8b | 8B | 0.077 | 0.160 | 0.314 | 0.245 | 0.129 |
 
 : Mean statistical metric scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-stat}
 
@@ -50,15 +50,17 @@ The following three tables present the mean scores grouped by metric category.
 
 | Model              | Size | Sem. Sim. | DAG | LLM-Judge |
 |--------------------|------|-----------|-----|-----------|
-| gemini-2.5-pro | Large | 0.835 | 0.619 | 0.730 |
-| gpt-5-nano | Small | 0.861 | 0.593 | 0.707 |
-| gemma3:27b | 27B | 0.790 | 0.520 | 0.702 |
-| granite3.3:2b | 2B | 0.843 | 0.528 | 0.659 |
-| qwen2:7b | 7B | 0.765 | 0.508 | 0.675 |
-| phi3.5:3.8b | 3.8B | 0.797 | 0.479 | 0.628 |
-| glm4:9b | 9B | 0.732 | 0.433 | 0.660 |
-| mistral-nemo | 12B | 0.794 | 0.261 | 0.643 |
-| llama3:8b | 8B | 0.650 | 0.475 | 0.636 |
+| gemini-2.5-pro | Large | 0.835 | 0.569 | 0.752 |
+| gemma3:27b | 27B | 0.790 | 0.510 | 0.671 |
+| Kimi-K2.5 | Large | 0.818 | 0.576 | 0.597 |
+| gpt-5-nano | Small | 0.861 | 0.510 | 0.537 |
+| qwen3.5-35b-a3b | 35B | 0.829 | 0.505 | 0.513 |
+| granite3.3:2b | 2B | 0.843 | 0.407 | 0.415 |
+| mistral-nemo | 12B | 0.794 | 0.424 | 0.553 |
+| glm4:9b | 9B | 0.732 | 0.425 | 0.466 |
+| qwen2:7b | 7B | 0.765 | 0.419 | 0.382 |
+| phi3.5:3.8b | 3.8B | 0.795 | 0.356 | 0.481 |
+| llama3:8b | 8B | 0.650 | 0.387 | 0.434 |
 
 : Mean embedding and LLM-as-a-Judge scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-judge}
 
@@ -69,41 +71,45 @@ To provide a consolidated view, Table \ref{tab:composite} aggregates the metric 
 
 | Model              | Size | Statistical | Embedding | LLM-as-a-Judge | Overall | Avg. Latency (ms) |
 |--------------------|------|-------------|-----------|----------------|---------|-------------------|
-| gemini-2.5-pro | Large (Cloud) | 0.315 | 0.835 | 0.675 | 0.470 | 22'259 |
-| gpt-5-nano | Small (Cloud) | 0.238 | 0.861 | 0.650 | 0.419 | 44'443 |
-| gemma3:27b | 27B | 0.263 | 0.790 | 0.611 | 0.416 | 69'136 |
-| granite3.3:2b | 2B | 0.217 | 0.843 | 0.593 | 0.390 | 16'506 |
-| glm4:9b | 9B | 0.216 | 0.732 | 0.547 | 0.363 | 20'237 |
-| qwen2:7b | 7B | 0.187 | 0.765 | 0.591 | 0.360 | 15'730 |
-| phi3.5:3.8b | 3.8B | 0.160 | 0.797 | 0.554 | 0.338 | 20'197 |
-| mistral-nemo | 12B | 0.188 | 0.794 | 0.452 | 0.330 | 24'556 |
-| llama3:8b | 8B | 0.159 | 0.650 | 0.556 | 0.320 | 17'002 |
+| gemini-2.5-pro | Large (Cloud) | 0.318 | 0.835 | 0.661 | 0.468 | 22'259 |
+| gemma3:27b | 27B | 0.261 | 0.790 | 0.590 | 0.409 | 69'136 |
+| Kimi-K2.5 | Large (Cloud) | 0.239 | 0.818 | 0.587 | 0.398 | 57'141 |
+| gpt-5-nano | Small (Cloud) | 0.250 | 0.861 | 0.524 | 0.395 | 44'443 |
+| qwen3.5-35b-a3b | 35B (MoE 3B) | 0.255 | 0.829 | 0.509 | 0.390 | 172'419 |
+| granite3.3:2b | 2B | 0.218 | 0.843 | 0.411 | 0.344 | 16'506 |
+| mistral-nemo | 12B | 0.189 | 0.794 | 0.488 | 0.339 | 24'556 |
+| glm4:9b | 9B | 0.211 | 0.732 | 0.445 | 0.335 | 20'237 |
+| qwen2:7b | 7B | 0.191 | 0.765 | 0.400 | 0.315 | 15'730 |
+| phi3.5:3.8b | 3.8B | 0.159 | 0.795 | 0.419 | 0.303 | 20'197 |
+| llama3:8b | 8B | 0.185 | 0.650 | 0.411 | 0.300 | 17'002 |
 
-: Composite scores (mean of metric averages) by category. Statistical = 5 lexical/structural metrics; Embedding = semantic similarity (text-embedding-3-small); LLM-as-a-Judge = 2 generative evaluation metrics. {#tab:composite}
+: Composite scores (mean of metric averages) by category. Statistical = 5 lexical/structural metrics; Embedding = semantic similarity (text-embedding-3-small); LLM-as-a-Judge = 2 generative evaluation metrics (judged by GPT-4o-mini). {#tab:composite}
 
-Gemini 2.5 Pro achieves the highest overall composite score (0.470), followed by GPT-5-nano (0.419) and Gemma3:27b (0.416). Among the locally executable SLMs, Granite 3.3 (2B) ranks surprisingly high at 0.390 — outperforming several models four to six times its size.
+Gemini 2.5 Pro achieves the highest overall composite score (0.468), followed by Gemma3:27b (0.409) and Kimi-K2.5 (0.398). Among the locally executable SLMs, Qwen3.5-35B-A3B — a MoE model with only 3B active parameters — ranks 5th at 0.390, closely matching the cloud models. Granite 3.3 (2B) achieves 0.344, outperforming several models with significantly more parameters.
 
 
 <!-- #R-TAB-JSON — regenerate from JSON, see INSTRUCTIONS.md -->
 ## JSON Structural Similarity
 
-A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema and the respective content. The `json_structural_similarity` metric directly measures this capability.
+A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema and the respective content. The `json_similarity_dsp4d_record` metric directly measures this capability.
 
 | Model              | Mean | Std | Min | Max |
 |--------------------|------|-----|-----|-----|
-| gemini-2.5-pro | 0.440 | 0.078 | 0.272 | 0.658 |
-| gemma3:27b | 0.372 | 0.067 | 0.193 | 0.553 |
-| glm4:9b | 0.255 | 0.061 | 0.000 | 0.386 |
-| gpt-5-nano | 0.272 | 0.084 | 0.000 | 0.426 |
-| granite3.3:2b | 0.254 | 0.076 | 0.000 | 0.397 |
-| qwen2:7b | 0.160 | 0.101 | 0.000 | 0.366 |
-| phi3.5:3.8b | 0.103 | 0.136 | 0.000 | 0.380 |
-| mistral-nemo | 0.059 | 0.117 | 0.000 | 0.334 |
-| llama3:8b | 0.000 | 0.000 | 0.000 | 0.000 |
+| gemini-2.5-pro | 0.457 | 0.092 | 0.298 | 0.783 |
+| Kimi-K2.5 | 0.374 | 0.093 | 0.000 | 0.543 |
+| qwen3.5-35b-a3b | 0.371 | 0.102 | 0.000 | 0.631 |
+| gemma3:27b | 0.362 | 0.070 | 0.177 | 0.521 |
+| gpt-5-nano | 0.335 | 0.104 | 0.000 | 0.512 |
+| granite3.3:2b | 0.258 | 0.082 | 0.000 | 0.406 |
+| glm4:9b | 0.231 | 0.078 | 0.000 | 0.436 |
+| qwen2:7b | 0.178 | 0.137 | 0.000 | 0.503 |
+| llama3:8b | 0.129 | 0.136 | 0.000 | 0.467 |
+| phi3.5:3.8b | 0.098 | 0.130 | 0.000 | 0.362 |
+| mistral-nemo | 0.065 | 0.118 | 0.000 | 0.327 |
 
-: JSON structural similarity distribution per model. {#tab:json-sim}
+: JSON similarity distribution per model. {#tab:json-sim}
 
-Llama3:8b scores 0.000 across all 62 test cases, indicating a complete failure to produce parseable JSON matching the required schema. Mistral-Nemo and Phi3.5 also exhibit high variance with many zero-score cases. In contrast, Gemini 2.5 Pro and Gemma3:27b produce consistently structured output with no zero-score cases.
+Gemini 2.5 Pro is the only model with no zero-score cases (min 0.298), producing consistently structured output. Kimi-K2.5 (0.374), Qwen3.5-35B-A3B (0.371), and Gemma3:27b (0.362) also achieve strong mean scores, though each except Gemma3 has occasional zero-score cases. Among the smaller SLMs, Mistral-Nemo (0.065), Phi3.5 (0.098), and Llama3 (0.129) exhibit severe structural compliance issues with high variance.
 
 
 <!-- END AI-GENERATED CONTENT -->
