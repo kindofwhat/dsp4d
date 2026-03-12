@@ -441,155 +441,777 @@ private DAGExecutionResult executeParallelBranches(
 }
 ```
 
-## Appendix: Token Cost per Evaluation Interaction {#appendix-token-cost}
+## Implementation Description: Silver Answers App {#appendix-silver-answers}
 
-Each evaluation interaction requires approximately 6,000–10,000 tokens for the LLM-as-a-Judge metrics. This cost is driven by the structured medical data that must be included in every judge call.
+### Executive Summary
 
-**LLM-Judge metric (~3,000–5,000 tokens):**
+The Silver Answers App is a cloud-based web application designed to automate the generation and evaluation of AI-powered document analyses using Google's Gemini large language model. The system implements a session-based architecture that enables researchers to systematically process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built on a modern full-stack architecture, the application integrates Google Cloud Platform services for AI processing and persistent storage, providing a scalable solution for document analysis research.
 
-- Prompt template and evaluation criteria: ~300–500 tokens
-- `ACTUAL_OUTPUT` — the model's structured health record JSON: ~1,000–2,000 tokens
-- `EXPECTED_OUTPUT` — the silver answer JSON: ~1,000–2,000 tokens
-- `INPUT` — the original clinical document: ~500–1,000 tokens
+### System Architecture
 
-**DAG metric (~3,000–7,000 tokens, depending on graph depth):**
+#### Architectural Overview
 
-- TaskNode call: injects `ACTUAL_OUTPUT` + `EXPECTED_OUTPUT` into the task prompt → ~2,000–4,000 tokens
-- The task node's LLM response is added to `accumulatedContext`
-- Each subsequent JudgementNode re-injects the accumulated context (including prior LLM responses) into its prompt → ~1,000–2,000 tokens per node
-- Each additional node in the DAG adds further context, as the accumulated responses grow
+The application follows a three-tier architecture pattern:
 
-**Total per interaction:** ~6,000–10,000 tokens across both metrics. For a full evaluation run of 62 test cases across 11 models, this amounts to approximately 4–7 million judge tokens — a significant cost factor that constrains the choice of judge model and the feasibility of multi-sample estimation approaches such as the G-Eval fallback strategy (which would multiply this cost by a factor of 20).
+**Presentation Layer (Frontend)**
+- Single-page React application (React 18.2.0)
+- Component-based UI with four primary panels
+- Real-time state management and progress tracking
+- Responsive design with custom dark mode styling
 
-## Appendix: Evaluation Metrics Reference {#appendix-metrics-reference}
+**Application Layer (Backend)**
+- Node.js/Express RESTful API server (Express 4.18.2)
+- Service-oriented architecture with separation of concerns
+- Middleware for error handling, CORS, and rate limiting
+- Asynchronous processing with progress callbacks
 
-This section provides a concise reference for all evaluation metrics used in this study, including their mathematical definitions as implemented in the *llm-validator* framework.
+**Data & AI Layer (Cloud Services)**
+- Google Cloud Vertex AI for Gemini API integration
+- Google Cloud Storage (GCS) for persistent data storage
+- Configuration management through cloud-based JSON files
+- Service account-based authentication and authorization
 
-All text-based metrics operate on normalised, lowercased token sequences. When multiple silver answers are available, the best score across all references is reported.
+#### Technology Stack
 
-### BLEU (Bilingual Evaluation Understudy)
+**Frontend Technologies:**
+- React 18.2.0 - Component framework
+- Axios 1.6.0 - HTTP client for API communication
+- react-beautiful-dnd 13.1.1 - Drag-and-drop functionality for prompt reordering
+- react-modal 3.16.1 - Modal dialog management
+- Custom CSS with CSS variables for theming
 
-BLEU measures **precision** of n-grams: what fraction of the generated text's n-grams appear in the reference.
+**Backend Technologies:**
+- Node.js with Express 4.18.2 - Web server framework
+- @google-cloud/vertexai 1.1.0 - Gemini API integration
+- @google-cloud/storage 7.7.0 - Cloud storage client
+- google-auth-library 9.6.0 - Authentication
+- express-rate-limit 7.1.5 - API rate limiting
+- dotenv 16.3.1 - Environment configuration
 
-**Computation:**
+**Cloud Infrastructure:**
+- Google Cloud Platform (GCP) Project: cas-gen-ki
+- Vertex AI API - Gemini 2.5 Flash model
+- Cloud Storage - Document and configuration persistence
+- Service Account authentication with IAM roles
 
-1. For each $n \in \{1, 2, 3, 4\}$, compute clipped n-gram precision:
-$$p_n = \frac{\sum_{\text{ngram}} \min(\text{count}_{\text{gen}}(\text{ngram}),\; \text{count}_{\text{ref}}(\text{ngram}))}{\sum_{\text{ngram}} \text{count}_{\text{gen}}(\text{ngram})}$$
-   Clipping ensures that repeated n-grams in the output are not counted more often than they occur in the reference.
+### Core Components
 
-2. Compute the brevity penalty (BP) to penalise short outputs:
-$$BP = \begin{cases} 1 & \text{if } |\text{gen}| \geq |\text{ref}| \\ e^{1 - |\text{ref}|/|\text{gen}|} & \text{otherwise} \end{cases}$$
+#### Frontend Architecture
 
-3. Final score is the brevity-penalised geometric mean of all four precisions:
-$$\text{BLEU} = BP \cdot \exp\!\left(\frac{1}{4}\sum_{n=1}^{4} \ln p_n\right)$$
+The frontend implements a four-panel layout with an additional session management overlay:
 
-**Range:** 0.0–1.0. **Pass threshold:** 0.3. **Interpretation:** Higher = more n-gram overlap with reference. Scores above 0.5 are considered strong for extraction tasks.
+##### Session Manager Component
+**Purpose:** Orchestrates work sessions that bind document bases, prompt sets, and generation results together.
 
----
+**Key Features:**
+- Session creation with optional document base and prompt set selection
+- Session switching with automatic state restoration
+- Session history tracking (creation date, modification date, generation runs)
+- Auto-loading of single sessions for improved UX
+- Deletion with cascade handling of dependent resources
 
-### ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
+**State Management:**
+```javascript
+- currentSession: Active session object
+- sessions: Array of all available sessions
+- Session metadata: name, docBaseId, promptSetId, status, history
+```
 
-ROUGE measures **recall**: what fraction of the reference content appears in the generated output. Three variants are computed.
+##### Document Base (DocsBase) Component
+**Purpose:** Manages document collections that serve as input for AI processing.
 
-**ROUGE-1 and ROUGE-2** (unigram and bigram overlap):
+**Key Features:**
+- JSON file upload with URL-based document references (Zenodo integration)
+- Folder upload with text file content embedding
+- Document preview modal with content display
+- Document base selection and switching
+- File count and metadata display
 
-$$\text{Precision}_n = \frac{|\text{ngrams}_{\text{gen}} \cap \text{ngrams}_{\text{ref}}|}{|\text{ngrams}_{\text{gen}}|}, \quad \text{Recall}_n = \frac{|\text{ngrams}_{\text{gen}} \cap \text{ngrams}_{\text{ref}}|}{|\text{ngrams}_{\text{ref}}|}$$
+**Data Model:**
+```javascript
+{
+  id: "docbase-{timestamp}",
+  name: "Document collection name",
+  data: {
+    files: {
+      count: number,
+      entries: {
+        "filename": {
+          id: string,
+          size: number,
+          mimetype: string,
+          links: { content: url }
+        }
+      }
+    }
+  },
+  uploadedAt: ISO timestamp
+}
+```
 
-$$\text{F1}_n = \frac{2 \cdot \text{Precision}_n \cdot \text{Recall}_n}{\text{Precision}_n + \text{Recall}_n}$$
+##### Prompt Engineering Component
+**Purpose:** Enables creation and configuration of prompt chains for document processing.
 
-Note: the implementation uses **set-based** overlap (unique n-grams), not count-based — each n-gram is counted at most once.
+**Key Features:**
+- Prompt creation (System and User types)
+- Drag-and-drop reordering with visual feedback
+- Prompt deletion with confirmation
+- Generation initiation with progress tracking
+- Token estimation and analysis preview
+- Prompt set saving for reusability
 
-**ROUGE-L** (Longest Common Subsequence):
+**Prompt Chain Execution:**
+1. System prompts set context/instructions for the AI
+2. User prompts provide specific questions/tasks
+3. Prompts execute sequentially, with each output feeding into the next
+4. Cumulative context grows with each step (document + previous results)
 
-Computes the length of the longest common subsequence (LCS) between generated and reference token sequences using dynamic programming, then derives an F1 score:
+##### Prospect Answers Component
+**Purpose:** Displays generation results with expandable document details.
 
-$$P_L = \frac{|LCS|}{|\text{gen}|}, \quad R_L = \frac{|LCS|}{|\text{ref}|}, \quad \text{ROUGE-L} = \frac{2 \cdot P_L \cdot R_L}{P_L + R_L}$$
+**Key Features:**
+- Hierarchical result display (generation → documents → steps)
+- Expandable/collapsible document sections
+- Intermediate step visualization
+- Final answer highlighting
+- Status indicators (completed, failed, processing)
+- Token usage statistics per document
 
-**Primary score:** ROUGE-L. **Range:** 0.0–1.0. **Pass threshold:** 0.4.
+##### Answer Details Component
+**Purpose:** Provides detailed view and rating interface for individual results.
 
----
+**Key Features:**
+- Full answer display with formatting
+- Star rating system (1-5 stars)
+- Comment field for qualitative feedback
+- Human input/correction field for ground truth
+- Rating persistence to session
+- Timestamp tracking for evaluations
 
-### Token F1
+#### Backend Architecture
 
-Token F1 measures **set-based word overlap** between generated and reference text using precision, recall, and their harmonic mean.
+##### Server Configuration (server.js)
+**Responsibilities:**
+- Express application initialization
+- Middleware configuration (CORS, JSON parsing, rate limiting)
+- Route registration for all API endpoints
+- Configuration loading from GCS on startup
+- Error handling middleware
+- Health check endpoint
 
-**Computation:**
+**Rate Limiting:**
+- 60 requests per minute per IP address
+- Applied to all /api/* endpoints
+- Configurable through config.json
 
-$$\text{Precision} = \frac{|\text{tokens}_{\text{gen}} \cap \text{tokens}_{\text{ref}}|}{|\text{tokens}_{\text{gen}}|}, \quad \text{Recall} = \frac{|\text{tokens}_{\text{gen}} \cap \text{tokens}_{\text{ref}}|}{|\text{tokens}_{\text{ref}}|}$$
+##### Service Layer
 
-$$\text{F1} = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
+**Gemini Service (services/gemini.js)**
+- Vertex AI client initialization with authentication
+- Token estimation (1 token $\approx$ 4 characters)
+- Token limit validation (30,000 input tokens for Gemini 1.5 Flash)
+- Content generation with system instructions
+- Document chain processing with cumulative context
+- Comprehensive logging of API requests and responses
+- Safety rating monitoring
 
-Both inputs are tokenised and deduplicated (set-based), so repeated tokens do not inflate the score.
+**Key Algorithm - Document Chain Processing:**
+```
+For each document:
+  currentInput = documentContent
+  For each prompt in chain:
+    If prompt.type == "system":
+      systemInstruction = prompt.content
+      userPrompt = currentInput
+    Else:
+      systemInstruction = null
+      userPrompt = currentInput + "\n\n" + prompt.content
+    
+    response = callGeminiAPI(userPrompt, systemInstruction)
+    
+    Store result with metadata
+    
+    currentInput = documentContent + "\n\n--- Previous Analysis ---\n" + response
+  
+  Return all results + final answer
+```
 
-**Range:** 0.0–1.0. **Pass threshold:** 0.7. **Interpretation:** High precision = output doesn't contain irrelevant content. High recall = output covers the reference content. F1 balances both.
+**Processor Service (services/processor.js)**
+- Document content fetching from URLs (Zenodo)
+- Multi-document batch processing
+- Progress callback system for real-time updates
+- Error handling with partial result preservation
+- Support for both URL-based and text-based documents
 
----
+**Storage Service (services/storage.js)**
+- GCS file upload/download operations
+- File listing with prefix filtering
+- File deletion
+- JSON serialization/deserialization
+- Error handling for cloud operations
 
-### Levenshtein Similarity
+##### Route Layer
 
-Measures **character-level** similarity by computing the minimum edit distance (insertions, deletions, substitutions) between the normalised texts.
+**Documents Routes (routes/documents.js)**
+- `GET /api/documents` - List all document bases from GCS
+- `POST /api/documents/upload` - Upload JSON with URL references
+- `POST /api/documents/upload-folder` - Upload folder with text content
+- `GET /api/documents/:id` - Get specific document base
+- `GET /api/documents/:id/files` - Get files in document base
+- `DELETE /api/documents/:id` - Delete document base
 
-**Computation:**
+**Sessions Routes (routes/sessions.js)**
+- `GET /api/sessions` - List all sessions (sorted by last modified)
+- `POST /api/sessions` - Create new session
+- `GET /api/sessions/:id` - Get session with full details
+- `PUT /api/sessions/:id` - Update session metadata
+- `POST /api/sessions/:id/results` - Add generation results
+- `POST /api/sessions/:id/prompts` - Add prompt to session
+- `PUT /api/sessions/:id/prompts/reorder` - Reorder session prompts
+- `DELETE /api/sessions/:id/prompts/:promptId` - Delete session prompt
+- `DELETE /api/sessions/:id` - Delete session (with cascade options)
 
-$$d(s_1, s_2) = \text{minimum edits to transform } s_1 \text{ into } s_2$$
+**Generation Routes (routes/generation.js)**
+- `POST /api/generation/analyze` - Analyze token usage without generation
+- `POST /api/generation/start` - Start asynchronous generation process
+- `GET /api/generation/:id/status` - Get generation progress
+- `GET /api/generation/results` - List all generation results
+- `GET /api/generation/results/:id` - Get specific generation result
 
-$$\text{Similarity} = 1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$$
+**Ratings Routes (routes/ratings.js)**
+- `POST /api/ratings` - Save rating (updates session)
+- `GET /api/ratings/:generationId/:documentId` - Get specific rating
 
-**Range:** 0.0–1.0. **Pass threshold:** 0.8. **Interpretation:** Sensitive to formatting differences, ordering, and verbosity — even semantically identical outputs score low if phrased differently.
+**Prompt Sets Routes (routes/prompt-sets.js)**
+- `GET /api/prompt-sets` - List all saved prompt sets
+- `POST /api/prompt-sets` - Create new prompt set
+- `GET /api/prompt-sets/:id` - Get specific prompt set
+- `PUT /api/prompt-sets/:id` - Update prompt set
+- `DELETE /api/prompt-sets/:id` - Delete prompt set
 
----
+### Data Flow and Processing Pipeline
 
-### Semantic Similarity
+#### Session-Based Workflow
 
-Measures **meaning-level** similarity by comparing embedding vectors of the generated and reference texts.
+**Phase 1: Session Initialization**
+1. User creates new session or selects existing session
+2. User selects/uploads document base (optional at creation)
+3. User selects/creates prompt set (optional at creation)
+4. System creates session object in GCS
+5. Frontend loads session state and associated resources
 
-**Computation:**
+**Phase 2: Configuration**
+1. User uploads/selects document base if not already set
+2. System parses document metadata and stores in GCS
+3. User creates/loads prompts for the session
+4. System validates prompt chain configuration
+5. User can preview token usage estimates
 
-1. Both texts are embedded using OpenAI's `text-embedding-3-small` model, producing high-dimensional vectors $\vec{a}$ and $\vec{b}$.
+**Phase 3: Generation**
+1. User initiates generation process
+2. Backend creates unique generation ID
+3. For each document in parallel or sequence:
+   - Fetch document content (from URL or embedded text)
+   - Process through prompt chain sequentially
+   - Each prompt builds on previous results
+   - Track token usage per step
+   - Store intermediate results
+4. Aggregate results and save to session
+5. Update session history (run count, timestamps)
+6. Return results to frontend with progress updates
 
-2. Cosine similarity is computed:
-$$\text{sim}(\vec{a}, \vec{b}) = \frac{\vec{a} \cdot \vec{b}}{|\vec{a}| \cdot |\vec{b}|}$$
+**Phase 4: Evaluation**
+1. User reviews generated answers in Prospect Answers panel
+2. User selects document for detailed view
+3. User provides rating (1-5 stars)
+4. User adds optional comment
+5. User provides optional human correction/ground truth
+6. System saves rating to session in GCS
+7. Rating metadata includes timestamp for tracking
 
-**Range:** -1.0 to 1.0 (in practice 0.0–1.0 for natural language). **Pass threshold:** 0.75. **Interpretation:** Captures semantic equivalence regardless of lexical differences. Two outputs expressing the same medical content in different words will score high.
+**Phase 5: Iteration**
+1. User analyzes results and ratings
+2. User modifies prompts based on feedback
+3. User re-runs generation (creates new result entry in session)
+4. System preserves all previous results for comparison
+5. User compares results across generation runs
 
-**Note:** This is the only statistical metric that requires an external API call (OpenAI embeddings), but it is deterministic — the same input always produces the same embedding.
+#### Prompt Chain Processing
 
----
+The system implements a sequential prompt chain where each prompt's output becomes part of the input for the next prompt:
 
-### Metric Comparison Summary
+**Initial State:**
+```
+Input = Document Content
+```
 
-| Metric | Granularity | Focus | Sensitive to | Robust to |
-|--------|-------------|-------|--------------|-----------|
-| BLEU | n-gram (1–4) | Precision | Word order, exact phrasing | — |
-| ROUGE | n-gram + LCS | Recall | Missing content | Minor additions |
-| Token F1 | Word (set) | Precision + Recall | Missing/extra words | Word order |
-| Levenshtein | Character | Edit distance | Formatting, ordering | — |
-| Semantic Sim. | Sentence embedding | Meaning | — | Paraphrasing, synonyms |
-| JSON Sim. | JSON leaf paths | Structure + Content | Schema violations | Key ordering |
+**After Prompt 1 (System):**
+```
+System Instruction: "You are an expert analyst..."
+User Prompt: Document Content
+Output: Analysis_1
+```
 
-## Appendix: Pearson Correlation Coefficient {#appendix-pearson}
+**After Prompt 2 (User):**
+```
+System Instruction: null
+User Prompt: Document Content + "\n\n--- Previous Analysis ---\n" + Analysis_1 + "\n\nExtract key findings..."
+Output: Analysis_2
+```
 
-The Pearson correlation coefficient $r$ measures the strength and direction of the linear relationship between two variables. It is used in this study to analyse whether evaluation metrics capture similar or independent quality dimensions.
+**After Prompt N:**
+```
+Input = Document Content + All Previous Analyses
+Output = Final Answer
+```
 
-**Definition:**
+**Token Growth Pattern:**
+- Prompt 1: ~D tokens (document size)
+- Prompt 2: ~D + O1 tokens (document + output 1)
+- Prompt 3: ~D + O1 + O2 tokens
+- Prompt N: ~D + O1 + O2 + ... + O(N-1) tokens
 
-Given $n$ paired observations $(x_i, y_i)$:
+This cumulative approach allows for multi-step reasoning but requires careful token management.
 
-$$r = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2} \cdot \sqrt{\sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
+#### Data Persistence Strategy
 
-where $\bar{x}$ and $\bar{y}$ are the sample means.
+**Google Cloud Storage Structure:**
+```
+gs://cas-gen-ki-golden-answers/
+|-- config.json                          # Application configuration
+|-- docbases/                            # Reusable document collections
+|   |-- docbase-1234567890.json
+|   `-- docbase-1234567891.json
+|-- prompt-sets/                         # Reusable prompt configurations
+|   |-- prompt-set-1234567890.json
+|   `-- prompt-set-1234567891.json
+`-- sessions/                            # Work sessions with results
+    |-- session-1234567890.json
+    `-- session-1234567891.json
+```
 
-**Range and interpretation:**
+**Persistence Characteristics:**
+- All data stored as JSON in GCS
+- Atomic writes with timestamp-based IDs
+- No database required - file-based storage
+- Automatic versioning through GCS
+- Lazy loading on application startup
+- In-memory caching for active session
 
-| $r$ value | Interpretation |
-|-----------|----------------|
-| 1.0 | Perfect positive linear relationship |
-| 0.7–1.0 | Strong positive correlation |
-| 0.4–0.7 | Moderate positive correlation |
-| 0.1–0.4 | Weak positive correlation |
-| -0.1–0.1 | No meaningful linear relationship |
-| < -0.1 | Negative correlation (analogous bands) |
+### Integration with Google Cloud Platform
 
-**Application in this study:** The correlation matrix (Figure \ref{fig:metric-correlation}) computes $r$ for every pair of metrics across all model-document interactions. Each observation is one interaction's score on two metrics. High correlation between two metrics (e.g., Levenshtein and ROUGE) indicates they capture similar quality aspects. Low correlation (e.g., DAG score and BLEU) suggests they measure fundamentally different dimensions — confirming the value of a multi-metric evaluation approach.
+#### Authentication and Authorization
 
-**Limitation:** Pearson correlation only captures *linear* relationships. Two metrics that are related but in a non-linear way (e.g., a threshold effect where semantic similarity is always high but JSON similarity is bimodal) would show low $r$ despite being meaningfully related.
+**Service Account Configuration:**
+- Service account: `golden-answers-engine@cas-gen-ki.iam.gserviceaccount.com`
+- Key file: JSON credentials stored locally (not in version control)
+- Environment variable: `GOOGLE_APPLICATION_CREDENTIALS`
+
+**IAM Roles:**
+- `roles/aiplatform.user` - Vertex AI API access for Gemini
+- `roles/storage.objectAdmin` - GCS bucket operations (scoped to specific bucket)
+
+**Authentication Flow:**
+1. Application loads service account key from environment variable
+2. GoogleAuth library creates authenticated client
+3. Client used for both Vertex AI and Storage API calls
+4. Token refresh handled automatically by SDK
+
+#### Vertex AI Integration
+
+**Model Configuration:**
+```json
+{
+  "model": "gemini-2.5-flash",
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 2048,
+    "topK": 40,
+    "topP": 0.95
+  }
+}
+```
+
+**API Request Structure:**
+```javascript
+{
+  systemInstruction: {
+    role: "system",
+    parts: [{ text: "System prompt content" }]
+  },
+  contents: [{
+    role: "user",
+    parts: [{ text: "User prompt content" }]
+  }]
+}
+```
+
+**Response Handling:**
+- Extract text from response.candidates[0].content.parts[0].text
+- Monitor finishReason for completion status
+- Check safetyRatings for content filtering
+- Log token usage estimates
+- Handle errors with detailed messages
+
+#### Cloud Storage Integration
+
+**Bucket Configuration:**
+- Bucket name: `cas-gen-ki-golden-answers`
+- Region: `europe-west6` (Switzerland)
+- Storage class: Standard
+- Access: Private (service account only)
+
+**File Operations:**
+- Upload: JSON.stringify → Buffer → GCS file.save()
+- Download: GCS file.download() → Buffer → JSON.parse()
+- List: bucket.getFiles({ prefix: 'folder/' })
+- Delete: file.delete()
+
+**Error Handling:**
+- Retry logic for transient failures
+- Fallback to default configuration if config.json unavailable
+- Graceful degradation for missing files
+- Detailed error logging
+
+### Key Features and Capabilities
+
+#### Session Management
+
+**Benefits:**
+- **Reusability:** Document bases and prompt sets can be reused across sessions
+- **Continuity:** Resume work from any previous point
+- **Organization:** Logical grouping of related work
+- **Comparison:** Run same documents with different prompts
+- **History:** Complete audit trail of all generation runs
+
+**Session Lifecycle:**
+1. Created with name and optional resources
+2. Active during configuration and generation
+3. Updated with each generation run
+4. Archived when work complete
+5. Deletable with cascade options
+
+#### Prompt Engineering
+
+**Prompt Types:**
+- **System Prompts:** Set AI behavior, role, and constraints
+- **User Prompts:** Provide specific tasks and questions
+
+**Capabilities:**
+- Visual drag-and-drop reordering
+- Real-time token estimation
+- Prompt validation
+- Save as reusable prompt sets
+- Load from existing prompt sets
+
+**Best Practices Supported:**
+- Chain-of-thought prompting through sequential steps
+- Role-based prompting with system instructions
+- Iterative refinement through multiple runs
+- A/B testing with different prompt configurations
+
+#### Document Processing
+
+**Supported Formats:**
+- JSON with URL references (Zenodo integration)
+- Folder upload with text files
+- Direct text content embedding
+
+**Processing Features:**
+- Batch processing of multiple documents
+- Parallel or sequential execution
+- Progress tracking with real-time updates
+- Partial result preservation on errors
+- Token usage tracking per document
+
+#### Result Evaluation
+
+**Rating System:**
+- 1-5 star quantitative rating
+- Free-text comment field
+- Human correction/ground truth field
+- Timestamp tracking
+- Persistent storage in session
+
+**Analysis Features:**
+- View intermediate prompt results
+- Compare across generation runs
+- Export results for external analysis
+- Token usage statistics
+- Processing time metrics
+
+#### Token Management
+
+**Estimation:**
+- Rough approximation: 1 token $\approx$ 4 characters
+- Real-time calculation during prompt configuration
+- Warning system for approaching limits
+
+**Limits:**
+- Input: ~30,000 tokens (Gemini 1.5 Flash)
+- Output: Configurable (default 2,048 tokens)
+- Warnings at 80% of limits
+- Errors when limits exceeded
+
+**Tracking:**
+- Per-prompt token counts
+- Per-document cumulative totals
+- Per-generation aggregate statistics
+- Detailed logging for analysis
+
+### Security and Performance
+
+#### Security Measures
+
+**Authentication:**
+- Service account with minimal required permissions
+- Key file excluded from version control (.gitignore)
+- Environment-based configuration
+- No hardcoded credentials
+
+**API Security:**
+- CORS configuration for allowed origins
+- Rate limiting (60 requests/minute)
+- Input validation on all endpoints
+- Error messages without sensitive data exposure
+
+**Data Protection:**
+- Private GCS bucket access
+- Service account-only permissions
+- No public endpoints for data access
+- Secure credential storage
+
+#### Performance Optimizations
+
+**Frontend:**
+- Component-level state management
+- Lazy loading of large datasets
+- Debounced user inputs
+- Optimistic UI updates
+- Efficient re-rendering with React keys
+
+**Backend:**
+- Asynchronous processing for long-running tasks
+- Progress callbacks for real-time updates
+- In-memory configuration caching
+- Connection pooling for GCS
+- Efficient JSON parsing
+
+**API:**
+- Rate limiting to prevent abuse
+- Request timeout configuration
+- Batch operations where possible
+- Minimal data transfer (pagination ready)
+
+### Error Handling and Logging
+
+#### Error Handling Strategy
+
+**Frontend:**
+- Try-catch blocks around API calls
+- User-friendly error messages
+- Fallback UI states
+- Error boundary components (ready for implementation)
+
+**Backend:**
+- Centralized error handler middleware
+- Specific error types (validation, authentication, API)
+- Graceful degradation
+- Partial result preservation
+
+**Cloud Integration:**
+- Retry logic for transient failures
+- Fallback configurations
+- Detailed error context
+- User notification of failures
+
+#### Logging System
+
+**Console Logging:**
+- Request/response details for Gemini API
+- Token usage statistics
+- Processing progress
+- Error stack traces
+- Performance metrics
+
+**Log Levels:**
+- INFO: Normal operations
+- WARN: Approaching limits, fallbacks used
+- ERROR: Failures requiring attention
+
+**Logged Information:**
+- API request parameters
+- Token estimates and actuals
+- Processing times
+- Success/failure rates
+- User actions (session creation, generation runs)
+
+### Deployment and Configuration
+
+#### Environment Configuration
+
+**Backend (.env):**
+```
+GOOGLE_APPLICATION_CREDENTIALS=./gcp-service-account.json
+GCP_PROJECT_ID=xxxxxx
+GCP_PROJECT_NAME=xxx-xxx-xxx
+GCS_CONFIG_BUCKET=xxx-xxx-xxx-xxx-xxx
+GCS_CONFIG_FILE=config.json
+PORT=3001
+NODE_ENV=development
+ALLOWED_ORIGINS=http://localhost:3000
+```
+
+**Frontend:**
+```
+REACT_APP_API_URL=http://localhost:3001/api
+```
+
+**Cloud Configuration (config.json in GCS):**
+```json
+{
+  "gcpProject": "xxxxxxxxxx",
+  "gcpProjectName": "cas-gen-ki",
+  "gcpLocation": "us-central1",
+  "geminiModel": "gemini-2.5-flash",
+  "geminiConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 2048,
+    "topK": 40,
+    "topP": 0.95
+  },
+  "rateLimit": {
+    "requestsPerMinute": 60
+  }
+}
+```
+
+#### Deployment Process
+
+**Prerequisites:**
+1. Node.js 18+ installed
+2. GCP account with billing enabled
+3. Service account created with proper roles
+4. GCS bucket created
+5. Configuration file uploaded to GCS
+
+**Backend Deployment:**
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with actual values
+npm start
+```
+
+**Frontend Deployment:**
+```bash
+cd frontend
+npm install
+npm start
+```
+
+**Production Considerations:**
+- Use process manager (PM2) for backend
+- Build optimized frontend bundle
+- Configure reverse proxy (nginx)
+- Set up SSL/TLS certificates
+- Enable production logging
+- Configure monitoring and alerts
+
+### Research Applications
+
+#### Use Cases
+
+**Prompt Engineering Research:**
+- Test different prompt formulations
+- Compare system vs. user prompt effectiveness
+- Analyze chain-of-thought vs. direct prompting
+- Measure impact of prompt order
+
+**Document Analysis:**
+- Batch process research papers
+- Extract structured information
+- Generate summaries and insights
+- Compare AI vs. human analysis
+
+**Model Evaluation:**
+- Rate AI-generated outputs
+- Collect human corrections
+- Build ground truth datasets
+- Measure improvement over iterations
+
+**Iterative Refinement:**
+- Track prompt evolution
+- Compare results across sessions
+- Identify optimal configurations
+- Document best practices
+
+#### Data Collection
+
+**Quantitative Metrics:**
+- Star ratings (1-5 scale)
+- Token usage statistics
+- Processing times
+- Success/failure rates
+- Generation run counts
+
+**Qualitative Data:**
+- User comments on results
+- Human corrections/ground truth
+- Prompt configurations
+- Session notes and descriptions
+
+**Exportable Data:**
+- Session JSON files
+- Generation results
+- Rating datasets
+- Token usage reports
+
+### Future Enhancement Opportunities
+
+#### Potential Improvements
+
+**Architecture:**
+- Database integration for better querying
+- Real-time collaboration features
+- Webhook support for external integrations
+- Microservices decomposition for scalability
+
+**Features:**
+- Bulk operations across multiple sessions
+- Advanced analytics dashboard
+- Export to various formats (CSV, PDF)
+- Template library for common tasks
+- Version control for prompts
+- A/B testing framework
+
+**AI Integration:**
+- Support for multiple AI models
+- Model comparison features
+- Automatic prompt optimization
+- Embedding-based document search
+- RAG (Retrieval-Augmented Generation) support
+
+**User Experience:**
+- Advanced filtering and search
+- Customizable dashboards
+- Keyboard shortcuts
+- Batch rating interface
+- Mobile-responsive design improvements
+
+#### Scalability Considerations
+
+**Current Limitations:**
+- File-based storage (not optimized for high concurrency)
+- In-memory state management
+- Sequential document processing
+- Manual session management
+
+**Scaling Strategies:**
+- Implement database (PostgreSQL, Firestore)
+- Add caching layer (Redis)
+- Implement job queue (Bull, Cloud Tasks)
+- Horizontal scaling with load balancer
+- CDN for static assets
+- Serverless functions for processing
