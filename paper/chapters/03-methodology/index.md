@@ -6,6 +6,8 @@ The primary objective of this study is the development of an algorithmic selecti
 
 ## Procedure
 
+TODO CHS kriege die positionierung nicht hin
+
 ![four-phase methodological approach](../../assets/03-Methodology-Overview.png)
 
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
@@ -282,10 +284,28 @@ X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate 
 
 ### Server and Application Setup
 
+The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for golden answer generation.
+
+**Hardware Configuration.** The system is built on an AMD Ryzen Threadripper Pro 9955WX with 128GB DDR5 RAM (5600 MHz) and an ASUS PRO WS WRX90E-SAGE SE mainboard. For GPU acceleration, a Radeon AI PRO R9700 AI TOP with 32GB GDDR6 memory provides a cost-effective alternative to NVIDIA solutions. The host system runs Fedora Server 42, with a dedicated Fedora Server 42 VM serving as the Docker host with GPU passthrough.
+
+**LLM Inference Stack.** Local model inference is provided through Ollama (image: `ollama/ollama:rocm`) running in a Docker container with ROCm support for AMD GPU acceleration. The ROCm software stack is configured with `HSA_OVERRIDE_GFX_VERSION=12.0.1` to ensure compatibility with the Radeon AI PRO R9700. The Ollama service exposes its API on port 11434 and stores model data in a persistent volume at `/mnt/data/ollama-data`.
+
+**User Interface.** Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based frontend for model interaction, accessible at https://ai.bniweb.ch and secured via Cloudflare. The interface connects to the Ollama backend and exposes its service on port 3030 (mapped to internal port 8080).
+
+**Golden Answer Generation Platform.** The Silver/Golden Answers web application runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
+
+**Evaluation Framework.** The llm-validator application, implemented in Java 21 with Quarkus, runs as a deployed application in a separate virtual machine on the host system. This framework executes the multi-dimensional evaluation pipeline, applying both statistical metrics and LLM-as-a-Judge assessments to compare model outputs against golden answers.
+
+**Cloud Services.** Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Flash model) and Cloud Storage (bucket: `cas-gen-ki-golden-answers`, region: europe-west6). Authentication is handled via service account `golden-answers-engine@cas-gen-ki.iam.gserviceaccount.com` with IAM roles for Vertex AI and Cloud Storage access.
+
 
 ### Silver Answer App
 
 The Silver Answers App is a cloud-based web application that automates AI-powered document analysis using Google's Gemini large language model. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built with React and Node.js, it integrates Google Cloud Platform services for AI processing and persistent storage.
+
+TODO CHS ich verstehe nicht warum das bild an einem falschen ort eingebettet wird
+
+![Silver Answers App Interface](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
 [See Appendix: Silver Answers App for full description](#appendix-silver-answers)
 
