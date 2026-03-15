@@ -349,3 +349,136 @@ Each evaluation interaction requires approximately 6,000–10,000 tokens for the
 - Each additional node in the DAG adds further context, as the accumulated responses grow
 
 **Total per interaction:** ~6,000–10,000 tokens across both metrics. For a full evaluation run of 62 test cases across 11 models, this amounts to approximately 4–7 million judge tokens — a significant cost factor that constrains the choice of judge model and the feasibility of multi-sample estimation approaches such as the G-Eval fallback strategy (which would multiply this cost by a factor of 20).
+
+## Appendix: Evaluation Metrics Reference {#appendix-metrics-reference}
+
+This section provides a concise reference for all evaluation metrics used in this study, including their mathematical definitions as implemented in the *llm-validator* framework.
+
+All text-based metrics operate on normalised, lowercased token sequences. When multiple silver answers are available, the best score across all references is reported.
+
+### BLEU (Bilingual Evaluation Understudy)
+
+BLEU measures **precision** of n-grams: what fraction of the generated text's n-grams appear in the reference.
+
+**Computation:**
+
+1. For each $n \in \{1, 2, 3, 4\}$, compute clipped n-gram precision:
+$$p_n = \frac{\sum_{\text{ngram}} \min(\text{count}_{\text{gen}}(\text{ngram}),\; \text{count}_{\text{ref}}(\text{ngram}))}{\sum_{\text{ngram}} \text{count}_{\text{gen}}(\text{ngram})}$$
+   Clipping ensures that repeated n-grams in the output are not counted more often than they occur in the reference.
+
+2. Compute the brevity penalty (BP) to penalise short outputs:
+$$BP = \begin{cases} 1 & \text{if } |\text{gen}| \geq |\text{ref}| \\ e^{1 - |\text{ref}|/|\text{gen}|} & \text{otherwise} \end{cases}$$
+
+3. Final score is the brevity-penalised geometric mean of all four precisions:
+$$\text{BLEU} = BP \cdot \exp\!\left(\frac{1}{4}\sum_{n=1}^{4} \ln p_n\right)$$
+
+**Range:** 0.0–1.0. **Pass threshold:** 0.3. **Interpretation:** Higher = more n-gram overlap with reference. Scores above 0.5 are considered strong for extraction tasks.
+
+---
+
+### ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
+
+ROUGE measures **recall**: what fraction of the reference content appears in the generated output. Three variants are computed.
+
+**ROUGE-1 and ROUGE-2** (unigram and bigram overlap):
+
+$$\text{Precision}_n = \frac{|\text{ngrams}_{\text{gen}} \cap \text{ngrams}_{\text{ref}}|}{|\text{ngrams}_{\text{gen}}|}, \quad \text{Recall}_n = \frac{|\text{ngrams}_{\text{gen}} \cap \text{ngrams}_{\text{ref}}|}{|\text{ngrams}_{\text{ref}}|}$$
+
+$$\text{F1}_n = \frac{2 \cdot \text{Precision}_n \cdot \text{Recall}_n}{\text{Precision}_n + \text{Recall}_n}$$
+
+Note: the implementation uses **set-based** overlap (unique n-grams), not count-based — each n-gram is counted at most once.
+
+**ROUGE-L** (Longest Common Subsequence):
+
+Computes the length of the longest common subsequence (LCS) between generated and reference token sequences using dynamic programming, then derives an F1 score:
+
+$$P_L = \frac{|LCS|}{|\text{gen}|}, \quad R_L = \frac{|LCS|}{|\text{ref}|}, \quad \text{ROUGE-L} = \frac{2 \cdot P_L \cdot R_L}{P_L + R_L}$$
+
+**Primary score:** ROUGE-L. **Range:** 0.0–1.0. **Pass threshold:** 0.4.
+
+---
+
+### Token F1
+
+Token F1 measures **set-based word overlap** between generated and reference text using precision, recall, and their harmonic mean.
+
+**Computation:**
+
+$$\text{Precision} = \frac{|\text{tokens}_{\text{gen}} \cap \text{tokens}_{\text{ref}}|}{|\text{tokens}_{\text{gen}}|}, \quad \text{Recall} = \frac{|\text{tokens}_{\text{gen}} \cap \text{tokens}_{\text{ref}}|}{|\text{tokens}_{\text{ref}}|}$$
+
+$$\text{F1} = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
+
+Both inputs are tokenised and deduplicated (set-based), so repeated tokens do not inflate the score.
+
+**Range:** 0.0–1.0. **Pass threshold:** 0.7. **Interpretation:** High precision = output doesn't contain irrelevant content. High recall = output covers the reference content. F1 balances both.
+
+---
+
+### Levenshtein Similarity
+
+Measures **character-level** similarity by computing the minimum edit distance (insertions, deletions, substitutions) between the normalised texts.
+
+**Computation:**
+
+$$d(s_1, s_2) = \text{minimum edits to transform } s_1 \text{ into } s_2$$
+
+$$\text{Similarity} = 1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$$
+
+**Range:** 0.0–1.0. **Pass threshold:** 0.8. **Interpretation:** Sensitive to formatting differences, ordering, and verbosity — even semantically identical outputs score low if phrased differently.
+
+---
+
+### Semantic Similarity
+
+Measures **meaning-level** similarity by comparing embedding vectors of the generated and reference texts.
+
+**Computation:**
+
+1. Both texts are embedded using OpenAI's `text-embedding-3-small` model, producing high-dimensional vectors $\vec{a}$ and $\vec{b}$.
+
+2. Cosine similarity is computed:
+$$\text{sim}(\vec{a}, \vec{b}) = \frac{\vec{a} \cdot \vec{b}}{|\vec{a}| \cdot |\vec{b}|}$$
+
+**Range:** -1.0 to 1.0 (in practice 0.0–1.0 for natural language). **Pass threshold:** 0.75. **Interpretation:** Captures semantic equivalence regardless of lexical differences. Two outputs expressing the same medical content in different words will score high.
+
+**Note:** This is the only statistical metric that requires an external API call (OpenAI embeddings), but it is deterministic — the same input always produces the same embedding.
+
+---
+
+### Metric Comparison Summary
+
+| Metric | Granularity | Focus | Sensitive to | Robust to |
+|--------|-------------|-------|--------------|-----------|
+| BLEU | n-gram (1–4) | Precision | Word order, exact phrasing | — |
+| ROUGE | n-gram + LCS | Recall | Missing content | Minor additions |
+| Token F1 | Word (set) | Precision + Recall | Missing/extra words | Word order |
+| Levenshtein | Character | Edit distance | Formatting, ordering | — |
+| Semantic Sim. | Sentence embedding | Meaning | — | Paraphrasing, synonyms |
+| JSON Sim. | JSON leaf paths | Structure + Content | Schema violations | Key ordering |
+
+## Appendix: Pearson Correlation Coefficient {#appendix-pearson}
+
+The Pearson correlation coefficient $r$ measures the strength and direction of the linear relationship between two variables. It is used in this study to analyse whether evaluation metrics capture similar or independent quality dimensions.
+
+**Definition:**
+
+Given $n$ paired observations $(x_i, y_i)$:
+
+$$r = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2} \cdot \sqrt{\sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
+
+where $\bar{x}$ and $\bar{y}$ are the sample means.
+
+**Range and interpretation:**
+
+| $r$ value | Interpretation |
+|-----------|----------------|
+| 1.0 | Perfect positive linear relationship |
+| 0.7–1.0 | Strong positive correlation |
+| 0.4–0.7 | Moderate positive correlation |
+| 0.1–0.4 | Weak positive correlation |
+| -0.1–0.1 | No meaningful linear relationship |
+| < -0.1 | Negative correlation (analogous bands) |
+
+**Application in this study:** The correlation matrix (Figure \ref{fig:metric-correlation}) computes $r$ for every pair of metrics across all model-document interactions. Each observation is one interaction's score on two metrics. High correlation between two metrics (e.g., Levenshtein and ROUGE) indicates they capture similar quality aspects. Low correlation (e.g., DAG score and BLEU) suggests they measure fundamentally different dimensions — confirming the value of a multi-metric evaluation approach.
+
+**Limitation:** Pearson correlation only captures *linear* relationships. Two metrics that are related but in a non-linear way (e.g., a threshold effect where semantic similarity is always high but JSON similarity is bimodal) would show low $r$ despite being meaningfully related.

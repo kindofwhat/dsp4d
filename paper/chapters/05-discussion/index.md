@@ -82,7 +82,7 @@ Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity
 <!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
 ## Metric Correlation Analysis
 
-To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all  model-document interactions .
+To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all model-document interactions (see [Appendix: Pearson Correlation Coefficient](#appendix-pearson) for the mathematical definition).
 
 ![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
 

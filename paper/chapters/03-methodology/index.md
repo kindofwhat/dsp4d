@@ -285,7 +285,7 @@ TODO BNI Maschine von Beni, Google cloud für Gemini
 
 ## Evaluation Metrics
 
-The following metrics are used to evaluate LLM outputs, divided into statistical metrics (no LLM call required) and generative metrics (LLM-as-a-Judge):
+The following metrics are used to evaluate LLM outputs, divided into statistical metrics (no LLM call required) and generative metrics (LLM-as-a-Judge). For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
 
 **Statistical Metrics:**
 
