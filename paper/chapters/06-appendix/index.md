@@ -329,3 +329,23 @@ private DAGExecutionResult executeParallelBranches(
         count > 0 ? totalScore / count : 0.0, trace, false);
 }
 ```
+
+## Appendix: Token Cost per Evaluation Interaction {#appendix-token-cost}
+
+Each evaluation interaction requires approximately 6,000–10,000 tokens for the LLM-as-a-Judge metrics. This cost is driven by the structured medical data that must be included in every judge call.
+
+**LLM-Judge metric (~3,000–5,000 tokens):**
+
+- Prompt template and evaluation criteria: ~300–500 tokens
+- `ACTUAL_OUTPUT` — the model's structured health record JSON: ~1,000–2,000 tokens
+- `EXPECTED_OUTPUT` — the silver answer JSON: ~1,000–2,000 tokens
+- `INPUT` — the original clinical document: ~500–1,000 tokens
+
+**DAG metric (~3,000–7,000 tokens, depending on graph depth):**
+
+- TaskNode call: injects `ACTUAL_OUTPUT` + `EXPECTED_OUTPUT` into the task prompt → ~2,000–4,000 tokens
+- The task node's LLM response is added to `accumulatedContext`
+- Each subsequent JudgementNode re-injects the accumulated context (including prior LLM responses) into its prompt → ~1,000–2,000 tokens per node
+- Each additional node in the DAG adds further context, as the accumulated responses grow
+
+**Total per interaction:** ~6,000–10,000 tokens across both metrics. For a full evaluation run of 62 test cases across 11 models, this amounts to approximately 4–7 million judge tokens — a significant cost factor that constrains the choice of judge model and the feasibility of multi-sample estimation approaches such as the G-Eval fallback strategy (which would multiply this cost by a factor of 20).
