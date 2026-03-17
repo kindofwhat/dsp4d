@@ -2,8 +2,8 @@
 
 ## Comprehensive Comparison of Prompting Techniques {#appendix-promp-techs}
 
-| Technique |                                                                               |
-|-----------|-------------------------------------------------------------------------------|
+| Technique                |                                                                    |
+|--------------------------|----------------------------------------------------------------------|
 | Zero-Shot Prompting | **Description:** Asking the model to perform a task without examples|
 ||**Application to Medical Silver Answers:** "Extract all diagnoses from this text."|
 ||**Pros for Medical Records:** Fast and low token cost. Useful for checking the baseline capability of a model.|

@@ -145,8 +145,8 @@ The following sections detail specific prompt engineering techniques and their a
 ### Comprehensive Comparison of Prompting Techniques
 This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Silver Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
 
-| Technique |                                                                               |
-|-----------|-------------------------------------------------------------------------------|
+| Technique                |                                                                    |
+|--------------------------|----------------------------------------------------------------------|
 | Zero-Shot Prompting | **Description:** Asking the model to perform a task without examples|
 ||**Application to Medical Silver Answers:** "Extract all diagnoses from this text."|
 ||**Pros for Medical Records:** Fast and low token cost. Useful for checking the baseline capability of a model.|
