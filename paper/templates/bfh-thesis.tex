@@ -117,8 +117,9 @@ $endif$
 % Captions
 \usepackage[font=small,labelfont=bf]{caption}
 
-% Float control
+% Float control — force figures to appear at their source position
 \usepackage{float}
+\floatplacement{figure}{H}
 
 % Code highlighting (if needed)
 $if(highlighting-macros)$
@@ -217,6 +218,9 @@ $endif$
       $endif$
       $if(date)$
       Datum: & $date$ \\[0.3em]
+      $endif$
+      $if(version)$
+      Version: & \texttt{$version$} \\[0.3em]
       $endif$
     \end{tabular}
     \end{center}

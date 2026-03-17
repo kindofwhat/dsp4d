@@ -121,6 +121,7 @@ tasks:
         PATH="/Library/TeX/texbin:$PATH"
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml
         {{.LINK_DEFAULTS}}
+        -M version=$(git rev-parse --short HEAD)
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf
       - echo "PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.pdf"
 
@@ -131,6 +132,7 @@ tasks:
       - >
         PATH="/Library/TeX/texbin:$PATH"
         pandoc --defaults={{.PAPER_DIR}}/defaults.yaml --citeproc=false
+        -M version=$(git rev-parse --short HEAD)
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf
       - echo "Draft PDF created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}-draft.pdf"
 
@@ -143,6 +145,7 @@ tasks:
         {{.LINK_DEFAULTS}}
         --to docx
         --reference-doc={{.PAPER_DIR}}/reference-styles.docx
+        -M version=$(git rev-parse --short HEAD)
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx
       - echo "Word document created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.docx using template"
 
@@ -155,6 +158,7 @@ tasks:
         {{.LINK_DEFAULTS}}
         --to html
         --standalone --toc
+        -M version=$(git rev-parse --short HEAD)
         -o {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html
       - echo "HTML created {{.OUTPUT_DIR}}/{{.PAPER_NAME}}.html"
 

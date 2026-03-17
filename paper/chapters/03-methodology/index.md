@@ -8,8 +8,6 @@ The theoretical foundations established in Chapter 2 directly dictate the struct
 
 ## Procedure
 
-TODO CHS kriege die positionierung nicht hin
-
 ![four-phase methodological approach](../../assets/03-Methodology-Overview.png)
 
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
@@ -304,8 +302,6 @@ The experimental infrastructure consists of a dedicated workstation with GPU acc
 ### Silver Answer App
 
 The Silver Answers App is a cloud-based web application that automates AI-powered document analysis using Google's Gemini large language model. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built with React and Node.js, it integrates Google Cloud Platform services for AI processing and persistent storage.
-
-TODO CHS ich verstehe nicht warum das bild an einem falschen ort eingebettet wird
 
 ![Silver Answers App Interface](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
