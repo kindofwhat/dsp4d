@@ -115,6 +115,7 @@
 [MMLU-Pro Benchmark Leaderboard (filtered)](https://artificialanalysis.ai/evaluations/mmlu-pro?models=apriel-v1-5-15b-thinker%2Capriel-v1-6-15b-thinker%2Cqwen3-vl-8b-reasoning%2Cdeepseek-r1-qwen3-8b%2Cqwen3-14b-instruct-reasoning%2Cdeepseek-r1-distill-qwen-14b%2Cfalcon-h1r-7b%2Cnvidia-nemotron-nano-12b-v2-vl-reasoning%2Cnvidia-nemotron-nano-9b-v2-reasoning%2Cllama-3-1-nemotron-nano-4b-reasoning%2Cqwen3-4b-instruct-reasoning%2Cqwen3-vl-4b-reasoning%2Cqwen3-8b-instruct-reasoning%2Cdeepseek-r1-distill-llama-8b%2Cjamba-reasoning-3b%2Colmo-3-7b-think%2Cdeepseek-r1-distill-qwen-1-5b%2Cexaone-4-0-1-2b-reasoning%2Cqwen3-1.7b-instruct-reasoning%2Cqwen3-0.6b-instruct-reasoning&model-filters=open-source%2Ctiny-models%2Csmall-models%2Creasoning-models)
 
 Filter: Size Class: Tiny, Small; Open Weights: Open Source; Reasoning: Reasoning; Paramters Count: <=18B
+
 ![MMLU-Pro Benchmark Leaderboard Results](assets/03-Methodology-MMLU-Pro-Benchmark-Leaderboard-Results.png)
 
 This "Gold Standard" example now includes the **Internal Monologue**, which is the hallmark of the Chain of Thought (CoT) approach. It demonstrates how the model "thinks" through the German syntax before committing to the structured fields.
@@ -755,7 +756,8 @@ Output: Analysis_1
 **After Prompt 2 (User):**
 ```
 System Instruction: null
-User Prompt: Document Content + "\n\n--- Previous Analysis ---\n" + Analysis_1 + "\n\nExtract key findings..."
+User Prompt: Document Content + "\n\n--- Previous Analysis ---\n" + Analysis_1 +
+"\n\nExtract key findings..."
 Output: Analysis_2
 ```
 
@@ -803,15 +805,18 @@ gs://cas-gen-ki-golden-answers/
 #### Authentication and Authorization
 
 **Service Account Configuration:**
+
 - Service account: `golden-answers-engine@cas-gen-ki.iam.gserviceaccount.com`
 - Key file: JSON credentials stored locally (not in version control)
 - Environment variable: `GOOGLE_APPLICATION_CREDENTIALS`
 
 **IAM Roles:**
+
 - `roles/aiplatform.user` - Vertex AI API access for Gemini
 - `roles/storage.objectAdmin` - GCS bucket operations (scoped to specific bucket)
 
 **Authentication Flow:**
+
 1. Application loads service account key from environment variable
 2. GoogleAuth library creates authenticated client
 3. Client used for both Vertex AI and Storage API calls
@@ -820,6 +825,7 @@ gs://cas-gen-ki-golden-answers/
 #### Vertex AI Integration
 
 **Model Configuration:**
+
 ```json
 {
   "model": "gemini-2.5-flash",
@@ -833,6 +839,7 @@ gs://cas-gen-ki-golden-answers/
 ```
 
 **API Request Structure:**
+
 ```javascript
 {
   systemInstruction: {
@@ -847,6 +854,7 @@ gs://cas-gen-ki-golden-answers/
 ```
 
 **Response Handling:**
+
 - Extract text from response.candidates[0].content.parts[0].text
 - Monitor finishReason for completion status
 - Check safetyRatings for content filtering
@@ -856,18 +864,21 @@ gs://cas-gen-ki-golden-answers/
 #### Cloud Storage Integration
 
 **Bucket Configuration:**
+
 - Bucket name: `cas-gen-ki-golden-answers`
 - Region: `europe-west6` (Switzerland)
 - Storage class: Standard
 - Access: Private (service account only)
 
 **File Operations:**
+
 - Upload: JSON.stringify → Buffer → GCS file.save()
 - Download: GCS file.download() → Buffer → JSON.parse()
 - List: bucket.getFiles({ prefix: 'folder/' })
 - Delete: file.delete()
 
 **Error Handling:**
+
 - Retry logic for transient failures
 - Fallback to default configuration if config.json unavailable
 - Graceful degradation for missing files
@@ -878,6 +889,7 @@ gs://cas-gen-ki-golden-answers/
 #### Session Management
 
 **Benefits:**
+
 - **Reusability:** Document bases and prompt sets can be reused across sessions
 - **Continuity:** Resume work from any previous point
 - **Organization:** Logical grouping of related work
@@ -885,6 +897,7 @@ gs://cas-gen-ki-golden-answers/
 - **History:** Complete audit trail of all generation runs
 
 **Session Lifecycle:**
+
 1. Created with name and optional resources
 2. Active during configuration and generation
 3. Updated with each generation run
@@ -894,10 +907,12 @@ gs://cas-gen-ki-golden-answers/
 #### Prompt Engineering
 
 **Prompt Types:**
+
 - **System Prompts:** Set AI behavior, role, and constraints
 - **User Prompts:** Provide specific tasks and questions
 
 **Capabilities:**
+
 - Visual drag-and-drop reordering
 - Real-time token estimation
 - Prompt validation
@@ -905,6 +920,7 @@ gs://cas-gen-ki-golden-answers/
 - Load from existing prompt sets
 
 **Best Practices Supported:**
+
 - Chain-of-thought prompting through sequential steps
 - Role-based prompting with system instructions
 - Iterative refinement through multiple runs
@@ -913,11 +929,13 @@ gs://cas-gen-ki-golden-answers/
 #### Document Processing
 
 **Supported Formats:**
+
 - JSON with URL references (Zenodo integration)
 - Folder upload with text files
 - Direct text content embedding
 
 **Processing Features:**
+
 - Batch processing of multiple documents
 - Parallel or sequential execution
 - Progress tracking with real-time updates
@@ -927,6 +945,7 @@ gs://cas-gen-ki-golden-answers/
 #### Result Evaluation
 
 **Rating System:**
+
 - 1-5 star quantitative rating
 - Free-text comment field
 - Human correction/ground truth field
@@ -934,6 +953,7 @@ gs://cas-gen-ki-golden-answers/
 - Persistent storage in session
 
 **Analysis Features:**
+
 - View intermediate prompt results
 - Compare across generation runs
 - Export results for external analysis
@@ -943,17 +963,20 @@ gs://cas-gen-ki-golden-answers/
 #### Token Management
 
 **Estimation:**
+
 - Rough approximation: 1 token $\approx$ 4 characters
 - Real-time calculation during prompt configuration
 - Warning system for approaching limits
 
 **Limits:**
+
 - Input: ~30,000 tokens (Gemini 1.5 Flash)
 - Output: Configurable (default 2,048 tokens)
 - Warnings at 80% of limits
 - Errors when limits exceeded
 
 **Tracking:**
+
 - Per-prompt token counts
 - Per-document cumulative totals
 - Per-generation aggregate statistics
@@ -964,18 +987,21 @@ gs://cas-gen-ki-golden-answers/
 #### Security Measures
 
 **Authentication:**
+
 - Service account with minimal required permissions
 - Key file excluded from version control (.gitignore)
 - Environment-based configuration
 - No hardcoded credentials
 
 **API Security:**
+
 - CORS configuration for allowed origins
 - Rate limiting (60 requests/minute)
 - Input validation on all endpoints
 - Error messages without sensitive data exposure
 
 **Data Protection:**
+
 - Private GCS bucket access
 - Service account-only permissions
 - No public endpoints for data access
@@ -984,6 +1010,7 @@ gs://cas-gen-ki-golden-answers/
 #### Performance Optimizations
 
 **Frontend:**
+
 - Component-level state management
 - Lazy loading of large datasets
 - Debounced user inputs
@@ -991,6 +1018,7 @@ gs://cas-gen-ki-golden-answers/
 - Efficient re-rendering with React keys
 
 **Backend:**
+
 - Asynchronous processing for long-running tasks
 - Progress callbacks for real-time updates
 - In-memory configuration caching
@@ -998,6 +1026,7 @@ gs://cas-gen-ki-golden-answers/
 - Efficient JSON parsing
 
 **API:**
+
 - Rate limiting to prevent abuse
 - Request timeout configuration
 - Batch operations where possible
@@ -1008,18 +1037,21 @@ gs://cas-gen-ki-golden-answers/
 #### Error Handling Strategy
 
 **Frontend:**
+
 - Try-catch blocks around API calls
 - User-friendly error messages
 - Fallback UI states
 - Error boundary components (ready for implementation)
 
 **Backend:**
+
 - Centralized error handler middleware
 - Specific error types (validation, authentication, API)
 - Graceful degradation
 - Partial result preservation
 
 **Cloud Integration:**
+
 - Retry logic for transient failures
 - Fallback configurations
 - Detailed error context
@@ -1028,6 +1060,7 @@ gs://cas-gen-ki-golden-answers/
 #### Logging System
 
 **Console Logging:**
+
 - Request/response details for Gemini API
 - Token usage statistics
 - Processing progress
@@ -1035,11 +1068,13 @@ gs://cas-gen-ki-golden-answers/
 - Performance metrics
 
 **Log Levels:**
+
 - INFO: Normal operations
 - WARN: Approaching limits, fallbacks used
 - ERROR: Failures requiring attention
 
 **Logged Information:**
+
 - API request parameters
 - Token estimates and actuals
 - Processing times

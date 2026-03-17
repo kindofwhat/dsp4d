@@ -240,11 +240,16 @@ const MEDICAL_EXTRACTION_SCHEMA = {
     internal_monologue: {
       type: "object",
       properties: {
-        "1": { type: "string", description: "Summarize creation date and author/source" },
-        "2": { type: "string", description: "Synthesize primary diagnoses and accident context" },
-        "3": { type: "string", description: "Summarize key lab values or clinical vitals" },
-        "4": { type: "string", description: "List existing vs. new medications using keywords" },
-        "5": { type: "string", description: "Summarize required follow-up actions" }
+        "1": { type: "string", description: "Summarize creation date and author/
+        source" },
+        "2": { type: "string", description: "Synthesize primary diagnoses and
+        accident context" },
+        "3": { type: "string", description: "Summarize key lab values or 
+        clinical vitals" },
+        "4": { type: "string", description: "List existing vs. new medications 
+        using keywords" },
+        "5": { type: "string", description: "Summarize required follow-up 
+        actions" }
       },
       required: ["1", "2", "3", "4", "5"]
     },
@@ -255,7 +260,9 @@ const MEDICAL_EXTRACTION_SCHEMA = {
           type: "array", 
           items: { 
             type: "string", 
-            enum: ["Onkologie", "Neurologie", "Psychiatrie", "Kardiologie", "Innere Medizin", "Chirurgie", "Orthopädie", "Ophthalmologie", "Dermatologie"] 
+            enum: ["Onkologie", "Neurologie", "Psychiatrie", "Kardiologie", 
+            "Innere Medizin", "Chirurgie", "Orthopädie", "Ophthalmologie", 
+            "Dermatologie"] 
           } 
         },
         date_and_source: { type: "string" },
@@ -271,7 +278,8 @@ const MEDICAL_EXTRACTION_SCHEMA = {
         },
         follow_up: { type: "string" }
       },
-      required: ["categories", "date_and_source", "diagnosis", "relevant_metrics", "medications", "follow_up"]
+      required: ["categories", "date_and_source", "diagnosis", 
+      "relevant_metrics", "medications", "follow_up"]
     }
   },
   required: ["internal_monologue", "structured_health_record"]
@@ -344,27 +352,44 @@ For Example:
 ```
 ATTRIBUTION NOTICE
 
-- If using Gemma: "Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms".
-- If using Llama 3.1: "Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved".
+- If using Gemma: "Gemma is provided under and subject to the Gemma 
+found at ai.google.dev/gemma/terms".
+- If using Llama 3.1: "Llama 3.1 is licensed under the Llama 3.1 Community License,
+ Copyright © Meta Platforms, Inc. All Rights Reserved".
 
 EULA Compliance Template
 
 Section X: AI Usage and Compliance
-X.1 License Grant and Pass-Down Terms. Licensor grants Customer a limited license to use the Software incorporating [Insert Model Name, e.g., Gemma 2 / Llama 3.1]. This Software is subject to the [Insert Model Terms, e.g., Gemma Terms of Use / Llama 3.1 Community License], which are incorporated herein by reference.
+X.1 License Grant and Pass-Down Terms. Licensor grants Customer a limited license 
+to use the Software incorporating [Insert Model Name, e.g., Gemma 2 / Llama 3.1]. 
+This Software is subject to the [Insert Model Terms, e.g., Gemma Terms of Use / 
+Llama 3.1 Community License], which are incorporated herein by reference.
 
-X.2 Professional Advice Disclaimer. The Software is an automated tool and is NOT a substitute for professional medical, legal, financial, or other licensed advice. Customer agrees that:
-- Output will not be used as authoritative for the unlicensed practice of medicine, law, or financial services.
-- All high-stakes outputs must be reviewed and authorized by a qualified human professional before any action is taken.
+X.2 Professional Advice Disclaimer. The Software is an automated tool and is NOT 
+a substitute for professional medical, legal, financial, or other licensed advice. 
+Customer agrees that:
+- Output will not be used as authoritative for the unlicensed practice of medicine, 
+law, or financial services.
+- All high-stakes outputs must be reviewed and authorized by a qualified human 
+professional before any action is taken.
 
 X.3 Prohibited Use & Safety. Customer shall not use the Software to:
 - Generate or facilitate illegal activities, violence, or terrorism.
 - Engage in harassment, bullying, or unlawful discrimination.
 - Create malicious code, malware, or viruses.
-- Deceive or mislead others, including the creation of disinformation or fake reviews.
+- Deceive or mislead others, including the creation of disinformation or fake 
+reviews.
 
-X.4 Local Deployment and Liability. As the Software is deployed locally on Customer’s private infrastructure, Customer assumes all risk associated with the use and distribution of the Software and its results. Customer shall indemnify and hold harmless [Your Company Name] and the Model Provider (e.g., Google/Meta) from any third-party claims arising out of Customer’s breach of these safety or professional advice policies.
+X.4 Local Deployment and Liability. As the Software is deployed locally on 
+Customer’s private infrastructure, Customer assumes all risk associated with the 
+use and distribution of the Software and its results. Customer shall indemnify and 
+hold harmless [Your Company Name] and the Model Provider (e.g., Google/Meta) from 
+any third-party claims arising out of Customer’s breach of these safety or 
+professional advice policies.
 
-X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate this Agreement immediately and without notice if Customer is found to be in violation of the safety or acceptable use policies mandated by the Model Provider.
+X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate 
+this Agreement immediately and without notice if Customer is found to be in violation
+of the safety or acceptable use policies mandated by the Model Provider.
 ```
 
 
@@ -384,8 +409,7 @@ The experimental infrastructure consists of a dedicated workstation with GPU acc
 
 **Evaluation Framework.** The llm-validator application, implemented in Java 21 with Quarkus, runs as a deployed application in a separate virtual machine on the host system. This framework executes the multi-dimensional evaluation pipeline, applying both statistical metrics and LLM-as-a-Judge assessments to compare model outputs against golden answers.
 
-**Cloud Services.** Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Flash model) and Cloud Storage (bucket: `cas-gen-ki-golden-answers`, region: europe-west6). Authentication is handled via service account `golden-answers-engine@cas-gen-ki.iam.gserviceaccount.com` with IAM roles for Vertex AI and Cloud Storage access.
-
+**Cloud Services.** Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Pro model) and Cloud Storage.
 
 ### Silver Answer App
 
