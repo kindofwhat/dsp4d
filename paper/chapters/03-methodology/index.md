@@ -193,6 +193,94 @@ Once execution is complete, the platform displays the generated answers for each
 
 Beyond the session workflow, the platform includes User Management to control expert access and API Configuration to query sessions and results.
 
+Here is a draft for the new paragraph, written in the academic, structured, and technical tone of the DSP4D paper. It is designed to be placed directly below the **Administrative Modules** paragraph in section 3.3.4. 
+
+***
+
+**Model Output Filtering and API Integration Challenges**
+
+During the integration of State-of-the-Art cloud models, such as Gemini 2.5 Flash and Gemma 3, early empirical testing revealed systematic generation failures. These errors occurred when the models' internal output filters were triggered by the clinical text, resulting in blocked responses and empty outputs. Our initial mitigation strategy involved explicitly configuring the safety settings within the API payload to the lowest restrictive thresholds to accommodate medical terminology:
+
+```javascript
+// Example Vertex AI Safety Settings Configuration
+const safetySettings = [
+  {
+    category: 'HARM_CATEGORY_HARASSMENT',
+    threshold: 'BLOCK_NONE',
+  },
+  {
+    category: 'HARM_CATEGORY_HATE_SPEECH',
+    threshold: 'BLOCK_NONE',
+  },
+  {
+    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+    threshold: 'BLOCK_NONE',
+  },
+  {
+    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+    threshold: 'BLOCK_NONE',
+  },
+];
+```
+
+While this resolved standard safety blocks, we subsequently encountered the `RECITATION` output filter, which blocks content perceived as memorized training data. **Unlike standard safety categories, the `RECITATION` filter cannot be actively directed, managed, or bypassed via API parameters.** To mitigate this intractable issue, we transitioned the backend model to Gemini 2.5 Pro. This architectural shift successfully reduced the `RECITATION` filter blocks to a highly manageable margin of only 2 out of 62 documents. 
+
+To achieve a complete 100% processing rate and fully bypass these residual blocks, a context-setting directive was introduced into the prompt. By explicitly prepending the phrase, "Please analyze this training document:", the model was linguistically instructed to treat the clinical text as a training artifact. This semantic framing successfully relaxed the heuristic strictness of the RECITATION filter, enabling the successful evaluation of all 62 documents without triggering generation failures.
+
+Despite this improvement in content generation, Gemini 2.5 Pro exhibited difficulties in reliably producing structural JSON output according to the schema provided solely in the system prompt. **To guarantee strict format compliance and avoid parsing errors, the expected JSON schema had to be manually injected and enforced directly within the Vertex AI client's configuration**:
+
+```javascript
+/**
+ * BLUEPRINT: Strictly defines the expected JSON structure.
+ * This prevents the model from defaulting to standard clinical schemas.
+ */
+const MEDICAL_EXTRACTION_SCHEMA = {
+  type: "object",
+  properties: {
+    internal_monologue: {
+      type: "object",
+      properties: {
+        "1": { type: "string", description: "Summarize creation date and author/source" },
+        "2": { type: "string", description: "Synthesize primary diagnoses and accident context" },
+        "3": { type: "string", description: "Summarize key lab values or clinical vitals" },
+        "4": { type: "string", description: "List existing vs. new medications using keywords" },
+        "5": { type: "string", description: "Summarize required follow-up actions" }
+      },
+      required: ["1", "2", "3", "4", "5"]
+    },
+    structured_health_record: {
+      type: "object",
+      properties: {
+        categories: { 
+          type: "array", 
+          items: { 
+            type: "string", 
+            enum: ["Onkologie", "Neurologie", "Psychiatrie", "Kardiologie", "Innere Medizin", "Chirurgie", "Orthopädie", "Ophthalmologie", "Dermatologie"] 
+          } 
+        },
+        date_and_source: { type: "string" },
+        diagnosis: { type: "string" },
+        relevant_metrics: { type: "string" },
+        medications: {
+          type: "object",
+          properties: {
+            current: { type: "string" },
+            advised: { type: "string" }
+          },
+          required: ["current", "advised"]
+        },
+        follow_up: { type: "string" }
+      },
+      required: ["categories", "date_and_source", "diagnosis", "relevant_metrics", "medications", "follow_up"]
+    }
+  },
+  required: ["internal_monologue", "structured_health_record"]
+};
+```
+
+**Conclusion:** The implementation of a standardized, OpenAI-compatible API interface provides substantial architectural convenience; however, it cannot solve all idiosyncratic challenges introduced by different models. Achieving robust, production-grade clinical extraction requires continuous, model-specific adaptation to overcome unique constraints—such as immutable safety filters and varying structural compliance capabilities.
+
+
 ## Selecting Smaller Large Language Models (SLM) for the Evaluation
 
 The objective is to identify a set of 5 SLMs that can run locally on consumer-grade hardware while maintaining enough semantic understanding to process (synthetic) clinical texts.
