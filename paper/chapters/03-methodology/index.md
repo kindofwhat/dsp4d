@@ -4,6 +4,8 @@
 
 The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of verified "Golden Answers", this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. The proposed algorithm argues for a shift away from maximalist parameter counts towards targeted efficiency without compromising output fidelity.
 
+The theoretical foundations established in Chapter 2 directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Chapter 2.3: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Chapter 2.4 demonstrates that Chain-of-Thought (CoT) prompting is essential for suppressing hallucinations in complex medical reasoning. These two constraints together make a CoT-based Silver Answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
+
 ## Procedure
 
 TODO CHS kriege die positionierung nicht hin
@@ -208,7 +210,7 @@ To filter the hundreds of available open-source models down to a manageable set,
 **1. Hardware-Aware Parameter Efficiency**
 
 * **Criterion:** Models must have between 7B to 20B parameters that support 4-bit or 8-bit quantization
-* **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16).
+* **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16). Grounded in the observations of the Densing Law by Xiao et al. (Chapter 2.3), we deliberately set the upper limit at under 20B parameters: modern SLMs in this range already achieve the capability density required for medical text extraction tasks, making larger models unnecessary for this scope. Furthermore, a typical Swiss medical practice runs on consumer-grade workstations with a standard GPU offering 8–16 GB of (V)RAM — a hard hardware constraint that makes 4-bit quantization not merely an optimisation but a prerequisite for local deployment.
 For Example: 
     * A 7B model requires ~16GB RAM at FP16 but only 5GB to 6GB at 4-bit quantization
     * A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasible for professional consumer desktops
@@ -231,7 +233,7 @@ For Example:
 **4. Context Window Capacity**
 
 * **Criterion:** Minimum context window of 8k tokens (preferably 32k+ or higher)
-* **Why:** Clinical notes can be lengthy. If a diagnosis or generally a patient report exceeds the model's context window, the model will "forget" early information, leading to missed health information annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass
+* **Why:** Clinical notes can be lengthy. If a diagnosis or generally a patient report exceeds the model's context window, the model will "forget" early information, leading to missed health information annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass. Based on the structural analysis of the GraSCCo corpus in Chapter 3.2, patient document histories regularly exceed 4k tokens; a minimum of 8k tokens is therefore required to process complete records without information loss. This requirement is further supported by the attention mechanism constraints discussed in Chapter 2.4, which show that truncating context directly degrades extraction quality for long-range clinical dependencies.
 * **Selection:** Discard models with <8k context limits
 
 **5. License & Data Sovereignty**
@@ -313,6 +315,11 @@ TODO CHS ich verstehe nicht warum das bild an einem falschen ort eingebettet wir
 ## Evaluation Metrics
 
 The following metrics are used to evaluate LLM outputs, divided into statistical metrics (no LLM call required) and generative metrics (LLM-as-a-Judge). For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
+
+**Rationale for Metric Selection.** Although Chapter 2.1 demonstrates that BLEU and ROUGE are semantically blind — penalising clinically correct paraphrases such as "Myokardinfarkt" vs. "Herzinfarkt" — these metrics are deliberately retained in the evaluation pipeline as a *baseline* for comparability with prior studies in the field. The actual clinical decision-making power rests on our purpose-built DiAG metric, which is theoretically grounded in the evaluation framework developed in Chapter 2. This dual approach ensures both backward compatibility with the existing literature and methodological rigour for the present study. 
+
+Since we are using a json based approach, statistical metrics might become more 
+relevant again for smaller, more strict fields like dates, names and categories.
 
 **Statistical Metrics:**
 
