@@ -151,22 +151,22 @@ This table evaluates techniques based on their ability to extract accurate, stru
 ||**Application to Medical Silver Answers:** "Extract all diagnoses from this text."|
 ||**Pros for Medical Records:** Fast and low token cost. Useful for checking the baseline capability of a model.|
 ||**Cons / Risks:** High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. |
-||**References:** [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+||**References:** [@dairai2024promptguide], [@k2view2024prompttechniques] |
 | Chain-of-Thought (CoT) | **Description:** Instructing the model to generate intermediate reasoning steps.
 ||**Application to Medical Silver Answers:** Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list."|
 ||**Pros for Medical Records:** Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details.|
 ||**Cons / Risks:** Increases token usage. Requires parsing to separate the "thought" from the "silver answer."|
-||**References:** [Chain of Thought Prompting Elicits reasoning (arXiv)](https://arxiv.org/pdf/2201.11903), [Prompt Engineering Guide](https://www.promptingguide.ai/), [Prompt engineering techniques: Top 6 for 2026](https://www.k2view.com/blog/prompt-engineering-techniques/) |
+||**References:** [@wei2022chain], [@dairai2024promptguide], [@k2view2024prompttechniques] |
 | Prompt Chaining | **Description:** Breaking a task into subtasks where output A becomes input B.|
 ||**Application to Medical Silver Answers:** Workflow: 1. Extraction Prompt -> 2. Filtering Prompt -> 3. Formatting Prompt.|
 ||**Pros for Medical Records:** High reliability. Isolates errors. Allows for intermediate transformation (e.g., cleaning citations).|
 ||**Cons / Risks:** Requires building a controller application (state management) between prompts.|
-||**References:** [Prompt Engineering Guide: Prompt Chaining (GitHub)](https://github.com/dair-ai/Prompt-Engineering-Guide/blob/main/notebooks/react.ipynb), [PromptChainer Paper (arXiv)](https://arxiv.org/pdf/2203.06566) |
+||**References:** [@dairai2024promptguide], [@wu2022promptchainer] |
 | Multi-Persona Prompting | **Description:** Simulating a discussion between multiple agents (e.g., Drafter & Reviewer).|
 ||**Application to Medical Silver Answers:** Quality Assurance: Agent A extracts data; Agent B reviews it for missing info; Agent C finalizes.|
 ||**Pros for Medical Records:** Simulates a "four-eyes principle" (peer review), reducing errors through internal debate.|
 ||**Cons / Risks:** High latency and token cost; complex to orchestrate.|
-||**References:** [Exploring Multi-Persona Prompting for Better Outputs](https://www.prompthub.us/blog/exploring-multi-persona-prompting-for-better-outputs) |
+||**References:** [@prompthub2024multipersona] |
 List truncated: [See: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
 
 ### Chain-of-Thought: The Optimal Technique for Generating Silver Answers

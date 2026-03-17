@@ -138,7 +138,11 @@ def main():
         'modersohn2022grascco': {
             'type': 'iospress',
             'id': '60437'
-        }
+        },
+        'kojima2022large': 'https://arxiv.org/pdf/2205.11916.pdf',
+        'wei2022chain': 'https://arxiv.org/pdf/2201.11903.pdf',
+        'moramarco2022human': 'https://aclanthology.org/2022.acl-long.363.pdf',
+        'saha2024advancing': 'https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10637264',
     }
     
     for ref in refs:
