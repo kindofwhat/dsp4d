@@ -10,8 +10,8 @@
 ||**Cons / Risks:** High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. |
 ||**References:** [@dairai2024promptguide], [@k2view2024prompttechniques] |
 | Few-Shot Prompting | **Description:** Providing examples (input-output pairs) within the prompt.
-||**Application to Medical Silver Answers:** "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "Silver Answer" format. (possible after first supervision session)"|
-||**Pros for Medical Records:** Essential for enforcing the specific syntax and brevity required for the Silver Answers.|
+||**Application to Medical Silver Answers:** "Style Guide: You provide 3 examples of GraSCCo raw text and the corresponding perfect "silver answer" format. (possible after first supervision session)"|
+||**Pros for Medical Records:** Essential for enforcing the specific syntax and brevity required for the silver answers.|
 ||**Cons / Risks:** The model may overfit to the examples and ignore the nuance of the new input.|
 ||**References:** [@brown2020language], [@dairai2024promptguide], [@k2view2024prompttechniques] |
 | Chain-of-Thought (CoT) | **Description:** Instructing the model to generate intermediate reasoning steps.
@@ -70,7 +70,7 @@
 ||**Cons / Risks:** Adds complexity; the model might fail to invoke the tool correctly.|
 ||**References:** [@schick2023toolformer] |
 | Active-Prompt | **Description:** Selecting the most uncertain examples for human annotation to teach the model.|
-||**Application to Medical Silver Answers:** Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the Silver Answer.|
+||**Application to Medical Silver Answers:** Identifying GraSCCo texts where the model is "unsure" and asking a doctor to manually create the silver answer.|
 ||**Pros for Medical Records:** Maximizes the value of human expert time (efficient annotation).|
 ||**Cons / Risks:** Requires a human-in-the-loop workflow.|
 ||**References:** [@dairai2024promptguide] |
@@ -87,7 +87,7 @@
 | ReAct (Reasoning + Acting) | **Description:** Interleaving reasoning traces with action execution.|
 ||**Application to Medical Silver Answers:** "Thought: I need to check if this drug interacts with... Action: Search drug database."|
 ||**Pros for Medical Records:** Good for clinical decision support agents.|
-||**Cons / Risks:** Overly complex for the specific task of generating static Silver Answers from text.|
+||**Cons / Risks:** Overly complex for the specific task of generating static silver answers from text.|
 ||**References:** [@yao2023react], [@dairai2024promptguide] |
 | Reflexion | **Description:** An agent reflecting on past mistakes to improve future responses.|
 ||**Application to Medical Silver Answers:** The model generates a summary, checks it against rules, critiques itself ("I missed the date"), and rewrites.|
@@ -142,7 +142,7 @@ Below is the processing of the same kardiologische report, but utilizing the **K
 
 ---
 
-### Output: Golden Answer (CoT)
+### Output: Silver Answer (CoT)
 
 ### Klinische Analyse (Internal Monologue)
 
@@ -288,9 +288,9 @@ A custom metric was developed to assess how well a model's JSON output conforms 
 
 The algorithm proceeds in four steps:
 
-1. **JSON extraction and flattening.** Both the model output and the Silver Answer are preprocessed: markdown code fences are stripped, and the JSON content is extracted by bracket-matching. The resulting JSON objects are then recursively flattened into leaf-path maps using dot notation for objects and bracket notation for arrays (e.g., `structured_health_record.medications.current` or `structured_health_record.categories[0]`). Configurable paths (e.g., `internal_monologue`) can be excluded from comparison.
+1. **JSON extraction and flattening.** Both the model output and the silver answer are preprocessed: markdown code fences are stripped, and the JSON content is extracted by bracket-matching. The resulting JSON objects are then recursively flattened into leaf-path maps using dot notation for objects and bracket notation for arrays (e.g., `structured_health_record.medications.current` or `structured_health_record.categories[0]`). Configurable paths (e.g., `internal_monologue`) can be excluded from comparison.
 
-2. **Array alignment.** JSON arrays pose a challenge because the model may output the same elements in a different order. The algorithm identifies array base paths, groups their children by index, and performs greedy best-match alignment: for each element in the Silver Answer's array, the response element with the highest average Levenshtein similarity across shared sub-fields is selected as the match.
+2. **Array alignment.** JSON arrays pose a challenge because the model may output the same elements in a different order. The algorithm identifies array base paths, groups their children by index, and performs greedy best-match alignment: for each element in the silver answer's array, the response element with the highest average Levenshtein similarity across shared sub-fields is selected as the match.
 
 3. **Leaf-by-leaf comparison.** For each aligned path, the leaf values are compared using normalised Levenshtein similarity ($1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$). Missing fields in the response score 0.0; matching `null` values on both sides score 1.0.
 
@@ -374,7 +374,7 @@ The specific DAG graph used for the `dag_medical_extraction_quality` metric eval
    - If valid JSON: a non-binary judgement rates schema compliance as *fully compliant* (1.0), *minor issues* (0.7), or *significant issues* (0.3).
    - If invalid JSON: a non-binary judgement classifies the output as *recoverable* (0.15) or *garbage* (0.0).
 
-2. **Factual accuracy** (content branch): A task node performs field-by-field comparison against the Silver Answer, marking each field as CORRECT, PARTIALLY_CORRECT, MISSING, or HALLUCINATED. A non-binary judgement then rates overall accuracy as *highly accurate* (1.0), *mostly accurate* (0.75), *partially accurate* (0.4), or *inaccurate* (0.1). Hallucinations are penalised most severely.
+2. **Factual accuracy** (content branch): A task node performs field-by-field comparison against the silver answer, marking each field as CORRECT, PARTIALLY_CORRECT, MISSING, or HALLUCINATED. A non-binary judgement then rates overall accuracy as *highly accurate* (1.0), *mostly accurate* (0.75), *partially accurate* (0.4), or *inaccurate* (0.1). Hallucinations are penalised most severely.
 
 3. **Completeness** (coverage branch): A task node counts populated vs. expected fields. A non-binary judgement rates completeness as *complete* (1.0), *mostly complete* (0.7), or *incomplete* (0.3).
 
@@ -446,7 +446,7 @@ private DAGExecutionResult executeParallelBranches(
 
 ### Executive Summary
 
-The Silver Answers App is a cloud-based web application designed to automate the generation and evaluation of AI-powered document analyses using Google's Gemini large language model. The system implements a session-based architecture that enables researchers to systematically process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built on a modern full-stack architecture, the application integrates Google Cloud Platform services for AI processing and persistent storage, providing a scalable solution for document analysis research.
+The silver answers app is a cloud-based web application designed to automate the generation and evaluation of AI-powered document analyses using Google's Gemini large language model. The system implements a session-based architecture that enables researchers to systematically process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built on a modern full-stack architecture, the application integrates Google Cloud Platform services for AI processing and persistent storage, providing a scalable solution for document analysis research.
 
 ### System Architecture
 

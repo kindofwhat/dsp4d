@@ -2,9 +2,9 @@
 
 **Development of an Algorithmic Framework for Resource-Efficient Local LLM Selection**
 
-The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of verified "Golden Answers", this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. The proposed algorithm argues for a shift away from maximalist parameter counts towards targeted efficiency without compromising output fidelity.
+The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of verified "silver answer", this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. The proposed algorithm argues for a shift away from maximalist parameter counts towards targeted efficiency without compromising output fidelity.
 
-The theoretical foundations established in Chapter 2 directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Chapter 2.3: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Chapter 2.4 demonstrates that Chain-of-Thought (CoT) prompting is essential for suppressing hallucinations in complex medical reasoning. These two constraints together make a CoT-based Silver Answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
+The theoretical foundations established in Chapter 2 directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Chapter 2.3: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Chapter 2.4 demonstrates that Chain-of-Thought (CoT) prompting is essential for suppressing hallucinations in complex medical reasoning. These two constraints together make a CoT-based silver answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
 
 ## Procedure
 
@@ -13,13 +13,13 @@ The theoretical foundations established in Chapter 2 directly dictate the struct
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
 ### Phase I: Dataset Curation and Establishment of Ground Truth
-The initial phase focuses on the identification and preprocessing of a stable text corpus. This corpus serves as the foundational bedrock for deriving "Golden Answers" (Ground Truth). Establishing this baseline is critical, as it functions not only for the initial assessment of the chosen State-of-the-Art (SOTA) LLM but also acts as the immutable comparative benchmark during the subsequent model evaluation phases.
+The initial phase focuses on the identification and preprocessing of a stable text corpus. This corpus serves as the foundational bedrock for deriving "silver answer" (Ground Truth). Establishing this baseline is critical, as it functions not only for the initial assessment of the chosen State-of-the-Art (SOTA) LLM but also acts as the immutable comparative benchmark during the subsequent model evaluation phases.
 
 ### Phase II: Automated Generation and Supervised Validation of Reference Solutions
-In this step, a selected high-performance LLM is utilised to generate high-fidelity "Golden Answers". To ensure domain-specific accuracy, these outputs undergo a supervised review and validation process by a qualified subject matter expert (General Practitioner). Concurrently, various prompt engineering techniques are evaluated, with sessions systematically logged. This data retention is essential to argue whether complex prompting strategies yield comparable performance enhancements when applied to significantly smaller models later in the process.
+In this step, a selected high-performance LLM is utilised to generate high-fidelity "silver answer". To ensure domain-specific accuracy, these outputs undergo a supervised review and validation process by a qualified subject matter expert (General Practitioner). Concurrently, various prompt engineering techniques are evaluated, with sessions systematically logged. This data retention is essential to argue whether complex prompting strategies yield comparable performance enhancements when applied to significantly smaller models later in the process.
 
 ### Phase III: Technical Implementation of the Multi-Model Evaluation Pipeline
-A robust evaluation framework is engineered to assess a diverse array of LLMs, varying in architecture, quantisation, and parameter size. The system is designed to task these models with reproducing the "Golden Answers" derived from the corpus in Phase I. Consistent with Phase II, the previously identified prompt engineering strategies are re-evaluated within this constrained environment. The pipeline captures comprehensive performance metrics, generating the necessary empirical data input for the final analysis.
+A robust evaluation framework is engineered to assess a diverse array of LLMs, varying in architecture, quantisation, and parameter size. The system is designed to task these models with reproducing the "silver answer" derived from the corpus in Phase I. Consistent with Phase II, the previously identified prompt engineering strategies are re-evaluated within this constrained environment. The pipeline captures comprehensive performance metrics, generating the necessary empirical data input for the final analysis.
 
 ### Phase IV: Statistical Analysis and Optimal Model Identification
 The concluding phase involves a multi-dimensional assessment of the generated data to isolate the optimal model. This includes the application of context-aware content metrics as well as an "LLM-as-a-Judge" paradigm to comparatively evaluate the semantic quality of the outputs. By synthesising these qualitative and quantitative insights, the study identifies the specific LLM that strictly adheres to the pre-defined requirements, thereby validating the feasibility of high-quality, local, and resource-efficient generative AI.
@@ -37,9 +37,9 @@ clinical actions based on German-language clinical reports.
 
 The task we give the models is to update a patients health record (HBA) based on supplied clinical report. 
 
-## Golden Answer Generation
+## Silver Answer Generation
 
-Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses undergoes evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Answers) additionally suitable for benchmarking smaller models.
+Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "silver answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses undergoes evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (golden answers) additionally suitable for benchmarking smaller models.
 
 ### Preparation Work
 
@@ -83,10 +83,10 @@ To minimize "hallucinations" and ensure clinical reliability, the prompt instruc
 
 ### Selection of Prompting Technique: Chain-of-Thought (CoT)
 
-To generate these Silver Answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
+To generate these silver answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
 * Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
 * Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
-* Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
+* Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the thought process from the final "silver answer" ensuring that the final structured data strictly complies with the required JSON schema and is not corrupted by the model's intermediate reasoning text.
 
 [See: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
 
@@ -154,14 +154,14 @@ Source Text:
 To facilitate the seamless generation and validation of these answers, we developed a dedicated web application. This platform serves three primary functions:
 
 * **Accessibility:** It allows researchers and medical experts to access the data and provide feedback from any location at any time.
-* **Centralized Storage:** It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
+* **Centralized Storage:** It records both the raw LLM outputs (silver answers) and the subsequent expert feedback/corrections.
 * **Data Pipeline Integration:** The application is designed to automatically export these validated results into the specific input format required by our evaluation framework, ensuring a smooth transition from annotation to model benchmarking.
 
 The platform consists of the following components:
 
 **Session Framework**
 
-The core of the platform is organized into Sessions. A Session acts as the functional container for processing input documents into "Silver Answers" and managing the subsequent expert annotation process.
+The core of the platform is organized into Sessions. A Session acts as the functional container for processing input documents into "silver answers" and managing the subsequent expert annotation process.
 
 **Input Documents**
 
@@ -180,7 +180,7 @@ To ensure clinical accuracy, users can fine-tune the following model parameters:
 
 This module provides real-time visibility into the generation process. It tracks Execution Status and critical performance metrics, including:
 * Token Consumption: Monitoring input and output volume.
-* Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "Silver Answers".
+* Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "silver answers".
 
 **Results & Annotation**
 
@@ -192,10 +192,6 @@ Once execution is complete, the platform displays the generated answers for each
 **Administrative Modules**
 
 Beyond the session workflow, the platform includes User Management to control expert access and API Configuration to query sessions and results.
-
-Here is a draft for the new paragraph, written in the academic, structured, and technical tone of the DSP4D paper. It is designed to be placed directly below the **Administrative Modules** paragraph in section 3.3.4. 
-
-***
 
 **Model Output Filtering and API Integration Challenges**
 
@@ -295,7 +291,7 @@ The objective is to identify a set of 5 SLMs that can run locally on consumer-gr
 
 While a comprehensive understanding of general-purpose context may be disregarded, it important that the models demonstrate a robust understanding of clinical context and the ability to perform precise information extraction. Furthermore, our selection criteria for SLMs are not strictly limited to models with specialized medical pre-training. Rather, we aim to investigate the inherent suitability and performance of general-purpose models within this specialized domain.
 
-Because we are evaluating SLMs answers against "Silver/Golden Answers" derived from a larger model (Gemini) and human verification, the selected SLMs must be capable of strict instruction following to ensure their outputs can be parsed and scored by our custom evaluation framework. The selection procedure prioritizes models that show "emergent" reasoning capabilities usually reserved for larger models, while remaining compressible enough to fit in local (V)RAM.  [See: Selection of Prompting Technique: Chain-of-Thought](#selection-of-prompting-technique-chain-of-thought-cot)
+Because we are evaluating SLMs answers against "silver answers" derived from a larger model (Gemini) and human verification, the selected SLMs must be capable of strict instruction following to ensure their outputs can be parsed and scored by our custom evaluation framework. The selection procedure prioritizes models that show "emergent" reasoning capabilities usually reserved for larger models, while remaining compressible enough to fit in local (V)RAM.  [See: Selection of Prompting Technique: Chain-of-Thought](#selection-of-prompting-technique-chain-of-thought-cot)
 
 ### Procedure: Selection Criteria for 'suitable' Clinical SLMs
 
@@ -321,7 +317,7 @@ For Example:
 **3. Instruction Following & Output Structure**
 
 * **Criterion:** Select "Instruct" or "Chat" rather than base models
-* **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine" not an assistant. Base trained models lack intent recognition.
+* **Why:** We compare SLM output against silver answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine" not an assistant. Base trained models lack intent recognition.
 * **Selection:** Choose the "Instruct" or "Chat" variants
 
 **4. Context Window Capacity**
@@ -397,28 +393,24 @@ of the safety or acceptable use policies mandated by the Model Provider.
 
 ### Server and Application Setup
 
-The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for golden answer generation.
+The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for silver answer generation.
 
 **Hardware Configuration.** The system is built on an AMD Ryzen Threadripper Pro 9955WX with 128GB DDR5 RAM (5600 MHz) and an ASUS PRO WS WRX90E-SAGE SE mainboard. For GPU acceleration, a Radeon AI PRO R9700 AI TOP with 32GB GDDR6 memory provides a cost-effective alternative to NVIDIA solutions. The host system runs Fedora Server 42, with a dedicated Fedora Server 42 VM serving as the Docker host with GPU passthrough.
 
 **LLM Inference Stack.** Local model inference is provided through Ollama (image: `ollama/ollama:rocm`) running in a Docker container with ROCm support for AMD GPU acceleration. The ROCm software stack is configured with `HSA_OVERRIDE_GFX_VERSION=12.0.1` to ensure compatibility with the Radeon AI PRO R9700. The Ollama service exposes its API on port 11434 and stores model data in a persistent volume at `/mnt/data/ollama-data`.
 
-**User Interface.** Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based frontend for model interaction, accessible at https://ai.bniweb.ch and secured via Cloudflare. The interface connects to the Ollama backend and exposes its service on port 3030 (mapped to internal port 8080).
+**Cloud Services.** Google Cloud Platform provides the infrastructure for silver answer generation and state-of-the-art models for the LLM as a judge metrics through Vertex AI (Gemini 2.5 Pro model).
 
-**Golden Answer Generation Platform.** The Silver/Golden Answers web application runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
+**User and REST Service Interface.** Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based frontend for model interaction, accessible at https://ai.bniweb.ch and secured via Cloudflare. The interface connects to the Ollama backend and exposes its service on port 3030 (mapped to internal port 8080).
 
-**Evaluation Framework.** The llm-validator application, implemented in Java 21 with Quarkus, runs as a deployed application in a separate virtual machine on the host system. This framework executes the multi-dimensional evaluation pipeline, applying both statistical metrics and LLM-as-a-Judge assessments to compare model outputs against golden answers.
-
-**Cloud Services.** Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Pro model) and Cloud Storage.
-
-### Silver Answer App
-
-The Silver Answers App is a cloud-based web application that automates AI-powered document analysis using Google's Gemini large language model. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built with React and Node.js, it integrates Google Cloud Platform services for AI processing and persistent storage.
+**Silver Answer Generation Platform.** As the first part of our evaluation pipline we built a custom silver answers web application, that runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`silver-answers-network`) with persistent volumes for database and upload storage. The silver answers app automates AI-powered document analysis using Google's Gemini 2.5 Pro. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches.
 
 ![Silver Answers App Interface](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
 [See Appendix: Silver Answers App for full description](#appendix-silver-answers)
 
+
+**Evaluation Framework.** As the second part of our evaluation pipeline, we built a custom llm-validator application, implemented in Java 21 with Quarkus, that runs as a deployed application in a separate virtual machine on the host system. This framework executes the multi-dimensional evaluation pipeline, applying both statistical metrics and LLM-as-a-Judge assessments to compare model outputs against silver answer.
 
 ## Evaluation Metrics
 
@@ -440,12 +432,12 @@ relevant again for smaller, more strict fields like dates, names and categories.
 
 **Generative Metrics (LLM-as-a-Judge):**
 
-- **Medical Field Comparision**: An LLM evaluates the factual correctness of the generated output against the golden answer on a scale from 0 to 1. It is defined as one shot as close as possible to the DAG metric with the goal tom make them comparable.
+- **Medical Field Comparision**: An LLM evaluates the factual correctness of the generated output against the silver answer on a scale from 0 to 1. It is defined as one shot as close as possible to the DAG metric with the goal tom make them comparable.
 - **Medical Semantic Field Comparision**: A multi-step, graph-based evaluation (Directed Acyclic Graph) that assesses format validity, factual accuracy, completeness, and medical terminology in separate steps, aggregating them into an overall score.
 
 ### Test Setup
 
-![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against golden answers.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
+![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against silver answer.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
 
 
 #### llm-validator
@@ -454,17 +446,17 @@ To facilitate the systematic evaluation described in Phase III and IV, a purpose
 
 **Technology Choice.** The framework is implemented in Java 21 using the Quarkus application framework, with LangChain4j for LLM integration and an Angular-based web interface for result inspection. The deliberate choice of a JVM-based stack over the more prevalent Python ecosystem in the LLM domain is motivated by the project's alignment with healthcare IT environments: Java remains the dominant technology in enterprise and clinical information systems in Switzerland and the DACH region. By building the evaluation tooling on this stack, the resulting artefact is not only a research instrument but also a reusable component that can be integrated into existing institutional infrastructure without introducing foreign runtime dependencies.
 
-**Evaluation Pipeline.** The core contribution of the tool lies in its multi-dimensional evaluation pipeline. Test cases — each comprising a clinical query, an optional system prompt, and a golden answer — are organised into *Test Runs* and executed in batch against one or more models. The framework then applies two categories of evaluation metrics:
+**Evaluation Pipeline.** The core contribution of the tool lies in its multi-dimensional evaluation pipeline. Test cases — each comprising a clinical query, an optional system prompt, and a silver answer — are organised into *Test Runs* and executed in batch against one or more models. The framework then applies two categories of evaluation metrics:
 
 - **Statistical metrics** (no LLM required): Token-level F1 score, Levenshtein similarity, and embedding-based semantic similarity provide quantitative baselines for output comparison.
-- *LLM-as-a-Judge metrics** (): both a "simple" one shot and a more sophisticated DAG metric are calculated.
+- **LLM-as-a-Judge metrics** (TODO CHS: Was woltest du in der Klammer ergänzen?): both a "simple" one shot and a more sophisticated DAG metric are calculated.
 
 
 ![llm-validator Interface](../../assets/sceen_llm-validator.png){#fig:llm-validator width=75%}
 
 #### JSON Structural Similarity
 
-A custom metric was developed to assess how well a model's JSON output conforms to the expected schema. The algorithm flattens both the model output and the Silver Answer into leaf-path maps, aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. For a detailed description see [Appendix: JSON Structural Similarity Algorithm](#appendix-json-sim).
+A custom metric was developed to assess how well a model's JSON output conforms to the expected schema. The algorithm flattens both the model output and the silver answer into leaf-path maps, aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. For a detailed description see [Appendix: JSON Structural Similarity Algorithm](#appendix-json-sim).
 
 #### DAG-Based Medical Extraction Quality
 

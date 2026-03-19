@@ -22,9 +22,9 @@ Eleven models were evaluated: two large cloud models (Gemini 2.5 Pro via Vertex 
 
 The evaluation framework applied eight metrics per interaction, categorised into three groups:
 
-- **Statistical metrics** (deterministic, no model required): BLEU, ROUGE, Levenshtein similarity, Token F1, and JSON similarity. These measure lexical overlap and structural conformance between the model output and the Silver Answer.
-- **Embedding-based metric** (requires an embedding model, but no generative LLM): Semantic similarity, computed via cosine distance on text-embedding-3-small vectors. This metric captures whether the output conveys the same meaning as the Silver Answer, independent of exact wording.
-- **LLM-as-a-Judge metrics** (require a generative LLM as evaluator): DAG medical semantic field extraction and LLM-Judge medical field comparison. These employ GPT-4o-mini to assess the clinical quality and field-level correctness of the extracted content against the Silver Answer.
+- **Statistical metrics** (deterministic, no model required): BLEU, ROUGE, Levenshtein similarity, Token F1, and JSON similarity. These measure lexical overlap and structural conformance between the model output and the silver answer.
+- **Embedding-based metric** (requires an embedding model, but no generative LLM): Semantic similarity, computed via cosine distance on text-embedding-3-small vectors. This metric captures whether the output conveys the same meaning as the silver answer, independent of exact wording.
+- **LLM-as-a-Judge metrics** (require a generative LLM as evaluator): DAG medical semantic field extraction and LLM-Judge medical field comparison. These employ GPT-4o-mini to assess the clinical quality and field-level correctness of the extracted content against the ailver answer.
 
 ## Impact of LLM Size
 
