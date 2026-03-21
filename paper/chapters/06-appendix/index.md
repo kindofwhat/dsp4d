@@ -1250,3 +1250,40 @@ npm start
 - Horizontal scaling with load balancer
 - CDN for static assets
 - Serverless functions for processing
+
+
+## Appendix: G-Eval Investigation {#appendix-geval}
+
+G-Eval [@liu2023geval] uses probability-weighted scoring: rather than taking the LLM's generated score at face value, the token log-probabilities of the score tokens (e.g. "1" through "5") are extracted and a weighted average is computed. This approach significantly reduces the known scoring bias of LLMs.
+
+![G-Eval algorithm: CoT evaluation steps are generated once and cached, then applied per test case with probability-weighted scoring via logprobs or multi-sample fallback.](../../assets/03-GEval-Algorithm.png){#fig:geval-algorithm width=75%}
+
+### The Logprobs Compatibility Problem
+
+The `logprobs` feature that enables this weighted scoring is not uniformly supported across LLM providers. The following table summarises the compatibility landscape.
+
+| Provider | Logprobs | Notes |
+|----------|----------|-------|
+| OpenAI (standard models) | Yes | gpt-4o, gpt-4.1-mini etc. via `/v1/chat/completions` |
+| OpenAI (reasoning models) | **No** | o-series, gpt-5-mini — `logprobs` not supported, `temperature` fixed at 1.0 |
+| vLLM (self-hosted) | Yes | Any HuggingFace model; logprobs reflect raw model output before post-processing |
+| Together.ai | Yes | Open-weight models via OpenAI-compatible API |
+| Ollama | **No** | Logprobs only on native `/api/generate`, not on OpenAI-compatible `/v1/chat/completions` |
+| LM Studio | **No** | Accepts `top_logprobs` on `/v1/responses` (since v0.3.26, Jan 2026) but returns empty arrays in practice |
+| llama.cpp server | **No** | Returns `null` for logprobs on `/v1/chat/completions` |
+
+: Logprobs compatibility by LLM provider (as of February 2026) {#tab:logprobs-compat}
+
+Particularly problematic is the incompatibility with reasoning models (OpenAI o-series, gpt-5-mini, gpt-5-nano). These models employ an internal reasoning phase that consumes tokens from the `max_completion_tokens` budget before any visible output is produced. For a task that merely requires a single integer score, reasoning models are architecturally unsuitable.
+
+This problem also affects existing reference implementations. DeepEval, the most widely used Python implementation of G-Eval, works around the issue with a hardcoded list of reasoning models for which it falls back to plain JSON extraction without probability weighting — which de facto is no longer G-Eval but a simple LLM-as-a-Judge approach.
+
+### Fallback Strategy
+
+For providers without logprobs support, the G-Eval paper defines an alternative method: *multi-sample estimation* with $n=20$ independent calls at `temperature=1.0`, where each response is parsed for an integer score and the results are averaged [@liu2023geval]. This procedure approximates the probability distribution through sampling — albeit at significantly higher cost (factor 20). Practically this turned out to be problematic since this led to rejected API calls (Vertex AI) or unacceptable performance (local LM Studio).
+
+A promising alternative for local execution is vLLM, a high-throughput self-hosted inference engine that provides full logprobs support on its OpenAI-compatible API for any HuggingFace model. Due to time constraints, vLLM was not integrated into the evaluation pipeline.
+
+### Consequence for Judge Model Selection
+
+The choice of judge model for G-Eval evaluation is therefore constrained: either a non-reasoning cloud model with logprobs support is used (e.g. gpt-4o-mini), a self-hosted vLLM instance serves as judge, or the cost-intensive multi-sample fallback is required. For this study, an auto-detection strategy is implemented that first attempts the logprobs path and automatically falls back to multi-sample upon failure — enabling both cloud APIs and local models to serve as judges. In practice, the evaluation relies primarily on direct LLM-as-a-Judge scoring via the DAG metric.

@@ -8,23 +8,24 @@ The theoretical foundations established in Chapter 2 directly dictate the struct
 
 ## Procedure
 
-![four-phase methodological approach](../../assets/03-Methodology-Overview.png)
+![Four-phase methodological approach. Source: Authors.](../../assets/03-Methodology-Overview.png){#fig:methodology-overview}
 
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
 ### Phase I: Dataset Curation and Establishment of Ground Truth
-The initial phase focuses on the identification and preprocessing of a stable text corpus. This corpus serves as the foundational bedrock for deriving "Golden Answers" (Ground Truth). Establishing this baseline is critical, as it functions not only for the initial assessment of the chosen State-of-the-Art (SOTA) LLM but also acts as the immutable comparative benchmark during the subsequent model evaluation phases.
+The 62 clinical reports from the GraSCCo corpus are selected, categorised by medical specialty, and preprocessed into a standardised input format. The researchers define the target extraction schema (a structured JSON record with six clinical fields) in collaboration with a General Practitioner (GP). This schema serves as the immutable benchmark structure for all subsequent phases.
 
 ### Phase II: Automated Generation and Supervised Validation of Reference Solutions
-In this step, a selected high-performance LLM is utilised to generate high-fidelity "Golden Answers". To ensure domain-specific accuracy, these outputs undergo a supervised review and validation process by a qualified subject matter expert (General Practitioner). Concurrently, various prompt engineering techniques are evaluated, with sessions systematically logged. This data retention is essential to argue whether complex prompting strategies yield comparable performance enhancements when applied to significantly smaller models later in the process.
+Using the *Silver Answers App*, a SOTA model (Gemini 2.5 Pro) generates structured extractions for all 62 documents via Chain-of-Thought prompting. The GP reviews a subset of these outputs, correcting hallucinations and omissions to produce validated reference answers. The prompt engineering sessions are logged to enable comparison of prompting strategies across model sizes in Phase III.
 
 ### Phase III: Technical Implementation of the Multi-Model Evaluation Pipeline
-A robust evaluation framework is engineered to assess a diverse array of LLMs, varying in architecture, quantisation, and parameter size. The system is designed to task these models with reproducing the "Golden Answers" derived from the corpus in Phase I. Consistent with Phase II, the previously identified prompt engineering strategies are re-evaluated within this constrained environment. The pipeline captures comprehensive performance metrics, generating the necessary empirical data input for the final analysis.
+This pipeline is implemented as *llm-validator*, a purpose-built evaluation framework described in Section 3.6. The framework executes each of the 11 candidate models against all 62 test cases in a Zero-Shot configuration. Each model receives the identical system prompt and clinical input. The framework captures eight evaluation metrics per interaction — five statistical, one embedding-based, and two LLM-as-a-Judge — producing the empirical dataset for analysis.
 
 ### Phase IV: Statistical Analysis and Optimal Model Identification
-The concluding phase involves a multi-dimensional assessment of the generated data to isolate the optimal model. This includes the application of context-aware content metrics as well as an "LLM-as-a-Judge" paradigm to comparatively evaluate the semantic quality of the outputs. By synthesising these qualitative and quantitative insights, the study identifies the specific LLM that strictly adheres to the pre-defined requirements, thereby validating the feasibility of high-quality, local, and resource-efficient generative AI.
+The evaluation data is aggregated into composite scores per model, combining statistical, embedding-based, and LLM-as-a-Judge metrics. Cross-metric correlation analysis identifies which metrics capture independent quality dimensions. The results are interpreted against the research questions to determine the minimum viable model size for clinical deployment.
 
- 
+**Self-Built Components.** Three purpose-built tools were developed to implement this pipeline: (1) The *Silver Answers App* (Node.js/React, cloud-based) facilitates Phase I–II by generating and annotating reference answers via Gemini 2.5 Pro (Section 3.5). (2) The *llm-validator* (Java 21/Quarkus, locally deployed) implements the evaluation pipeline for Phase III–IV, orchestrating batch execution across multiple models and applying both statistical and LLM-as-a-Judge metrics (Section 3.6.2). (3) Two *custom evaluation metrics* — JSON Structural Similarity and the DAG-based medical extraction quality metric — were developed specifically for this study to capture structured extraction quality that standard NLP metrics cannot assess (Sections 3.6.2–3.6.3). No existing evaluation framework (e.g. RAGAS, DeepEval) was used; the entire pipeline was implemented from scratch to ensure full control over the evaluation process and compatibility with both cloud and local LLM providers.
+
 ## Data Source: GraSCCo
 
 Instead of generic document types, this research utilizes the **Graz Synthetic Clinical text Corpus (GraSCCo)** [@GraSCCo_PII_V2_2025; @modersohn2022grascco]. 
@@ -35,11 +36,16 @@ patient privacy.
 The corpus provides a diverse set of clinical scenarios, which we use to evaluate the models' ability to classify document intent and generate appropriate 
 clinical actions based on German-language clinical reports.
 
-The task we give the models is to update a patients health record (HBA) based on supplied clinical report. 
+The task we give the models is to update a patients health record (HBA) based on supplied clinical report. [Appendix: Gold Standard Example](#appendix-gold-standard) shows a representative GraSCCo clinical report alongside its CoT-extracted structured output.
 
 ## Golden Answer Generation
 
-Due to the lack of a specialized medical background, we use a State-of-the-Art (SOTA) Large Language Model (LLM) to generate initial "Silver Answers". These serve as preliminary structured outputs derived from the GraSCCo medical corpus. To ensure the high quality and clinical validity of these answers, a subset of the LLM-generated responses undergoes evaluation by one or more medical experts. This human-in-the-loop verification allows us to refine the outputs into a "Gold Standard" (Golden Answers) additionally suitable for benchmarking smaller models.
+This study distinguishes two tiers of reference answers:
+
+- **Silver Answer:** A structured JSON extraction generated by a SOTA LLM (Gemini 2.5 Pro) using Chain-of-Thought prompting. Silver Answers are produced automatically for all 62 documents and serve as the primary evaluation benchmark.
+- **Golden Answer:** A Silver Answer that has been reviewed and corrected by a medical expert (GP). Golden Answers represent the validated ground truth but are available only for a subset of documents due to expert time constraints.
+
+The use of Silver Answers as the primary benchmark is a pragmatic decision: manually authoring 62 structured extractions with the required JSON schema would demand significant expert time and would itself introduce annotator variability. The validity of this approach is discussed in Chapter 5.
 
 ### Preparation Work
 
@@ -102,7 +108,9 @@ While techniques like Self-Consistency or Multi-Persona Prompting offer higher r
 
 ### System Prompt: Clinical Data Extraction (CoT)
 
-In a medical context, this is particularly valuable because it forces the LLM to identify the evidence in the text before committing to a category or a medication status. This reduces "lazy" extractions where a model might miss a nuance (like a medication being discontinued).
+The system prompt is formulated in English while input documents are German. This reflects standard LLM practice: instruction-tuned models typically achieve better instruction adherence with English-language system prompts, while the output constraint (German content values, see schema below) ensures extracted medical content remains in the source language.
+
+In a medical context, the CoT structure is particularly valuable because it forces the LLM to identify the evidence in the text before committing to a category or a medication status. This reduces "lazy" extractions where a model might miss a nuance (like a medication being discontinued).
 
 **Used prompt:**
 
@@ -192,10 +200,6 @@ Once execution is complete, the platform displays the generated answers for each
 **Administrative Modules**
 
 Beyond the session workflow, the platform includes User Management to control expert access and API Configuration to query sessions and results.
-
-Here is a draft for the new paragraph, written in the academic, structured, and technical tone of the DSP4D paper. It is designed to be placed directly below the **Administrative Modules** paragraph in section 3.3.4. 
-
-***
 
 **Model Output Filtering and API Integration Challenges**
 
@@ -347,50 +351,7 @@ For Example:
 | Llama-3-8B-Instruct | Instruct | 8k | |
 | Granite-3.3-2B | Instruct | 128k | Apache 2.0 | 2 | Additional to have a really small one |
 
-**If we want to use models under Llama 3.1, Gemma or Qwen license we need to integrate following NOTICE text:**
-
-```
-ATTRIBUTION NOTICE
-
-- If using Gemma: "Gemma is provided under and subject to the Gemma 
-found at ai.google.dev/gemma/terms".
-- If using Llama 3.1: "Llama 3.1 is licensed under the Llama 3.1 Community License,
- Copyright © Meta Platforms, Inc. All Rights Reserved".
-
-EULA Compliance Template
-
-Section X: AI Usage and Compliance
-X.1 License Grant and Pass-Down Terms. Licensor grants Customer a limited license 
-to use the Software incorporating [Insert Model Name, e.g., Gemma 2 / Llama 3.1]. 
-This Software is subject to the [Insert Model Terms, e.g., Gemma Terms of Use / 
-Llama 3.1 Community License], which are incorporated herein by reference.
-
-X.2 Professional Advice Disclaimer. The Software is an automated tool and is NOT 
-a substitute for professional medical, legal, financial, or other licensed advice. 
-Customer agrees that:
-- Output will not be used as authoritative for the unlicensed practice of medicine, 
-law, or financial services.
-- All high-stakes outputs must be reviewed and authorized by a qualified human 
-professional before any action is taken.
-
-X.3 Prohibited Use & Safety. Customer shall not use the Software to:
-- Generate or facilitate illegal activities, violence, or terrorism.
-- Engage in harassment, bullying, or unlawful discrimination.
-- Create malicious code, malware, or viruses.
-- Deceive or mislead others, including the creation of disinformation or fake 
-reviews.
-
-X.4 Local Deployment and Liability. As the Software is deployed locally on 
-Customer’s private infrastructure, Customer assumes all risk associated with the 
-use and distribution of the Software and its results. Customer shall indemnify and 
-hold harmless [Your Company Name] and the Model Provider (e.g., Google/Meta) from 
-any third-party claims arising out of Customer’s breach of these safety or 
-professional advice policies.
-
-X.5 Termination for Misuse. [Your Company Name] reserves the right to terminate 
-this Agreement immediately and without notice if Customer is found to be in violation
-of the safety or acceptable use policies mandated by the Model Provider.
-```
+Models under restrictive licences (Llama 3.1, Gemma) require attribution notices; the full compliance template is available in the project repository.
 
 
 ## Experimental Setup
@@ -467,40 +428,21 @@ To facilitate the systematic evaluation described in Phase III and IV, a purpose
 
 #### JSON Structural Similarity
 
-A custom metric was developed to assess how well a model's JSON output conforms to the expected schema. The algorithm flattens both the model output and the Silver Answer into leaf-path maps, aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. For a detailed description see [Appendix: JSON Structural Similarity Algorithm](#appendix-json-sim).
+Standard NLP metrics (BLEU, ROUGE) cannot capture whether a model's output is structurally usable in a clinical pipeline. A model may produce semantically correct medical content in free-text form or in the wrong JSON structure — in both cases, the output is unparseable and therefore unusable for automated health record updates. To address this gap, a custom metric was developed.
+
+The algorithm flattens both the model output and the Silver Answer into leaf-path maps (e.g. `structured_health_record.medications.current`), aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. A score of 1.0 indicates perfect schema and content match; a score of 0.0 indicates either unparseable output or a completely non-conforming structure — regardless of the medical correctness of the content. For example, a model outputting a well-written clinical summary as free text scores 0.0 because the output cannot be programmatically processed.
+
+For a detailed description of the algorithm see [Appendix: JSON Structural Similarity Algorithm](#appendix-json-sim).
 
 #### DAG-Based Medical Extraction Quality
 
-To evaluate clinical quality beyond what statistical metrics can capture, a Directed Acyclic Graph (DAG) evaluation metric was developed. Unlike single-prompt LLM-as-a-Judge approaches, the DAG metric decomposes the evaluation into multiple specialised assessment tasks executed by the judge LLM. The medical extraction quality graph evaluates four parallel dimensions — format compliance, factual accuracy, completeness, and medical terminology — and averages their scores. For a detailed description of the execution engine and the graph structure see [Appendix: DAG-Based Medical Extraction Quality Algorithm](#appendix-dag).
+A single-prompt LLM-as-a-Judge approach conflates multiple quality dimensions into one score, making it impossible to distinguish *where* a model fails. A model that produces perfectly formatted but factually wrong output would receive a similar score to one that extracts correct content in the wrong structure. To address this limitation, a Directed Acyclic Graph (DAG) evaluation metric was developed, inspired by the decomposition principle of the DeepEval framework but implemented from scratch.
 
-![G-Eval algorithm: CoT evaluation steps are generated once and cached, then applied per test case with probability-weighted scoring via logprobs or multi-sample fallback.](../../assets/03-GEval-Algorithm.png){#fig:geval-algorithm width=75%}
+The DAG metric decomposes the evaluation into four parallel assessment nodes, each scored independently by the judge LLM on a 0–1 scale: (1) *format compliance* — does the output conform to the expected JSON schema? (2) *factual accuracy* — are the extracted values correct according to the source document? (3) *completeness* — are all relevant clinical fields populated? (4) *medical terminology* — does the output use appropriate clinical language? The overall DAG score is the arithmetic mean of these four dimensions.
 
-#### The Logprobs Problem in G-Eval
+This decomposition enables diagnostic interpretation of model performance. For example, a model scoring 0.9 on completeness but 0.3 on format compliance tells a fundamentally different story than one scoring 0.5 uniformly — the former can likely be fixed with format-specific Few-Shot examples, while the latter indicates deeper comprehension issues.
 
-The central mechanism of G-Eval is probability-weighted scoring: rather than taking the LLM's generated score at face value, the token log-probabilities of the score tokens (e.g. "1" through "5") are extracted and a weighted average is computed [@liu2023geval]. This approach significantly reduces the known scoring bias of LLMs and is the primary reason for G-Eval's superior human correlation compared to naive LLM-as-a-Judge approaches.
+For a detailed description of the execution engine and the graph structure see [Appendix: DAG-Based Medical Extraction Quality Algorithm](#appendix-dag).
 
-However, the `logprobs` feature that enables this weighted scoring is not uniformly supported across LLM providers. Table \ref{tab:logprobs-compat} summarises the current compatibility landscape.
-
-| Provider | Logprobs | Notes |
-|----------|----------|-------|
-| OpenAI (standard models) | Yes      | gpt-4o, gpt-4.1-mini etc. via `/v1/chat/completions` |
-| OpenAI (reasoning models) | **No**   | o-series, gpt-5-mini — `logprobs` not supported, `temperature` fixed at 1.0 |
-| vLLM (self-hosted) | Yes      | Any HuggingFace model; logprobs reflect raw model output before post-processing |
-| Together.ai | Yes      | Open-weight models via OpenAI-compatible API |
-| Ollama | **No**   | Logprobs only on native `/api/generate`, not on OpenAI-compatible `/v1/chat/completions` |
-| LM Studio | **No**   | Accepts `top_logprobs` on `/v1/responses` (since v0.3.26, Jan 2026) but returns empty arrays in practice |
-| llama.cpp server | **No**   | Returns `null` for logprobs on `/v1/chat/completions` |
-
-: Logprobs compatibility by LLM provider (as of February 2026) {#tab:logprobs-compat}
-
-Particularly problematic is the incompatibility with reasoning models (OpenAI o-series, gpt-5-mini, gpt-5-nano). These models employ an internal reasoning phase that consumes tokens from the `max_completion_tokens` budget before any visible output is produced. For a task that merely requires a single integer score, reasoning models are architecturally unsuitable: they spend hundreds of tokens on internal deliberation for a trivial decision — while supporting neither `logprobs` nor configurable `temperature` values.
-
-This problem also affects existing reference implementations. DeepEval, the most widely used Python implementation of G-Eval, works around the issue with a hardcoded list of reasoning models for which it falls back to plain JSON extraction without probability weighting — which de facto is no longer G-Eval but a simple LLM-as-a-Judge approach. Several open issues document this limitation: reasoning models break G-Eval entirely^[<https://github.com/confident-ai/deepeval/issues/1358>], custom (non-OpenAI) models never receive weighted summation^[<https://github.com/confident-ai/deepeval/issues/1831>], and the fallback from weighted to unweighted scoring occurs silently without warning^[<https://github.com/confident-ai/deepeval/issues/1029>].
-
-
-A promising alternative for local execution is vLLM, a high-throughput self-hosted inference engine that provides full logprobs support on its OpenAI-compatible API for any HuggingFace model. While vLLM returns logprobs from the model's raw output (before temperature scaling or penalty adjustments), this is sufficient for G-Eval scoring where the probability distribution over score tokens is the quantity of interest. Due to time constraints we did not engineer vLLM into our evaluation pipeline. 
-
-**Fallback strategy.** For providers without logprobs support, the G-Eval paper defines an alternative method: *multi-sample estimation* with $n=20$ independent calls at `temperature=1.0`, where each response is parsed for an integer score and the results are averaged [@liu2023geval]. This procedure approximates the probability distribution through sampling and thus remains faithful to the G-Eval   algorithm — albeit at significantly higher cost (factor 20 compared to the logprobs variant). Practically this turned out to be problematic since this lead to rejected API calls (Vertex AI) or not acceptable performance (local LMStudio).
-
-**Consequence for judge model selection.** The choice of judge model for G-Eval evaluation is therefore constrained: either a non-reasoning cloud model with logprobs support is used (e.g. gpt-4o-mini), a self-hosted vLLM instance serves as judge, or the cost-intensive multi-sample fallback is required. For this study, an auto-detection strategy is implemented that first attempts the logprobs path and automatically falls back to multi-sample upon failure — enabling both cloud APIs and local models to serve as judges.
+G-Eval [@liu2023geval] was evaluated as a candidate for probability-weighted scoring but could not be reliably used due to inconsistent `logprobs` support across LLM providers — most critically, Ollama and LM Studio (the primary local inference backends) do not provide logprobs on their OpenAI-compatible API endpoints. The multi-sample fallback defined by the G-Eval paper ($n=20$ calls) proved impractical due to cost and rate-limiting issues. The evaluation therefore relies on direct LLM-as-a-Judge scoring via the DAG metric and a one-shot field comparison. See [Appendix: G-Eval Investigation](#appendix-geval) for the full compatibility analysis and fallback strategy.
 
