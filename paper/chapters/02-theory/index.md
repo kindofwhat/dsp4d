@@ -83,7 +83,7 @@ Among the prompting techniques analysed, **Chain-of-Thought (CoT) prompting** wa
 
 **Zero-shot generalizability.** Zero-Shot CoT — achieved by instructing the model to reason step by step — eliminates the need for task-specific examples [@kojima2022large]. This allows the same prompt structure to generalise across the diverse medical specialties represented in GraSCCo without introducing selection bias through manually curated examples.
 
-**Reduced hallucination.** By forcing the model to articulate and justify each extraction step, CoT makes it harder to fabricate information. The model must explicitly link each extracted field to evidence in the source document.
+**Reduced hallucination.** By forcing the model to articulate and justify each extraction step, CoT makes it harder to fabricate information — the model must explicitly link each extracted field to evidence in the source document. Chain-of-Verification extends this principle by having the model verify its own initial outputs against the source, demonstrating measurable hallucination reduction [@dhuliawala2023chainofverification].
 
 **Simplicity and reproducibility.** Unlike multi-stage pipelines (prompt chaining) or computationally expensive approaches (self-consistency with 5–10× sampling), CoT requires only a single inference pass — reducing costs and enhancing reproducibility.
 
