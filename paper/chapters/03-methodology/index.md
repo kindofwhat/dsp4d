@@ -422,26 +422,29 @@ The Silver Answers App is a cloud-based web application that automates AI-powere
 
 ## Evaluation Metrics
 
-The following metrics are used to evaluate LLM outputs, divided into statistical metrics (no LLM call required) and generative metrics (LLM-as-a-Judge). For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
+The evaluation pipeline combines established NLP metrics with purpose-built clinical quality measures. Each metric was selected for a specific reason related to the medical extraction use case. For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
 
-**Rationale for Metric Selection.** Although Chapter 2.1 demonstrates that BLEU and ROUGE are semantically blind — penalising clinically correct paraphrases such as "Myokardinfarkt" vs. "Herzinfarkt" — these metrics are deliberately retained in the evaluation pipeline as a *baseline* for comparability with prior studies in the field. The actual clinical decision-making power rests on our purpose-built DiAG metric, which is theoretically grounded in the evaluation framework developed in Chapter 2. This dual approach ensures both backward compatibility with the existing literature and methodological rigour for the present study. 
-
-Since we are using a json based approach, statistical metrics might become more 
-relevant again for smaller, more strict fields like dates, names and categories.
+**Rationale for Metric Selection.** Classical n-gram metrics such as BLEU and ROUGE are known to correlate weakly with human judgment for complex reasoning tasks [@reiter2018structured], penalising clinically correct paraphrases (e.g. "Myokardinfarkt" vs. "Herzinfarkt") while rewarding superficial lexical overlap. Nevertheless, they are deliberately retained as a *baseline* for comparability with prior NLP studies. The actual clinical decision-making power rests on the purpose-built DAG metric and the JSON Structural Similarity measure. Furthermore, because our extraction target is a structured JSON record, statistical metrics regain relevance for compact, deterministic fields such as dates, category labels, and medication names — where exact match is both expected and meaningful.
 
 **Statistical Metrics:**
 
-- **BLEU** (*Bilingual Evaluation Understudy*): Measures n-gram overlap between generated and expected output. Reports brevity penalty and 1- to 4-gram precision.
-- **ROUGE** (*Recall-Oriented Understudy for Gisting Evaluation*): Evaluates overlap based on ROUGE-1 (unigram), ROUGE-2 (bigram), and ROUGE-L (longest common subsequence).
-- **Token F1**: Computes precision, recall, and F1 score at the token level between generated and expected output.
-- **Levenshtein Similarity**: Determines character-level similarity via normalised edit distance.
-- **Semantic Similarity**: Compares semantic similarity using embedding vectors (model: `text-embedding-3-small`).
-- **JSON Structural Similarity**: Evaluates structural correspondence of JSON output by matching paths and their contents.
+- **BLEU** (*Bilingual Evaluation Understudy*) [@papineni2002bleu]: Measures n-gram precision between generated and expected output. In this study, BLEU captures whether the model reproduces specific clinical terms verbatim — relevant for fields like medication names where "Metformin 500mg" must not be paraphrased. *Limitation:* BLEU penalises correct paraphrases and is insensitive to recall.
+
+- **ROUGE** (*Recall-Oriented Understudy for Gisting Evaluation*) [@lin2004rouge]: Evaluates recall-oriented overlap (ROUGE-1, ROUGE-2, ROUGE-L). ROUGE complements BLEU by measuring how much of the reference content appears in the output — critical for completeness-sensitive fields like diagnosis lists where omitting a secondary diagnosis is clinically relevant. *Limitation:* Like BLEU, ROUGE relies on surface-level token overlap and cannot distinguish synonyms.
+
+- **Token F1**: Computes precision, recall, and F1 score at the token level. Token F1 provides a balanced view of extraction quality: precision indicates whether the model avoids hallucinated content, while recall indicates whether it captures all relevant clinical information. *Limitation:* Treats all tokens equally — mismatching a filler word counts the same as mismatching a diagnosis code.
+
+- **Levenshtein Similarity** [@levenshtein1966binary]: Determines character-level similarity via normalised edit distance. Levenshtein catches fine-grained format mismatches that token-level metrics miss — for example, date format discrepancies like "2025-03-14" vs. "14.03.2025", or spelling variants in German medical terminology ("Hämoglobin" vs. "Haemoglobin"). *Limitation:* Purely syntactic — semantically equivalent texts with different wording score low.
+
+- **Semantic Similarity**: Compares meaning using cosine distance on embedding vectors (model: `text-embedding-3-small`). This metric captures whether the model conveys the same medical content regardless of exact wording — essential because different models may express the same diagnosis or treatment plan using different but equivalent terminology. *Limitation:* Embedding models may not capture domain-specific nuances in clinical vocabulary.
+
+- **JSON Structural Similarity**: A custom metric that evaluates structural correspondence of JSON output by matching paths and their contents (see Section 3.6.2). This metric directly measures whether a model's output can be programmatically processed in a clinical pipeline — a score of 0.0 means the output is unusable regardless of its medical correctness. *Limitation:* Sensitive to key naming and nesting differences that may not affect clinical utility.
 
 **Generative Metrics (LLM-as-a-Judge):**
 
-- **Medical Field Comparision**: An LLM evaluates the factual correctness of the generated output against the golden answer on a scale from 0 to 1. It is defined as one shot as close as possible to the DAG metric with the goal tom make them comparable.
-- **Medical Semantic Field Comparision**: A multi-step, graph-based evaluation (Directed Acyclic Graph) that assesses format validity, factual accuracy, completeness, and medical terminology in separate steps, aggregating them into an overall score.
+- **Medical Field Comparison (LLM-Judge)**: An LLM evaluates the factual correctness of each extracted field against the reference answer on a scale from 0 to 1. Defined as a one-shot evaluation to provide a direct, interpretable quality score per field — analogous to how a medical expert would review individual extraction results. This metric serves as a simpler baseline for comparison with the more structured DAG metric.
+
+- **DAG Medical Semantic Field Extraction**: A multi-step, graph-based evaluation (Directed Acyclic Graph) that decomposes clinical quality into four parallel dimensions — format compliance, factual accuracy, completeness, and medical terminology — each scored independently and then averaged. This decomposition reveals *where* a model fails: a model scoring high on completeness but low on format compliance tells a fundamentally different story than one failing on factual accuracy. See Section 3.6.3 for the detailed derivation.
 
 ### Test Setup
 

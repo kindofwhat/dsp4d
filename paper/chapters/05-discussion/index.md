@@ -37,6 +37,8 @@ Despite the structural compliance issues, semantic similarity scores remain rela
 
 Mistral-Nemo (12B) underperforms its parameter class significantly. Its JSON similarity score (0.065) is the second-lowest of all models, and its DAG score (0.424) remains below that of the 2B Granite model (0.407) despite having six times more parameters. While its LLM-Judge score (0.553) is mid-range, the overall composite (0.339) places it below Granite 3.3:2b (0.344). This suggests that the model's instruction-following capability for structured extraction in German clinical texts is inadequate despite its size, reinforcing the observation that model selection for domain-specific tasks cannot rely on parameter count alone.
 
+The metric correlation analysis (Chapter 4, Figure \ref{fig:metric-correlation}) further supports these observations: LLM-as-a-Judge metrics show low correlation with lexical measures (r = 0.10–0.27), confirming that clinical extraction quality cannot be approximated by surface-level overlap metrics alone. Notably, JSON similarity correlates more strongly with the DAG metric (r = 0.45) than with any lexical metric, suggesting that format compliance and content quality are interdependent.
+
 ## Implications for Clinical Practice
 
 The results carry several implications for the deployment of local LLMs in clinical settings:
@@ -64,6 +66,18 @@ In Phase III, the SLMs were evaluated in a Zero-Shot configuration to establish 
 
 Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity, 100% pass rate) but falls short on structural compliance (0.258 JSON similarity). Interestingly, Qwen3.5-35B-A3B with only 3B active parameters (MoE architecture) achieves 0.371 JSON similarity and 0.390 overall composite — demonstrating that efficient architectures can significantly outperform dense models of similar active parameter count. In a Zero-Shot setting, dense sub-3B models capture the medical content but cannot reliably produce structured output that would be programmatically processable in a clinical pipeline. The bottleneck is not comprehension but instruction following — a capability that is known to improve significantly with Few-Shot examples and explicit format demonstrations. Whether targeted context engineering can close this gap is a key question for subsequent phases.
 
+## Validity of the Evaluation Benchmark
+
+A central methodological decision in this study is the use of LLM-generated *silver answers* rather than expert-authored *golden answers* as the evaluation benchmark. Three arguments support the validity of silver answers for this study's purposes.
+
+**Relative comparison remains valid.** The primary objective is not to measure absolute clinical accuracy but to *rank* models against each other under identical conditions. Since all models are evaluated against the same reference, any systematic bias in the silver answers affects all models equally and cancels out in relative comparisons. A model that scores higher against a silver answer also demonstrates better instruction following, structural compliance, and content extraction — regardless of whether the reference itself is perfect.
+
+**Consistent baseline across 62 test cases.** The target use case — a general practitioner updating a patient's health record from incoming specialist reports — defines a relatively narrow extraction task with limited interpretive ambiguity: the relevant diagnoses, medications, metrics, and follow-up actions are typically stated explicitly in the source text. Nevertheless, manually authoring 62 golden answers with the required JSON structure would demand significant expert time and would itself introduce variability depending on the annotator's thoroughness and attention. A SOTA model with CoT reasoning produces a consistent, reproducible baseline across all test cases, ensuring that performance differences between evaluated models reflect genuine capability gaps rather than annotation inconsistencies.
+
+**Methodological mitigation through Chain-of-Thought.** The silver answers were not generated naively. The CoT prompt forces the model to expose its reasoning — identifying evidence in the source text before committing to structured fields. This internal monologue provides an audit trail that makes the silver answers more transparent than opaque single-pass extractions: a reviewer can trace each extracted field back to the model's reasoning and the corresponding passage in the source document.
+
+**Acknowledged limitation.** Two forms of bias must be considered. First, lexical metrics (BLEU, ROUGE, Token F1) inherently reward surface-level similarity to the reference text — a model that paraphrases the same medical content differently will score lower regardless of correctness. This is a property of the metrics themselves and is partially mitigated by including semantic similarity alongside lexical measures. Second, LLM-as-a-Judge evaluation introduces the well-documented self-preference bias: LLM judges tend to favour outputs stylistically similar to their own generations [@panickssery2024llmevaluatorsrecognizefavor]. Since the silver answers were generated by Gemini while the judge is GPT-4o-mini, these two biases do not compound directly — but neither can be fully eliminated.
+
 <!-- #D-LIMITS — mostly static, update only if methodology changes -->
 ## Limitations
 
@@ -78,25 +92,6 @@ Granite 3.3 (2B) demonstrates promising semantic comprehension (0.843 similarity
 5. **German clinical text:** The evaluation is specific to German-language clinical documents from the GraSCCo corpus. Generalisability to other languages or clinical text types is not established.
 
 6. **Metric thresholds:** The overall pass rates are notably low even for top-performing models (Gemini: 30.8%), partly because the stricter GPT-4o-mini-based judge metrics and lexical metrics apply thresholds that may be overly demanding for this extraction task, where semantically equivalent but lexically diverse outputs are expected.
-
-<!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
-## Metric Correlation Analysis
-
-To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all model-document interactions (see [Appendix: Pearson Correlation Coefficient](#appendix-pearson) for the mathematical definition).
-
-![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
-
-Several patterns emerge from the correlation analysis:
-
-**Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.53–0.88). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.23–0.34), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
-
-**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical semantic field extraction shows weak correlation with the lexical metrics (r = 0.13–0.27), and LLM-Judge field comparison similarly exhibits weak correlations (r = 0.10–0.20). This confirms that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate.
-
-**Moderate correlation between LLM-as-a-Judge metrics.** The two judge metrics now show a meaningful positive correlation (r = 0.35), a significant improvement over the previous evaluation run where they were nearly uncorrelated. This suggests that the refined judge prompts (using GPT-4o-mini) achieve better alignment between the DAG-based and direct judge approaches.
-
-**JSON similarity correlates with judge metrics.** JSON similarity shows the highest cross-category correlation with the DAG metric (r = 0.45) and LLM-Judge (r = 0.31), stronger than its correlation with the lexical group (r = 0.17–0.42). This suggests that models producing well-structured JSON also tend to generate clinically more accurate content — format compliance and content quality are not independent.
-
-
 
 <!-- #D-FUTURE — static -->
 ## Future Work
