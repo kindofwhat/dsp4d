@@ -105,3 +105,5 @@ A central methodological decision in this study is the use of LLM-generated *sil
 4. **Expanded expert validation:** Involving multiple medical experts to elevate Silver Answers to true Golden Answers and reduce single-annotator bias.
 
 5. **Fine-tuning exploration:** Investigating whether task-specific fine-tuning of small models (2–7B) on a subset of validated reference answers can close the format compliance gap observed in Zero-Shot evaluation.
+
+6. **Chain-of-Verification (CoVe) for hallucination mitigation:** Standard CoT prompting provides traceability but does not inherently reduce hallucination rates [@dhuliawala2023chainofverification]. Integrating CoVe — where the model generates verification questions about its own output and self-corrects against the source document — is a promising approach to actively reduce unsupported extractions in the clinical pipeline.

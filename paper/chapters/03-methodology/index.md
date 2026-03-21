@@ -4,7 +4,7 @@
 
 The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of verified "Golden Answers", this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. The proposed algorithm argues for a shift away from maximalist parameter counts towards targeted efficiency without compromising output fidelity.
 
-The theoretical foundations established in Chapter \ref{sec:related-work} directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Section \ref{sec:scaling-laws}: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Section \ref{sec:context-engineering} demonstrates that Chain-of-Thought (CoT) prompting is essential for suppressing hallucinations in complex medical reasoning. These two constraints together make a CoT-based Silver Answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
+The theoretical foundations established in Chapter \ref{sec:related-work} directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Section \ref{sec:scaling-laws}: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Section \ref{sec:context-engineering} demonstrates that Chain-of-Thought (CoT) prompting provides the traceability needed for scientific validation of medical extraction outputs. These two constraints together make a CoT-based Silver Answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
 
 ## Procedure
 
@@ -91,7 +91,7 @@ To minimize "hallucinations" and ensure clinical reliability, the prompt instruc
 
 To generate these Silver Answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
 * Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
-* Reduced Hallucinations: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model is less likely to produce the formatting inconsistencies or "guesses" typical of Zero-Shot prompting.
+* Improved Traceability: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model's reasoning becomes auditable, making unsupported extractions detectable during expert review.
 * Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
 
 [See: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
@@ -102,7 +102,7 @@ While techniques like Self-Consistency or Multi-Persona Prompting offer higher r
 |-------------|---------------------|-----------------------------|
 | **Processing Style**	| Pattern matching & Direct Extraction	| Logical deduction & Evidence-first |
 | **Accuracy** | High for simple reports | Superior for complex, conflicting reports |
-| **Hallucination Risk** | Moderate (may guess missing values) | Lower (reasoning step identifies gaps) |
+| **Traceability** | Low (only the result is visible) | High (reasoning exposes evidence gaps) |
 | **Token Usage** | Low (Cost-efficient) | Higher (More verbose output) |
 | **Auditability** | Difficult (Only the result is visible) | Transparent (You see why it chose a category) |
 

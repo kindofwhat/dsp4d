@@ -52,7 +52,7 @@ Prompt engineering is the systematic practice of designing, refining, and optimi
 
 1. **Bridging the Capability Gap:** Even state-of-the-art models require carefully structured prompts to consistently produce high-quality outputs [@brown2020language]. A poorly formulated prompt can cause a capable model to underperform, while a well-engineered prompt can enable even smaller models to achieve surprisingly strong results — particularly relevant when deploying SLMs in resource-constrained environments.
 
-2. **Reducing Hallucinations:** Language models are prone to generating plausible-sounding but factually incorrect information — a phenomenon known as hallucination [@ji2023survey]. In medical contexts, prompt engineering techniques such as chain-of-thought reasoning help ground model outputs in verifiable facts and reduce the risk of fabricated content.
+2. **Improving Traceability:** Language models are prone to generating plausible-sounding but factually incorrect information — a phenomenon known as hallucination [@ji2023survey]. While standard CoT prompting does not inherently reduce hallucination rates [@dhuliawala2023chainofverification], it exposes the model's reasoning steps, enabling reviewers to trace extracted information back to the source document and identify unsupported claims.
 
 3. **Ensuring Consistency and Reproducibility:** Medical documentation requires standardized formats and terminology. Structured prompting techniques ensure that outputs conform to required schemas and clinical standards [@bsharat2023principled].
 
@@ -72,7 +72,7 @@ Among the prompting techniques analysed, **Chain-of-Thought (CoT) prompting** wa
 
 **Zero-shot generalizability.** Zero-Shot CoT — achieved by instructing the model to reason step by step — eliminates the need for task-specific examples [@kojima2022large]. This allows the same prompt structure to generalise across the diverse medical specialties represented in GraSCCo without introducing selection bias through manually curated examples.
 
-**Reduced hallucination.** By forcing the model to articulate and justify each extraction step, CoT makes it harder to fabricate information — the model must explicitly link each extracted field to evidence in the source document. While CoT itself does not guarantee hallucination-free output, it provides the structural foundation for verification-based techniques such as Chain-of-Verification [@dhuliawala2023chainofverification], which adds an explicit self-check step after the initial CoT reasoning to detect and correct unsupported claims.
+**Traceability over hallucination reduction.** It is important to note that CoT does not inherently reduce hallucination rates — Dhuliawala et al. found that standard CoT prompting fails to improve factual accuracy and may even increase incorrect outputs compared to few-shot baselines [@dhuliawala2023chainofverification]. However, CoT's value lies in *traceability*: by forcing the model to articulate its reasoning, each extracted field can be traced back to evidence in the source document, making hallucinations *detectable* rather than hidden. For active hallucination mitigation, Chain-of-Verification (CoVe) [@dhuliawala2023chainofverification] adds an explicit self-check step after CoT reasoning — a promising extension for future work.
 
 **Simplicity and reproducibility.** Unlike multi-stage pipelines (prompt chaining) or computationally expensive approaches (self-consistency with 5–10× sampling), CoT requires only a single inference pass — reducing costs and enhancing reproducibility.
 
