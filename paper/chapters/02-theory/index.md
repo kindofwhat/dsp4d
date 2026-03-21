@@ -6,7 +6,7 @@ The application of Large Language Models (LLMs) in medicine is an evolution of c
 
 ### Privacy, Security, and Data Sovereignty
 
-These risks directly motivate the local deployment constraint in our methodology (Chapter 3) and inform the model selection criteria. The use of cloud-based LLMs in healthcare introduces significant risks that have been documented since the early days of transformer models.
+These risks directly motivate the local deployment constraint in our methodology (Chapter 3) and inform the model selection criteria. The use of cloud-based LLMs in healthcare introduces significant risks that have been documented since the early days of transformer models.  
 
 *   **Data Leakage and Memorization:** Foundational research has shown that LLMs can memorize and inadvertently "regurgitate" sensitive training data, including personally identifiable information (PII) [@carlini2021extracting]. In a medical context, this poses a risk of exposing protected health information (PHI) through model outputs.
 *   **Adversarial Vulnerabilities:** Modern aligned models are susceptible to adversarial attacks, such as prompt injection, which can bypass safety filters and potentially lead to the disclosure of sensitive context or the generation of incorrect medical advice [@zou2023universal].
@@ -14,20 +14,8 @@ These risks directly motivate the local deployment constraint in our methodology
 
 To mitigate these risks, researchers are exploring **Data Sovereignty**—the principle that health data should remain under the control of the originating institution or the patient. This has led to two main research directions:
 
-1.  **On-Device Deployment:** Operating models entirely on local hardware (e.g., Jetson Nano) to ensure no sensitive data ever leaves the clinical environment [@wu2025dualstage].
-2.  **Privacy-Preserving Training:** Techniques like "Whispered Tuning" and differential privacy are being developed to prevent PII memorization during model adaptation [@Singh2024WhisperedTuning].
-
-### Specialized Medical Applications
-
-**Dual-stage and Lightweight Patient Chart Summarization**
-Directly relevant to our research question of minimum viable model size, Wu et al. (2025) proposed a dual-stage system specifically for emergency departments. By using a Small Language Model (SLM) on embedded devices, they demonstrate that it is possible to provide actionable clinical summaries without cloud dependencies, thereby fulfilling the highest standards of data sovereignty [@wu2025dualstage].
-
-**ELMTEX: Structured Clinical Information Extraction**
-This finding directly supports our hypothesis that smaller models can perform clinical extraction tasks. Guluzade et al. (2024) showed that fine-tuned smaller models can outperform larger, general-purpose counterparts in extracting structured data from unstructured German clinical reports. Their work demonstrates that for specialized medical tasks, increased parameter count does not guarantee improved performance — a finding that supports the feasibility of local deployment [@guluzade2024elmtex].
-
-**GraSCCo: A Foundation for Privacy-Preserving Research**
-GraSCCo serves as the primary dataset for this study's evaluation pipeline. The Graz Synthetic Clinical text Corpus (GraSCCo) remains a cornerstone for this research area. As a multiply-alienated German clinical corpus, it allows researchers to benchmark models on realistic medical narratives without the legal and ethical risks associated with real patient data [@modersohn2022grascco; @GraSCCo_PII_V2_2025].
-
+1.  **On-Device Deployment:** Operating models entirely on local hardware (e.g., Jetson Nano) to ensure no sensitive data ever leaves the clinical environment [@wu2025dualstage]. We use customer hardware in our work which are deployable locally.
+2.  **Privacy-Preserving Training:** Techniques like "Whispered Tuning" and differential privacy are being developed to prevent PII memorization during model adaptation [@Singh2024WhisperedTuning]. This is out of scope for our work, since we rely on pretrained public models.
 
 ## Scaling Laws and Model Efficiency
 
