@@ -483,8 +483,8 @@ The application follows a three-tier architecture pattern:
 
 **Backend Technologies:**
 - Node.js with Express 4.18.2 - Web server framework
-- @google-cloud/vertexai 1.1.0 - Gemini API integration
-- @google-cloud/storage 7.7.0 - Cloud storage client
+- `@google-cloud/vertexai` 1.1.0 - Gemini API integration
+- `@google-cloud/storage` 7.7.0 - Cloud storage client
 - google-auth-library 9.6.0 - Authentication
 - express-rate-limit 7.1.5 - API rate limiting
 - dotenv 16.3.1 - Environment configuration
@@ -1250,6 +1250,38 @@ npm start
 - Horizontal scaling with load balancer
 - CDN for static assets
 - Serverless functions for processing
+
+
+## Appendix: Evaluation Metrics Reference {#appendix-metrics-reference}
+
+This section provides the mathematical definitions for all evaluation metrics used in the study.
+
+**BLEU** [@papineni2002bleu] computes modified n-gram precision $p_n$ for $n = 1 \ldots 4$, combined with a brevity penalty $BP$:
+$$\text{BLEU} = BP \cdot \exp\left(\sum_{n=1}^{4} w_n \log p_n\right)$$
+
+**ROUGE** [@lin2004rouge] measures recall-oriented overlap: ROUGE-1 (unigram recall), ROUGE-2 (bigram recall), and ROUGE-L (longest common subsequence).
+
+**Token F1** computes the harmonic mean of token-level precision and recall between generated and reference text.
+
+**Levenshtein Similarity** [@levenshtein1966binary] is the normalised complement of the edit distance: $1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$, where $d$ is the minimum number of single-character edits.
+
+**Semantic Similarity** computes the cosine similarity between embedding vectors of the generated and reference texts, using OpenAI's `text-embedding-3-small` model.
+
+**JSON Structural Similarity** and **DAG-Based Medical Extraction Quality** are described in their own appendix sections below.
+
+
+## Appendix: Pearson Correlation Coefficient {#appendix-pearson}
+
+The Pearson correlation coefficient $r$ quantifies the linear relationship between two variables $X$ and $Y$:
+
+$$r = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2} \cdot \sqrt{\sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
+
+Values range from $-1$ (perfect negative correlation) through $0$ (no linear relationship) to $+1$ (perfect positive correlation). In the metric correlation analysis (Chapter 4), $r$ is computed across all model-document interactions ($n = 11 \times 62 = 682$ observations) for each pair of evaluation metrics.
+
+
+## Appendix: Token Cost per Evaluation Interaction {#appendix-token-cost}
+
+Each evaluation interaction with the LLM-as-a-Judge (GPT-4o-mini) consumes approximately 6,000–10,000 tokens: the clinical input document (~1,000–3,000 tokens), the silver answer (~500–1,500 tokens), the model output (~500–1,500 tokens), and the evaluation prompt with instructions (~2,000 tokens). For the DAG metric, the cost is higher due to four parallel evaluation nodes. A single full evaluation run across all 11 models and 62 test cases therefore consumes approximately 4–7 million judge tokens.
 
 
 ## Appendix: G-Eval Investigation {#appendix-geval}

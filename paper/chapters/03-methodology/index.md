@@ -356,6 +356,8 @@ Models under restrictive licences (Llama 3.1, Gemma) require attribution notices
 
 ## Experimental Setup
 
+The complete source code for both the Silver Answers App and the llm-validator evaluation framework, as well as all evaluation data, is available in the project repository^[TODO: Insert GitLab URL].
+
 ### Server and Application Setup
 
 The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for golden answer generation.
@@ -376,7 +378,7 @@ The experimental infrastructure consists of a dedicated workstation with GPU acc
 
 The Silver Answers App is a cloud-based web application that automates AI-powered document analysis using Google's Gemini large language model. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built with React and Node.js, it integrates Google Cloud Platform services for AI processing and persistent storage.
 
-![Silver Answers App Interface](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
+![Silver Answers App Interface. Source: Authors (screenshot).](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
 [See Appendix: Silver Answers App for full description](#appendix-silver-answers)
 
@@ -409,7 +411,7 @@ The evaluation pipeline combines established NLP metrics with purpose-built clin
 
 ### Test Setup
 
-![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against golden answers.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
+![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against golden answers. Source: Authors.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
 
 
 #### llm-validator
@@ -424,7 +426,7 @@ To facilitate the systematic evaluation described in Phase III and IV, a purpose
 - *LLM-as-a-Judge metrics** (): both a "simple" one shot and a more sophisticated DAG metric are calculated.
 
 
-![llm-validator Interface](../../assets/sceen_llm-validator.png){#fig:llm-validator width=75%}
+![llm-validator Interface. Source: Authors (screenshot).](../../assets/sceen_llm-validator.png){#fig:llm-validator width=75%}
 
 #### JSON Structural Similarity
 

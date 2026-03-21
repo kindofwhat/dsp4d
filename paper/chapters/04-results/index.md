@@ -111,7 +111,7 @@ Gemini 2.5 Pro is the only model with no zero-score cases (min 0.298), producing
 
 To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all model-document interactions (see [Appendix: Pearson Correlation Coefficient](#appendix-pearson) for the mathematical definition).
 
-![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
+![Pearson correlation matrix between evaluation metrics. Strong correlations (r > 0.5) appear among lexical metrics; LLM-as-a-Judge metrics show low correlation with statistical measures. Source: Authors.](../../assets/04-metric-correlation.png){#fig:metric-correlation width=85%}
 
 Several patterns emerge from the correlation analysis:
 
