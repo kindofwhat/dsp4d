@@ -6,7 +6,7 @@ The application of Large Language Models (LLMs) in medicine is an evolution of c
 
 ### Privacy, Security, and Data Sovereignty
 
-The use of cloud-based LLMs in healthcare introduces significant risks that have been documented since the early days of transformer models.
+These risks directly motivate the local deployment constraint in our methodology (Chapter 3) and inform the model selection criteria. The use of cloud-based LLMs in healthcare introduces significant risks that have been documented since the early days of transformer models.
 
 *   **Data Leakage and Memorization:** Foundational research has shown that LLMs can memorize and inadvertently "regurgitate" sensitive training data, including personally identifiable information (PII) [@carlini2021extracting]. In a medical context, this poses a risk of exposing protected health information (PHI) through model outputs.
 *   **Adversarial Vulnerabilities:** Modern aligned models are susceptible to adversarial attacks, such as prompt injection, which can bypass safety filters and potentially lead to the disclosure of sensitive context or the generation of incorrect medical advice [@zou2023universal].
@@ -19,23 +19,21 @@ To mitigate these risks, researchers are exploring **Data Sovereignty**—the pr
 
 ### Specialized Medical Applications
 
-**Dual-stage and Lightweight Patient Chart Summarization**  
-Wu et al. (2025) proposed a dual-stage system specifically for emergency departments. By using a Small Language Model (SLM) on embedded devices, they demonstrate that it is possible to provide actionable clinical summaries without cloud dependencies, thereby fulfilling the highest standards of data sovereignty [@wu2025dualstage].
+**Dual-stage and Lightweight Patient Chart Summarization**
+Directly relevant to our research question of minimum viable model size, Wu et al. (2025) proposed a dual-stage system specifically for emergency departments. By using a Small Language Model (SLM) on embedded devices, they demonstrate that it is possible to provide actionable clinical summaries without cloud dependencies, thereby fulfilling the highest standards of data sovereignty [@wu2025dualstage].
 
-**ELMTEX: Structured Clinical Information Extraction**  
-Guluzade et al. (2024) showed that fine-tuned smaller models can outperform larger, general-purpose counterparts in extracting structured data from unstructured German clinical reports. Their work demonstrates that for specialized medical tasks, increased parameter count does not guarantee improved performance — a finding that supports the feasibility of local deployment [@guluzade2024elmtex].
+**ELMTEX: Structured Clinical Information Extraction**
+This finding directly supports our hypothesis that smaller models can perform clinical extraction tasks. Guluzade et al. (2024) showed that fine-tuned smaller models can outperform larger, general-purpose counterparts in extracting structured data from unstructured German clinical reports. Their work demonstrates that for specialized medical tasks, increased parameter count does not guarantee improved performance — a finding that supports the feasibility of local deployment [@guluzade2024elmtex].
 
-**GraSCCo: A Foundation for Privacy-Preserving Research**  
-The Graz Synthetic Clinical text Corpus (GraSCCo) remains a cornerstone for this research area. As a multiply-alienated German clinical corpus, it allows researchers to benchmark models on realistic medical narratives without the legal and ethical risks associated with real patient data [@modersohn2022grascco; @GraSCCo_PII_V2_2025].
+**GraSCCo: A Foundation for Privacy-Preserving Research**
+GraSCCo serves as the primary dataset for this study's evaluation pipeline. The Graz Synthetic Clinical text Corpus (GraSCCo) remains a cornerstone for this research area. As a multiply-alienated German clinical corpus, it allows researchers to benchmark models on realistic medical narratives without the legal and ethical risks associated with real patient data [@modersohn2022grascco; @GraSCCo_PII_V2_2025].
 
 
 ## Scaling Laws and Model Efficiency
 
-A central question for deploying LLMs in privacy-sensitive environments is: how small can a model be while maintaining acceptable performance? Early scaling laws suggested a straightforward trade-off, but recent developments in Small Language Models (SLMs) have significantly shifted expectations.
+Given the hardware constraints of on-device deployment for sensitive medical data, a central question is: what is the smallest pre-trained model that can reliably perform clinical document classification? The answer depends not only on parameter count, but also on model generation and — as Section 2.4 explores — context engineering strategies that can augment smaller models at inference time. The following subsections trace how scaling laws have evolved to make this question increasingly tractable.
 
-### Historical Context
-
-Early work by Kaplan et al. (2020) and Hoffmann et al. (2022) established that language model performance follows predictable power-law relationships with model size and training data [@kaplan2020scaling; @hoffmann2022training]. While foundational, these findings predate the current generation of highly optimized small models and do not fully capture the capabilities of modern SLMs.
+Early scaling laws — notably by Kaplan et al. [@kaplan2020scaling] and Hoffmann et al. [@hoffmann2022training] — established that language model performance follows predictable power-law relationships with model size and training data. However, these findings predate the current generation of highly optimized small models and do not fully capture the capabilities of modern SLMs.
 
 ### The Rise of Small Language Models
 
@@ -43,7 +41,7 @@ A comprehensive survey by Lu et al. (2024) benchmarked 59 SLMs (100M–5B parame
 
 ### A Note on Terminology
 
-The term "Small Language Model" warrants clarification. In current usage, "small" refers exclusively to parameter count — not to training data scope. A 3B parameter model trained on trillions of web-scale tokens is considered "small" only relative to 70B+ frontier models. This stands in contrast to *domain-specific* models such as ClinicalBERT or PubMedBERT, which are smaller in both parameters and training scope, having been trained on specialized medical corpora. Throughout this thesis, the term SLM refers to language models with fewer than 100 billion parameters, regardless of their training data origin. This broader definition encompasses both general-purpose compact models (Phi, Qwen, Llama) and domain-specialized models, allowing for comparison across deployment scenarios.
+The term "Small Language Model" warrants clarification. In current usage, "small" refers exclusively to parameter count — not to training data scope. A 3B parameter model trained on trillions of web-scale tokens is considered "small" only relative to 70B+ frontier models. This stands in contrast to *domain-specific* models such as ClinicalBERT or PubMedBERT, which are smaller in both parameters and training scope, having been trained on specialized medical corpora. Throughout this thesis, the term SLM refers to language models with fewer than 100 billion parameters, regardless of their training data origin — consistent with the boundary used by Lu et al. [@lu2024slmsurvey] in their comprehensive SLM survey. This broader definition encompasses both general-purpose compact models (Phi, Qwen, Llama) and domain-specialized models, allowing for comparison across deployment scenarios.
 
 ### Capability Density and the Densing Law
 
@@ -52,10 +50,6 @@ Xiao et al. (2025) formalize this trend through the concept of *capability densi
 ### Edge Deployment Considerations
 
 Recent work specifically addresses SLM deployment on resource-constrained devices. Hassanpour et al. (2025) systematically evaluate SLMs for edge scenarios, examining the trade-offs between model size, quantization levels, and task performance [@hassanpour2025edge]. Their findings confirm that sub-4B parameter models can achieve practical utility for domain-specific tasks when properly configured — a key consideration for medical applications where data must remain on-device.
-
-### Implications for This Study
-
-These developments frame the research question: given hardware constraints of on-device deployment for sensitive medical data, what is the smallest pre-trained model that can reliably perform clinical document classification? The answer depends not only on parameter count, but also on model generation and — as the following section explores — context engineering strategies that can augment smaller models at inference time.
 
 ## Context Engineering Strategies
 
@@ -67,107 +61,31 @@ Prompt engineering is the systematic practice of designing, refining, and optimi
 
 **Why Prompt Engineering Matters:**
 
-1. **Bridging the Capability Gap:** Even state-of-the-art models require carefully structured prompts to consistently produce high-quality outputs. A poorly formulated prompt can cause a capable model to underperform, while a well-engineered prompt can enable even smaller models to achieve surprisingly strong results. This is particularly relevant when deploying SLMs in resource-constrained environments where model size is limited by hardware constraints.
+1. **Bridging the Capability Gap:** Even state-of-the-art models require carefully structured prompts to consistently produce high-quality outputs [@brown2020language]. A poorly formulated prompt can cause a capable model to underperform, while a well-engineered prompt can enable even smaller models to achieve surprisingly strong results — particularly relevant when deploying SLMs in resource-constrained environments.
 
-2. **Reducing Hallucinations:** Language models are prone to generating plausible-sounding but factually incorrect information — a phenomenon known as hallucination. In medical contexts, where errors can have serious consequences, prompt engineering techniques such as self-consistency checking and chain-of-thought reasoning help ground model outputs in verifiable facts and reduce the risk of fabricated content.
+2. **Reducing Hallucinations:** Language models are prone to generating plausible-sounding but factually incorrect information — a phenomenon known as hallucination [@ji2023survey]. In medical contexts, prompt engineering techniques such as chain-of-thought reasoning help ground model outputs in verifiable facts and reduce the risk of fabricated content.
 
-3. **Ensuring Consistency and Reproducibility:** Medical documentation requires standardized formats and terminology. Without explicit guidance through prompts, models may produce outputs in inconsistent formats, use non-standard terminology, or omit critical information. Structured prompting techniques ensure that outputs conform to required schemas and clinical standards.
+3. **Ensuring Consistency and Reproducibility:** Medical documentation requires standardized formats and terminology. Structured prompting techniques ensure that outputs conform to required schemas and clinical standards [@bsharat2023principled].
 
-4. **Maximizing Limited Resources:** For SLMs deployed on edge devices, prompt engineering becomes even more critical. Since these models have fewer parameters and potentially less training data than frontier models, carefully designed prompts can compensate for architectural limitations by providing explicit reasoning frameworks and domain-specific context.
+4. **Maximizing Limited Resources:** For SLMs deployed on edge devices, carefully designed prompts can compensate for architectural limitations by providing explicit reasoning frameworks and domain-specific context [@lu2024slmsurvey].
 
-5. **Enabling Transparent Reasoning:** When using LLMs to generate reference answers (silver answers) for evaluation purposes — as in this study — prompt engineering is essential for ensuring that these references are accurate, complete, and scientifically defensible. Chain-of-Thought (CoT) prompting, in particular, allows models to expose their reasoning process, making it possible to verify the logical steps that led to a conclusion. This transparency is crucial for scientific validation: rather than accepting a model's output as a black box, researchers can inspect the intermediate reasoning steps to identify potential errors, biases, or hallucinations. Zero-shot CoT, which requires no task-specific examples, offers the additional advantage of generalizability across diverse medical documents without the need for manual example curation.
+5. **Enabling Transparent Reasoning:** Chain-of-Thought (CoT) prompting allows models to expose their reasoning process, making it possible to verify the logical steps that led to a conclusion [@wei2022chain; @kojima2022large]. This transparency is crucial for scientific validation and is the basis for generating the reference answers (silver answers) in this study.
 
 The following sections detail specific prompt engineering techniques and their application to medical text processing, with particular emphasis on methods that enable reliable extraction of structured information from clinical narratives.
 
-### Comprehensive Comparison of Prompting Techniques
-This table evaluates techniques based on their ability to extract accurate, structured "Ground Truth" (Silver Answers) from the GraSCCo medical corpus. The comparison of techniques is equally relevant for prompting the set of smaller LLMs in the evaluation phase.
+A comprehensive comparison of 20 prompting techniques is provided in [Appendix: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs). Based on this analysis, Chain-of-Thought (CoT) was selected for the following reasons.
 
-| Technique                |                                                                    |
-|--------------------------|----------------------------------------------------------------------|
-| Zero-Shot Prompting | **Description:** Asking the model to perform a task without examples|
-||**Application to Medical Silver Answers:** "Extract all diagnoses from this text."|
-||**Pros for Medical Records:** Fast and low token cost. Useful for checking the baseline capability of a model.|
-||**Cons / Risks:** High risk of hallucination and format inconsistency. The model may guess the required medical style incorrectly. |
-||**References:** [@dairai2024promptguide], [@k2view2024prompttechniques] |
-| Chain-of-Thought (CoT) | **Description:** Instructing the model to generate intermediate reasoning steps.
-||**Application to Medical Silver Answers:** Clinical Reasoning: "First, list all medications found. Second, check if they are current or historical. Finally, output the list."|
-||**Pros for Medical Records:** Critical for connecting implied symptoms to explicit medical codes. Reduces "skipping" of details.|
-||**Cons / Risks:** Increases token usage. Requires parsing to separate the "thought" from the "silver answer."|
-||**References:** [@wei2022chain], [@dairai2024promptguide], [@k2view2024prompttechniques] |
-| Prompt Chaining | **Description:** Breaking a task into subtasks where output A becomes input B.|
-||**Application to Medical Silver Answers:** Workflow: 1. Extraction Prompt -> 2. Filtering Prompt -> 3. Formatting Prompt.|
-||**Pros for Medical Records:** High reliability. Isolates errors. Allows for intermediate transformation (e.g., cleaning citations).|
-||**Cons / Risks:** Requires building a controller application (state management) between prompts.|
-||**References:** [@dairai2024promptguide], [@wu2022promptchainer] |
-| Multi-Persona Prompting | **Description:** Simulating a discussion between multiple agents (e.g., Drafter & Reviewer).|
-||**Application to Medical Silver Answers:** Quality Assurance: Agent A extracts data; Agent B reviews it for missing info; Agent C finalizes.|
-||**Pros for Medical Records:** Simulates a "four-eyes principle" (peer review), reducing errors through internal debate.|
-||**Cons / Risks:** High latency and token cost; complex to orchestrate.|
-||**References:** [@prompthub2024multipersona] |
-List truncated: [See: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
+### Chain-of-Thought: The Selected Technique for Generating Silver Answers
 
-### Chain-of-Thought: The Optimal Technique for Generating Silver Answers
+Among the prompting techniques analysed, **Chain-of-Thought (CoT) prompting** was selected for generating silver answers from medical documents. CoT balances transparency, generalizability, and accuracy for the following reasons:
 
-Among the diverse landscape of prompt engineering techniques, **Chain-of-Thought (CoT) prompting** emerges as the optimal choice for generating scientifically defensible silver answers from medical documents. While other techniques offer valuable capabilities, CoT uniquely balances transparency, generalizability, and accuracy — making it the technique of choice for this study.
+**Transparent reasoning.** CoT explicitly exposes the model's reasoning steps, enabling researchers to trace how diagnoses, medications, and follow-up actions were extracted from the source text [@wei2022chain]. This audit trail is essential for scientific validation of silver answers.
 
-#### Why Chain-of-Thought Wins
+**Zero-shot generalizability.** Zero-Shot CoT — achieved by instructing the model to reason step by step — eliminates the need for task-specific examples [@kojima2022large]. This allows the same prompt structure to generalise across the diverse medical specialties represented in GraSCCo without introducing selection bias through manually curated examples.
 
-**1. Transparent Reasoning Process**
+**Reduced hallucination.** By forcing the model to articulate and justify each extraction step, CoT makes it harder to fabricate information. The model must explicitly link each extracted field to evidence in the source document.
 
-Unlike black-box approaches that produce direct answers, CoT explicitly exposes the model's reasoning steps. This transparency is essential for scientific validation: researchers can inspect the intermediate logic to verify correctness, identify potential errors, and understand how the model arrived at its conclusion. For medical text extraction, this means being able to trace how the model connected symptoms to diagnoses or medications to treatment plans.
+**Simplicity and reproducibility.** Unlike multi-stage pipelines (prompt chaining) or computationally expensive approaches (self-consistency with 5–10× sampling), CoT requires only a single inference pass — reducing costs and enhancing reproducibility.
 
-**Source Evidence:** The foundational work on Chain-of-Thought prompting demonstrates that instructing models to generate intermediate reasoning steps dramatically improves performance on complex reasoning tasks [@wei2022chain]. G-Eval further validates this approach by using CoT reasoning to decompose evaluation tasks into verifiable steps [@liu2023geval].
-
-**2. Zero-Shot Generalizability**
-
-The breakthrough of **Zero-Shot CoT** — achieved simply by adding "Let's think step by step" to prompts — eliminates the need for task-specific examples. This is particularly valuable when working with diverse medical documents where manually curating representative examples for few-shot prompting would be impractical and potentially introduce selection bias. Zero-shot CoT allows the same prompt structure to generalize across different document types, medical specialties, and clinical scenarios without requiring domain-specific example curation.
-
-**Source Evidence:** Research on zero-shot CoT shows that this simple prompting strategy enables large language models to perform complex reasoning without any task-specific demonstrations, achieving performance comparable to or exceeding few-shot approaches [@kojima2022large].
-
-**3. Reduced Hallucination Through Explicit Reasoning**
-
-By forcing the model to articulate its reasoning process, CoT naturally reduces hallucinations. The model must justify each step, making it more difficult to fabricate information. When extracting medical entities, the model must explicitly state where in the text it found each piece of information, creating an audit trail that can be verified against the source document.
-
-**4. Simplicity and Reproducibility**
-
-Unlike complex multi-stage pipelines (prompt chaining) or computationally expensive validation methods (self-consistency with multiple runs), CoT requires only a single inference pass with a straightforward prompt modification. This simplicity enhances reproducibility — a critical requirement for scientific research — and reduces computational costs, making it feasible even when working with resource-constrained SLMs.
-
-**5. Compatibility with Other Techniques**
-
-CoT serves as a foundational technique that can be combined with complementary approaches when needed. Role prompting can specify the medical expertise level, while self-consistency can validate CoT outputs through majority voting. However, CoT alone provides sufficient reasoning structure for most medical extraction tasks.
-
-#### Application to Medical Silver Answers
-
-For generating silver answers from GraSCCo medical documents, zero-shot CoT is applied as follows:
-
-**Prompt Structure:**
-```
-You are analyzing a clinical document. Extract all relevant medical information.
-Let's think step by step:
-
-1. First, identify all mentioned diagnoses and their supporting evidence in the text
-2. Second, list all medications with their dosages and administration routes
-3. Third, note any procedures or treatments described
-4. Finally, structure this information in the required JSON format
-
-[Clinical document text]
-```
-
-**Value for This Study:**
-
-* **Scientific Defensibility:** The exposed reasoning allows verification of extraction accuracy
-* **Generalizability:** Works across diverse medical documents without example curation
-* **Efficiency:** Single-pass inference suitable for both large LLMs and smaller SLMs
-* **Transparency:** Enables identification of model limitations and systematic errors
-* **Reproducibility:** Simple, well-documented approach that other researchers can replicate
-
-#### Comparison with Alternative Techniques
-
-**Prompt Chaining** offers modularity but introduces complexity through multi-stage orchestration and error propagation between stages. For medical extraction, the overhead of managing state between prompts outweighs the benefits when CoT can achieve similar decomposition within a single prompt.
-
-**Self-Consistency** provides statistical validation through multiple sampling runs but multiplies computational costs by 5-10×. While valuable for critical applications, it is better positioned as an optional validation layer on top of CoT rather than a primary technique.
-
-**Multi-Persona Prompting** simulates expert review but requires complex orchestration of multiple model calls and personas. The "four-eyes principle" it provides can be approximated more efficiently through careful CoT prompt design that instructs the model to verify its own reasoning.
-
-**Conclusion:** Chain-of-Thought prompting, particularly in its zero-shot form, represents the optimal balance of transparency, efficiency, and accuracy for generating silver answers from medical documents. Its ability to expose reasoning while maintaining generalizability makes it the technique of choice for this study's evaluation framework.
+Alternative techniques such as prompt chaining, self-consistency, and multi-persona prompting offer additional guarantees but at substantially higher complexity and computational cost. For the scope of this study, CoT provides sufficient reasoning structure while remaining feasible for both large LLMs (silver answer generation) and smaller SLMs (evaluation phase). The concrete prompt design is detailed in Chapter 3.
 
