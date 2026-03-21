@@ -1,6 +1,6 @@
 <!-- #D-INTRO — AI-generated (Claude, Feb 2026) — see paper/INSTRUCTIONS.md -->
 
-# Discussion
+# Discussion {#sec:discussion}
 
 ## Interpretation of Results
 
@@ -37,7 +37,7 @@ Despite the structural compliance issues, semantic similarity scores remain rela
 
 Mistral-Nemo (12B) underperforms its parameter class significantly. Its JSON similarity score (0.065, Table \ref{tab:json-sim}) is the second-lowest of all models, and its DAG score (0.424, Table \ref{tab:avg-scores-judge}) remains below that of the 2B Granite model (0.407) despite having six times more parameters. While its LLM-Judge score (0.553) is mid-range, the overall composite (0.339, Table \ref{tab:composite}) places it below Granite 3.3:2b (0.344). This suggests that the model's instruction-following capability for structured extraction in German clinical texts is inadequate despite its size, reinforcing the observation that model selection for domain-specific tasks cannot rely on parameter count alone.
 
-The metric correlation analysis (Chapter 4, Figure \ref{fig:metric-correlation}) further supports these observations: LLM-as-a-Judge metrics show low correlation with lexical measures (r = 0.10–0.27), confirming that clinical extraction quality cannot be approximated by surface-level overlap metrics alone. Notably, JSON similarity correlates more strongly with the DAG metric (r = 0.45) than with any lexical metric, suggesting that format compliance and content quality are interdependent.
+The metric correlation analysis (Chapter \ref{sec:results}, Figure \ref{fig:metric-correlation}) further supports these observations: LLM-as-a-Judge metrics show low correlation with lexical measures (r = 0.10–0.27), confirming that clinical extraction quality cannot be approximated by surface-level overlap metrics alone. Notably, JSON similarity correlates more strongly with the DAG metric (r = 0.45) than with any lexical metric, suggesting that format compliance and content quality are interdependent.
 
 ## Implications for Clinical Practice
 

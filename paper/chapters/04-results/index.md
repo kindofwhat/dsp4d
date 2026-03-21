@@ -1,12 +1,12 @@
 <!-- #R-INTRO — AI-generated (Claude, Feb 2026) — see paper/INSTRUCTIONS.md -->
 
-# Results
+# Results {#sec:results}
 
 This chapter presents the empirical findings of the Zero-Shot evaluation run across all eleven models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
 
 ## Overview
 
-Eleven models were evaluated in a Zero-Shot configuration using the metrics defined in Section 3.6. Tables \ref{tab:avg-scores-stat}–\ref{tab:composite} present the mean scores across all 62 test cases, grouped by metric category. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
+Eleven models were evaluated in a Zero-Shot configuration using the metrics defined in Section \ref{sec:eval-metrics}. Tables \ref{tab:avg-scores-stat}–\ref{tab:composite} present the mean scores across all 62 test cases, grouped by metric category. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
 
 ## Impact of LLM Size
 
