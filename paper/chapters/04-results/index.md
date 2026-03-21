@@ -4,15 +4,9 @@
 
 This chapter presents the empirical findings of the Zero-Shot evaluation run across all eleven models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
 
-## Overview of Models and Evaluation Metrics
+## Overview
 
-Eleven models were evaluated: two large cloud models (Gemini 2.5 Pro via Vertex AI, Kimi-K2.5 via Infomaniak), one small cloud model (GPT-5-nano via OpenAI), one MoE model (Qwen3.5-35B-A3B with 3B active parameters, run locally via MLX on Apple M3), and seven locally executable SLMs ranging from 2B to 27B parameters run via Ollama. All models received the identical system prompt and clinical input documents in a Zero-Shot configuration — no few-shot examples or retrieval augmentation was applied.
-
-The evaluation framework applied eight metrics per interaction, categorised into three groups:
-
-- **Statistical metrics** (deterministic, no model required): BLEU, ROUGE, Levenshtein similarity, Token F1, and JSON similarity. These measure lexical overlap and structural conformance between the model output and the Silver Answer.
-- **Embedding-based metric** (requires an embedding model, but no generative LLM): Semantic similarity, computed via cosine distance on text-embedding-3-small vectors. This metric captures whether the output conveys the same meaning as the Silver Answer, independent of exact wording.
-- **LLM-as-a-Judge metrics** (require a generative LLM as evaluator): DAG medical semantic field extraction and LLM-Judge medical field comparison. These employ GPT-4o-mini to assess the clinical quality and field-level correctness of the extracted content against the Silver Answer.
+Eleven models were evaluated in a Zero-Shot configuration using the metrics defined in Section 3.6. Tables \ref{tab:avg-scores-stat}–\ref{tab:composite} present the mean scores across all 62 test cases, grouped by metric category. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
 
 ## Impact of LLM Size
 
@@ -39,6 +33,8 @@ The following three tables present the mean scores across all 62 test cases per 
 
 : Mean statistical metric scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-stat}
 
+The statistical metrics measure whether the model reproduces the exact content and structure of the reference answer. For clinical deployment, these scores indicate how well a model's output could be automatically ingested into a health record system without manual correction. The overall low BLEU scores (0.054–0.122) reflect the expected lexical diversity in clinical text extraction — models express the same medical content using different phrasing. JSON similarity (rightmost column) is the most actionable metric here: a score near zero (e.g. Mistral-Nemo: 0.065) means the output is structurally unparseable.
+
 <!-- #R-TAB-JUDGE — regenerate from JSON, see INSTRUCTIONS.md -->
 **Embedding-Based Metric** (requires embedding model) and **LLM-as-a-Judge Metrics** (require generative LLM as evaluator):
 
@@ -57,6 +53,8 @@ The following three tables present the mean scores across all 62 test cases per 
 | llama3:8b | 8B | 0.650 | 0.387 | 0.434 |
 
 : Mean embedding and LLM-as-a-Judge scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-judge}
+
+Semantic similarity (Table \ref{tab:avg-scores-judge}) indicates whether a model captures the medical *meaning* regardless of exact wording. The high scores across most models (0.650–0.861) suggest that even small SLMs comprehend the clinical content. The DAG and LLM-Judge scores assess clinical extraction quality as judged by GPT-4o-mini: the gap between semantic similarity and DAG scores (e.g. Granite 2B: 0.843 vs. 0.407) quantifies the difference between understanding content and producing usable structured output.
 
 <!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
 ### Composite Scores by Metric Category
@@ -78,6 +76,8 @@ To provide a consolidated view, Table \ref{tab:composite} aggregates the metric 
 | llama3:8b | 8B | 0.185 | 0.650 | 0.411 | 0.300 | 17'002 |
 
 : Composite scores (mean of metric averages) by category. Statistical = 5 lexical/structural metrics; Embedding = semantic similarity (text-embedding-3-small); LLM-as-a-Judge = 2 generative evaluation metrics (judged by GPT-4o-mini). {#tab:composite}
+
+The composite score (Table \ref{tab:composite}) provides a consolidated view for clinical deployment viability. An overall score of 0.468 (Gemini 2.5 Pro) represents the current ceiling: a GP using this model would still need to review and correct a substantial portion of extractions. The averaging across metric categories is appropriate here because all three dimensions — lexical fidelity, semantic comprehension, and clinical quality — must be satisfied simultaneously for pipeline integration.
 
 Gemini 2.5 Pro achieves the highest overall composite score (0.468), followed by Gemma3:27b (0.409) and Kimi-K2.5 (0.398). Among the locally executable SLMs, Qwen3.5-35B-A3B — a MoE model with only 3B active parameters — ranks 5th at 0.390, closely matching the cloud models. Granite 3.3 (2B) achieves 0.344, outperforming several models with significantly more parameters.
 
