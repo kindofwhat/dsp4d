@@ -40,5 +40,7 @@ abstract: |
   evaluation of Few-Shot, RAG, and Long-Context augmentation strategies.
 
   **Keywords:** Large Language Models, Context Engineering, Medical Document
-  Classification, Edge Deployment, Data Sovereignty, Zero-Shot Evaluation
+  Classification, Edge Deployment, Data Sovereignty, Zero-Shot Evaluation.
+  
+  The paper is built on github, see https://github.com/kindofwhat/dsp4d.
 ---
