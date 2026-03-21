@@ -356,7 +356,7 @@ Models under restrictive licences (Llama 3.1, Gemma) require attribution notices
 
 ## Experimental Setup
 
-The complete source code for both the Silver Answers App and the llm-validator evaluation framework, as well as all evaluation data, is available in the project repository^[TODO: Insert GitLab URL].
+The complete source code for both the Silver Answers App and the llm-validator evaluation framework, as well as all evaluation data, is available in the project repository^[<https://github.com/kindofwhat/dsp4d> — the version identifier on the title page corresponds to the Git commit hash].
 
 ### Server and Application Setup
 

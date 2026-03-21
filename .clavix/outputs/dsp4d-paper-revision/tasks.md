@@ -235,7 +235,7 @@ Address the core email feedback: "Kapitel 3 wirkt wenig zusammenhängend."
 
 ## Phase 4: Ch 1 (Introduction) — Trim
 
-- [ ] [BLOCKED: Awaiting user decision] **Decision: "A Note on the Craft" — keep, footnote, or remove?**
+- [x] **Decision: "A Note on the Craft" — keep, footnote, or remove?**
   Task ID: p4-01
   > **File**: `01-introduction/index.md` lines 3–16
   > **Action**: HUMAN DECISION REQUIRED. The supervisor questioned this section: "Was hat die Fontwahl zu bedeuten?" Options:
