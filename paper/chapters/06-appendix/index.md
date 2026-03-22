@@ -444,6 +444,124 @@ private DAGExecutionResult executeParallelBranches(
 }
 ```
 
+## Appendix: LLM-Judge Medical Field Comparison Prompt {#appendix-llm-judge-prompt}
+
+The following prompt is used for the one-shot Medical Field Comparison metric. The judge LLM (GPT-4o-mini) receives the actual model output and the expected Silver Answer, evaluates seven clinical fields independently using a weighted rubric, and returns a structured JSON score.
+
+```text
+You are a medical record extraction evaluator. You will compare an ACTUAL
+output against an EXPECTED output from a medical record extraction system.
+
+Both outputs contain a 'structured_health_record' JSON object. Ignore any
+'internal_monologue' field. If either output is wrapped in markdown code
+fences, strip them and parse the JSON inside.
+
+## Fields to Evaluate
+
+Compare these 7 fields independently. For each field, assign a score
+using the rubric below.
+
+### 1. categories (weight: 1)
+Medical specialty labels (e.g. Onkologie, Chirurgie, Innere Medizin).
+Order does not matter. Hallucinated categories (in ACTUAL but not
+EXPECTED) are worse than missing ones.
+- 1.0: All categories match exactly (order-independent)
+- 0.7: One category missing or one extra, but core specialties correct
+- 0.3: Multiple categories wrong, missing, or hallucinated
+- 0.05: Categories entirely wrong or field missing
+
+### 2. date_and_source (weight: 1)
+Document date and authoring institution/person. Focus on factual
+correctness, not formatting (e.g. '21.03.2023' vs 'March 21, 2023'
+are equivalent).
+- 1.0: Same date and source, possibly different wording or format
+- 0.6: Date correct but source incomplete or vice versa
+- 0.2: Wrong date, wrong source, or major inaccuracies
+- 0.05: Field missing or empty in ACTUAL
+
+### 3. diagnosis (weight: 2 — most critical field)
+Check: (1) Primary diagnosis present and correct? (2) Secondary
+diagnoses and past medical history? (3) Any hallucinated diagnoses
+not in EXPECTED? (4) Important diagnoses missing? Hallucinated
+diagnoses are the most severe error. Terminology differences (German,
+Latin, English) are acceptable if the medical concept is the same.
+- 1.0: All diagnoses match semantically, no hallucinations,
+       no important omissions
+- 0.8: Core diagnoses correct, minor omissions, no hallucinations
+- 0.5: Primary diagnosis correct but significant omissions or
+       minor hallucinations
+- 0.15: Major hallucinations or primary diagnosis wrong/missing
+- 0.05: Diagnosis completely wrong, hallucinated, or field missing
+
+### 4. relevant_metrics (weight: 1)
+Clinical values like lab results (CRP, potassium), vital signs,
+diagnostic findings. Incorrect numerical values are critical errors.
+Missing metrics are less severe. Unit or formatting differences
+are acceptable.
+- 1.0: Same metrics with correct values and units
+- 0.75: Key metrics correct, minor omissions or extra context
+- 0.4: Some metrics correct but important values missing or wrong
+- 0.05: Metrics largely incorrect, wrong values, or field missing
+
+### 5. medications.current (weight: 1)
+Current medication regimen at discharge. Brand name vs generic name
+equivalences are acceptable. Wrong dosages are critical errors.
+Timing notation like '1-0-1' means morning-noon-evening.
+- 1.0: All medications match with correct dosages and timing
+- 0.75: Most medications correct, minor dosage or timing differences
+- 0.4: Some medications correct but important ones missing or
+       wrong dosages
+- 0.05: Medications largely wrong, hallucinated, or field missing
+
+### 6. medications.advised (weight: 1)
+Newly prescribed medications, changes, tapering/discontinuation
+instructions. Wrong medication advice is a critical error.
+- 1.0: All medication advice matches including new prescriptions
+       and tapering instructions
+- 0.75: Core advice correct, minor details differ
+- 0.4: Some advice correct but important changes missing or wrong
+- 0.05: Advice largely wrong, hallucinated, or field missing
+
+### 7. follow_up (weight: 1)
+Post-discharge care: monitoring, appointments, nursing, restrictions.
+Missing safety-critical follow-up instructions are severe errors.
+- 1.0: All follow-up instructions match semantically
+- 0.75: Core follow-up correct, minor details differ
+- 0.4: Some follow-up correct but important instructions missing
+- 0.05: Follow-up largely wrong or field missing
+
+## Data to Evaluate
+
+**ACTUAL_OUTPUT:**
+{{actual_output}}
+
+**EXPECTED_OUTPUT:**
+{{expected_output}}
+
+## Your Task
+
+For each of the 7 fields: extract the values from both outputs,
+compare them, pick the closest score from the rubric, and write
+a one-sentence justification.
+
+Respond in exactly this JSON format:
+{
+  "categories": {"score": <number>, "reason": "<one sentence>"},
+  "date_and_source": {"score": <number>, "reason": "<one sentence>"},
+  "diagnosis": {"score": <number>, "reason": "<one sentence>"},
+  "relevant_metrics": {"score": <number>, "reason": "<one sentence>"},
+  "medications_current": {"score": <number>, "reason": "<one sentence>"},
+  "medications_advised": {"score": <number>, "reason": "<one sentence>"},
+  "follow_up": {"score": <number>, "reason": "<one sentence>"},
+  "overall_score": <weighted average:
+    (1*cat + 1*date + 2*diag + 1*metrics + 1*med_cur
+     + 1*med_adv + 1*follow) / 8>
+}
+```
+
+The weighted average formula assigns double weight to the diagnosis field, reflecting its clinical criticality. The overall score ranges from 0.0 to 1.0.
+
+
 ## Implementation Description: Silver Answers App {#appendix-silver-answers}
 
 ### Executive Summary
@@ -1253,23 +1371,6 @@ npm start
 - CDN for static assets
 - Serverless functions for processing
 
-
-## Appendix: Evaluation Metrics Reference {#appendix-metrics-reference}
-
-This section provides the mathematical definitions for all evaluation metrics used in the study.
-
-**BLEU** [@papineni2002bleu] computes modified n-gram precision $p_n$ for $n = 1 \ldots 4$, combined with a brevity penalty $BP$:
-$$\text{BLEU} = BP \cdot \exp\left(\sum_{n=1}^{4} w_n \log p_n\right)$$
-
-**ROUGE** [@lin2004rouge] measures recall-oriented overlap: ROUGE-1 (unigram recall), ROUGE-2 (bigram recall), and ROUGE-L (longest common subsequence).
-
-**Token F1** computes the harmonic mean of token-level precision and recall between generated and reference text.
-
-**Levenshtein Similarity** [@levenshtein1966binary] is the normalised complement of the edit distance: $1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$, where $d$ is the minimum number of single-character edits.
-
-**Semantic Similarity** computes the cosine similarity between embedding vectors of the generated and reference texts, using OpenAI's `text-embedding-3-small` model.
-
-**JSON Structural Similarity** and **DAG-Based Medical Extraction Quality** are described in their own appendix sections below.
 
 
 ## Appendix: Pearson Correlation Coefficient {#appendix-pearson}
