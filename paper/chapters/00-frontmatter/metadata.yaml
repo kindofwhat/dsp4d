@@ -34,17 +34,21 @@ header-includes: |
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size
   required for reliable medical document classification in edge deployment
-  scenarios where data sovereignty mandates local processing. We develop a
-  four-phase evaluation framework: first, Chain-of-Thought (CoT) prompting —
-  selected through a systematic comparison of 15 context engineering strategies —
-  is used to generate clinically validated reference answers from the GraSCCo
-  corpus. These silver answers then serve as benchmarks for a Zero-Shot
-  evaluation of nine models ranging from 2B to 27B parameters. Our results
-  show that model size alone does not predict extraction quality: a 2B model
-  outperforms several models four to six times its size, while the primary
-  bottleneck for smaller models is structural output compliance rather than
-  semantic comprehension. These findings establish a baseline for subsequent
-  evaluation of Few-Shot, RAG, and Long-Context augmentation strategies.
+  scenarios where data sovereignty mandates local processing. Two custom
+  applications were developed: a *Silver Answers App* for generating and
+  annotating reference answers via a cloud-based SOTA model, and
+  *llm-validator*, an evaluation framework implementing both statistical
+  metrics and LLM-as-a-Judge assessment with two purpose-built metrics
+  (JSON Structural Similarity and a DAG-based extraction quality metric).
+  Using this pipeline, Chain-of-Thought (CoT) prompting generates clinically
+  validated reference answers from the GraSCCo corpus, which serve as
+  benchmarks for a Zero-Shot evaluation of eleven models ranging from 2B to
+  27B parameters. Our results show that model size alone does not predict
+  extraction quality: a 2B model outperforms several models four to six times
+  its size, while the primary bottleneck for smaller models is structural
+  output compliance rather than semantic comprehension. These findings
+  establish a baseline for subsequent evaluation of Few-Shot, RAG, and
+  Long-Context augmentation strategies.
 
   **Keywords:** Large Language Models, Context Engineering, Medical Document
   Classification, Edge Deployment, Data Sovereignty, Zero-Shot Evaluation.
