@@ -25,20 +25,19 @@ Early scaling laws — notably by Kaplan et al. [@kaplan2020scaling] and Hoffman
 
 ### The Rise of Small Language Models
 
-A comprehensive survey by Lu et al. (2024) benchmarked 59 SLMs (100M–5B parameters) across commonsense reasoning, mathematics, and in-context learning tasks. Their findings reveal substantial performance improvements: SLMs improved by 10–13% between 2022 and 2024, outpacing larger models which improved by only 7.5% over the same period [@lu2024slmsurvey]. Notably, the Phi-3 model (3.8B parameters) achieves 69% on MMLU — performance comparable to Mixtral 8x7B and GPT-3.5. This demonstrates that modern SLMs, through optimized architectures and high-quality training data, can compete with models several times their size.
-
+A comprehensive survey by Lu et al. (2024) benchmarked 59 SLMs (100M–5B parameters) across commonsense reasoning, problem-solving, and mathematics tasks. SLM performance improved by 10–14% across these tasks between 2022 and 2024, while the LLaMA-7B series — used as a reference for open-source LLMs — improved by only 7.5% over the same period [@lu2024slmsurvey, Section 3.2]. This demonstrates that modern SLMs, through optimized architectures and high-quality training data, are rapidly closing the gap with models several times their size.
 
 ### Capability Density and the Densing Law
 
 Xiao et al. (2025) formalize this trend through the concept of *capability density* — defined as capability per parameter. Their empirical analysis reveals a "densing law": capability density approximately doubles every 3.5 months [@xiao2025densing]. This trajectory indicates that equivalent performance can be achieved with exponentially fewer parameters over time, making local deployment increasingly viable.
 
-### A Note on Terminology
-
-The term "Small Language Model" warrants clarification. In current usage, "small" refers exclusively to parameter count — not to training data scope. A 3B parameter model trained on trillions of web-scale tokens is considered "small" only relative to 70B+ frontier models. This stands in contrast to *domain-specific* models such as ClinicalBERT or PubMedBERT, which are smaller in both parameters and training scope, having been trained on specialized medical corpora. Throughout this thesis, the term SLM refers to language models with fewer than 100 billion parameters, regardless of their training data origin — consistent with the boundary used by Lu et al. [@lu2024slmsurvey] in their comprehensive SLM survey. This broader definition encompasses both general-purpose compact models (Phi, Qwen, Llama) and domain-specialized models, allowing for comparison across deployment scenarios.
-
 ### Edge Deployment Considerations
 
 Recent work specifically addresses SLM deployment on resource-constrained devices. Hassanpour et al. (2025) systematically evaluate SLMs for edge scenarios, examining the trade-offs between model size, quantization levels, and task performance [@hassanpour2025edge]. Their findings confirm that sub-4B parameter models can achieve practical utility for domain-specific tasks when properly configured — a key consideration for medical applications where data must remain on-device.
+
+### A Note on Terminology
+
+The term "Small Language Model" warrants clarification. In current usage, "small" refers exclusively to parameter count — not to training data scope. A 3B parameter model trained on trillions of web-scale tokens is considered "small" only relative to 70B+ frontier models. This stands in contrast to *domain-specific* models such as ClinicalBERT or PubMedBERT, which are smaller in both parameters and training scope, having been trained on specialized medical corpora. Throughout this thesis, the term SLM refers to language models with fewer than 100 billion parameters, regardless of their training data origin — consistent with the boundary used by Lu et al. [@lu2024slmsurvey] in their comprehensive SLM survey. This broader definition encompasses both general-purpose compact models (Phi, Qwen, Llama) and domain-specialized models, allowing for comparison across deployment scenarios.
 
 ## Context Engineering Strategies {#sec:context-engineering}
 
@@ -60,8 +59,6 @@ Prompt engineering is the systematic practice of designing, refining, and optimi
 
 5. **Enabling Transparent Reasoning:** Chain-of-Thought (CoT) prompting allows models to expose their reasoning process, making it possible to verify the logical steps that led to a conclusion [@wei2022chain; @kojima2022large]. This transparency is crucial for scientific validation and is the basis for generating the reference answers (silver answers) in this study.
 
-The following sections detail specific prompt engineering techniques and their application to medical text processing, with particular emphasis on methods that enable reliable extraction of structured information from clinical narratives.
-
 A comprehensive comparison of 20 prompting techniques is provided in [Appendix: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs). Based on this analysis, Chain-of-Thought (CoT) was selected for the following reasons.
 
 ### Chain-of-Thought: The Selected Technique for Generating Silver Answers
@@ -76,5 +73,6 @@ Among the prompting techniques analysed, **Chain-of-Thought (CoT) prompting** wa
 
 **Simplicity and reproducibility.** Unlike multi-stage pipelines (prompt chaining) or computationally expensive approaches (self-consistency with 5–10× sampling), CoT requires only a single inference pass — reducing costs and enhancing reproducibility.
 
-Alternative techniques such as prompt chaining, self-consistency, and multi-persona prompting offer additional guarantees but at substantially higher complexity and computational cost. For the scope of this study, CoT provides sufficient reasoning structure while remaining feasible for both large LLMs (silver answer generation) and smaller SLMs (evaluation phase). The concrete prompt design is detailed in Chapter \ref{sec:methodology}.
+Alternative techniques such as prompt chaining, self-consistency, and multi-persona prompting offer additional guarantees but at substantially higher complexity and computational cost. For the scope of this study, CoT provides sufficient reasoning structure while remaining feasible for both large LLMs (silver answer generation) and smaller SLMs (evaluation phase). The concrete prompt design is detailed in Chapter \ref{sec:methodology}. 
 
+More sophisticated variants — such as Tree-of-Thought [@yao2023treethoughts], Chain-of-Verification [@dhuliawala2023chainofverification], and Self-Consistency [@wang2023selfconsistency] — extend CoT with branching, self-correction, or multi-sample voting. These techniques are acknowledged as promising directions for future work (Chapter \ref{sec:discussion}) but fall outside the scope of this initial evaluation, which deliberately uses standard Zero-Shot CoT to establish an unaugmented baseline.

@@ -8,7 +8,7 @@ The theoretical foundations established in Chapter \ref{sec:related-work} direct
 
 ## Procedure
 
-![Four-phase methodological approach. Source: Authors.](../../assets/03-Methodology-Overview.png){#fig:methodology-overview}
+![Four-phase methodological approach. Source: Authors (AI generated).](../../assets/03-Methodology-Overview.png){#fig:methodology-overview}
 
 The research design follows a rigorous four-phase methodological approach to ensure reproducibility and statistical significance:
 
@@ -49,7 +49,7 @@ The use of Silver Answers as the primary benchmark is a pragmatic decision: manu
 
 ### Preparation Work
 
-To ensure a structured and scientifically sound prompt engineering process, the following preparatory steps were undertaken in collaboration with medical professionals.
+The following preparatory steps were undertaken in collaboration with a General Practitioner to define the extraction target and ensure clinical relevance of the output format.
 
 #### Medical Context Stratification
 
@@ -108,7 +108,7 @@ While techniques like Self-Consistency or Multi-Persona Prompting offer higher r
 
 ### System Prompt: Clinical Data Extraction (CoT)
 
-The system prompt is formulated in English while input documents are German. This reflects standard LLM practice: instruction-tuned models typically achieve better instruction adherence with English-language system prompts, while the output constraint (German content values, see schema below) ensures extracted medical content remains in the source language.
+The system prompt is formulated in English while input documents are German. This pragmatic choice reflects the English-centric training data of most instruction-tuned models, though recent research suggests that the advantage of English-language prompts over native-language prompts is task-dependent rather than universal [@huang2025multilingualprompt]. The output schema constrains extracted medical content to the source language (German), ensuring clinical accuracy. In a Swiss deployment context, this separation of instruction language and content language is additionally practical, as clinical reports may arrive in German, French, or Italian. It should be noted that the model selection (Section \ref{sec:experimental-setup}) did not specifically account for whether individual models were trained on multilingual corpora — a factor that may influence extraction quality for non english clinical texts.
 
 In a medical context, the CoT structure is particularly valuable because it forces the LLM to identify the evidence in the text before committing to a category or a medication status. This reduces "lazy" extractions where a model might miss a nuance (like a medication being discontinued).
 
@@ -159,7 +159,7 @@ Source Text:
 [Gold Standard Example (CoT Approach)](#appendix-gold-standard)
 
 ### Ground Truth Generation and Annotation Platform
-To facilitate the seamless generation and validation of these answers, we developed a dedicated web application. This platform serves three primary functions:
+To facilitate the seamless generation and validation of these answers, we developed a dedicated and custom web application. This platform serves three primary functions:
 
 * **Accessibility:** It allows researchers and medical experts to access the data and provide feedback from any location at any time.
 * **Centralized Storage:** It records both the raw LLM outputs (Silver Answers) and the subsequent expert feedback/corrections.
@@ -179,6 +179,7 @@ This component manages the medical corpora, specifically the GraSCCo raw text fi
 
 The platform allows for sophisticated prompt management. While it supports single-prompt execution, it is optimized for Prompt Chaining—breaking complex medical tasks into subtasks (e.g., Extraction -> Filtering -> Formatting) to isolate errors and improve reliability.
 To ensure clinical accuracy, users can fine-tune the following model parameters:
+
 * Temperature: Controls randomness. For medical extraction, a lower range of 0.2–0.5 is recommended to ensure deterministic, consistent, and predictable outputs.
 * Max Output Tokens: Defines the response length. We recommend 1024–2048 for concise outputs or 4096–8192 for detailed clinical extractions
 * Top-K Sampling: Limits the model to the $K$ most likely tokens. A setting of 10–40 balances consistency with the flexibility needed for medical terminology.
@@ -187,12 +188,16 @@ To ensure clinical accuracy, users can fine-tune the following model parameters:
 **Execution & Metrics**
 
 This module provides real-time visibility into the generation process. It tracks Execution Status and critical performance metrics, including:
+
 * Token Consumption: Monitoring input and output volume.
 * Cost & Quality: Assessing the financial efficiency and the perceived reliability of the "Silver Answers".
+
+TODO Beni: wird hier wirklich eine metric bez perceived reliability gemessen?
 
 **Results & Annotation**
 
 Once execution is complete, the platform displays the generated answers for each input document. This interface is designed for the human-in-the-loop phase, allowing medical experts to:
+
 * Review execution details for each document.
 * Annotate and provide feedback to correct hallucinations or omissions.
 * Download the final validated results in a standardized exchange format for use in the study’s evaluation framework.
@@ -305,7 +310,7 @@ Because we are evaluating SLMs answers against "Silver/Golden Answers" derived f
 
 To filter the hundreds of available open-source models down to a manageable set, we use this five criteria in order.
 
-**1. Hardware-Aware Parameter Efficiency**
+#### 1. Hardware-Aware Parameter Efficiency
 
 * **Criterion:** Models must have between 7B to 20B parameters that support 4-bit or 8-bit quantization
 * **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16). Grounded in the observations of the Densing Law by Xiao et al. (Section \ref{sec:scaling-laws}), we deliberately set the upper limit at under 20B parameters: modern SLMs in this range already achieve the capability density required for medical text extraction tasks, making larger models unnecessary for this scope. Furthermore, a typical Swiss medical practice runs on consumer-grade workstations with a standard GPU offering 8–16 GB of (V)RAM — a hard hardware constraint that makes 4-bit quantization not merely an optimisation but a prerequisite for local deployment.
@@ -316,31 +321,31 @@ For Example:
 * **Selection:** Exclude any models <=18B consider choosing higher bit-quantization for smaller models.
 [LLM Model Parameters 2025](https://local-ai-zone.github.io/guides/what-is-ai-model-3b-7b-30b-parameters-guide-2025.html)
 
-**2. High Reasoning & Knowledge Benchmark Scores**
+#### 2. High Reasoning & Knowledge Benchmark Scores
 
 * **Criterion:** Prioritize models with high scores on MMLU-Pro disciplines Biology, Chemistry, Health and Psychology
 * **Why:**  Clinical text annotation is not just text generation. It is a reasoning task. Standard benchmarks like MMLU are becoming saturated and less discriminative. MMLU-Pro better distinguishes models that "understand" complex topics versus those that just guess.
 * **Selection:** Based on the MMLU-Pro Leaderboards: Select models that outperform in Biology, Chemistry, Health and Psychology and provide "Reasoning" or "Thinking" to reduce hallucination. See Table below.
 
-**3. Instruction Following & Output Structure**
+#### 3. Instruction Following & Output Structure
 
 * **Criterion:** Select "Instruct" or "Chat" rather than base models
 * **Why:** We compare SLM output against Silver/Golden Answers. If the SLM cannot follow instructions, we simply get the output of a "completion engine" not an assistant. Base trained models lack intent recognition.
 * **Selection:** Choose the "Instruct" or "Chat" variants
 
-**4. Context Window Capacity**
+#### 4. Context Window Capacity
 
 * **Criterion:** Minimum context window of 8k tokens (preferably 32k+ or higher)
 * **Why:** Clinical notes can be lengthy. If a diagnosis or generally a patient report exceeds the model's context window, the model will "forget" early information, leading to missed health information annotations. Newer architectures support massive context windows, allowing the model to read a full report in one pass. Based on the structural analysis of the GraSCCo corpus, patient document histories regularly exceed 4k tokens; a minimum of 8k tokens is therefore required to process complete records without information loss. This requirement is further supported by the attention mechanism constraints discussed in Section \ref{sec:context-engineering}, which show that truncating context directly degrades extraction quality for long-range clinical dependencies.
 * **Selection:** Discard models with <8k context limits
 
-**5. License & Data Sovereignty**
+#### 5. License & Data Sovereignty
 
 * **Criterion:** Permissive licenses (Apache 2.0, MIT) allowing local commercial use
 * **Why:** The primary advantage of SLMs in healthcare is data sovereignty—running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.
 * **Selection:** Model is truly open source (and does not require any API calls)
 
-**Proposed set of SLMs for Evaluation**
+#### Proposed Set of SLMs for Evaluation
 
 | Models | Qualifier | Context Window | License | Size (B) | Remarks |
 |--------|-----------|----------------|---------|----------|---------|
@@ -387,7 +392,7 @@ The Silver Answers App is a cloud-based web application that automates AI-powere
 
 The evaluation pipeline combines established NLP metrics with purpose-built clinical quality measures. Each metric was selected for a specific reason related to the medical extraction use case. For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
 
-**Rationale for Metric Selection.** Classical n-gram metrics such as BLEU and ROUGE are known to correlate weakly with human judgment for complex reasoning tasks [@reiter2018structured], penalising clinically correct paraphrases (e.g. "Myokardinfarkt" vs. "Herzinfarkt") while rewarding superficial lexical overlap. Nevertheless, they are deliberately retained as a *baseline* for comparability with prior NLP studies. The actual clinical decision-making power rests on the purpose-built DAG metric and the JSON Structural Similarity measure. Furthermore, because our extraction target is a structured JSON record, statistical metrics regain relevance for compact, deterministic fields such as dates, category labels, and medication names — where exact match is both expected and meaningful.
+**Rationale for Metric Selection.** Classical n-gram metrics such as BLEU and ROUGE are known to correlate weakly with human judgment for complex reasoning tasks [@reiter2018structured], penalising clinically correct paraphrases (e.g. "Myokardinfarkt" vs. "Herzinfarkt") while rewarding superficial lexical overlap. Despite these limitations, statistical metrics are included for three reasons. First, they are *computationally inexpensive*: unlike LLM-as-a-Judge metrics, they require no model inference and can be computed deterministically in milliseconds, enabling rapid iteration during pipeline development. Second, their relationship to the LLM-based quality metrics is *empirically evaluated* through Pearson correlation analysis (Chapter \ref{sec:results}), quantifying the extent to which lexical overlap approximates clinical extraction quality — and where it fails. Third, because the extraction target is a *structured JSON record*, statistical metrics regain practical relevance for compact, deterministic fields such as dates (`"2025-03-14"`), category labels (`"Kardiologie"`), and medication names (`"Metformin 500mg"`) — where exact match is both expected and clinically meaningful [@papineni2002bleu; @lin2004rouge]. The actual clinical decision-making power rests on the purpose-built DAG metric and the JSON Structural Similarity measure.
 
 **Statistical Metrics:**
 

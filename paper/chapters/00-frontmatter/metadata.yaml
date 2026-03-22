@@ -23,6 +23,13 @@ declaration: true
 header-includes: |
   \usepackage{float}
   \floatplacement{figure}{H}
+  \usepackage{needspace}
+  \widowpenalty=10000
+  \clubpenalty=10000
+  \usepackage{etoolbox}
+  \pretocmd{\section}{\needspace{5\baselineskip}}{}{}
+  \pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
+  \pretocmd{\subsubsection}{\needspace{3\baselineskip}}{}{}
 
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size

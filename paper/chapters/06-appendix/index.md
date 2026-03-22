@@ -128,6 +128,8 @@ Below is the processing of the same kardiologische report, but utilizing the **K
 
 ### Input: Sample Clinical Report (GraSCCo-Style)
 
+TODO Beni: hier ganzes Beispiel: ich habe dieses NICHT gefunden
+
 **Bericht vom 14.03.2025 – Kardiologische Gemeinschaftspraxis Dr. Müller**
 
 **Anamnese:** 68-jähriger Patient stellt sich zur Verlaufskontrolle bei bekannter arterieller Hypertonie und stabiler Angina Pectoris vor. Aktuell klagt der Patient über gelegentliches Herzstolpern.
