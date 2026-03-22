@@ -2,59 +2,53 @@
 
 # Results {#sec:results}
 
-This chapter presents the empirical findings of the Zero-Shot evaluation run across all eleven models and 62 test cases from the GraSCCo corpus. Each test case was evaluated using eight metrics spanning statistical, embedding-based, and LLM-as-a-Judge categories. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
+This chapter presents the empirical findings of the Zero-Shot evaluation across all eleven models and 62 test cases from the GraSCCo corpus, using the metrics defined in Section \ref{sec:eval-metrics}. Table \ref{tab:avg-scores-key} presents the four key metric scores and Table \ref{tab:composite} the composite scores. All LLM-as-a-Judge evaluations were performed by GPT-4o-mini (OpenAI).
 
-## Overview
-
-Eleven models were evaluated in a Zero-Shot configuration using the metrics defined in Section \ref{sec:eval-metrics}. Tables \ref{tab:avg-scores-stat}–\ref{tab:composite} present the mean scores across all 62 test cases, grouped by metric category. The LLM-as-a-Judge evaluation was performed by GPT-4o-mini (OpenAI).
+An important caveat for interpreting the results: Gemini 2.5 Pro was also the model used to generate the Silver Answers (with CoT prompting in Phase II). Its top ranking is therefore expected — it is effectively being compared against its own prior outputs, albeit in a different prompting configuration (Zero-Shot vs. CoT). This self-similarity advantage does not extend to the other models, making the relative ranking among the remaining ten models the more meaningful comparison.
 
 ## Impact of LLM Size
 
 ### Aggregate Performance
 
-<!-- #R-TAB-STAT — regenerate from JSON, see INSTRUCTIONS.md -->
-The following three tables present the mean scores across all 62 test cases per model, grouped by metric category.
+The following table presents the mean scores across all 62 test cases per model for the four key metrics: JSON Structural Similarity (deterministic), Semantic Similarity (embedding-based), and the two LLM-as-a-Judge metrics (DAG and LLM-Judge, evaluated by GPT-4o-mini). Classical lexical metrics (BLEU, ROUGE, Levenshtein, Token F1) are omitted here as they correlate weakly with clinical extraction quality (see metric correlation analysis below); the full statistical metrics are available in the composite table.
 
-**Statistical Metrics** (deterministic, no model required):
+| Model              | Size | JSON Sim. | Sem. Sim. | DAG | LLM-Judge |
+|--------------------|------|-----------|-----------|-----|-----------|
+| gemini-2.5-pro | Large | 0.457 | 0.835 | 0.569 | 0.752 |
+| gemma3:27b | 27B | 0.362 | 0.790 | 0.510 | 0.671 |
+| Kimi-K2.5 | Large | 0.374 | 0.818 | 0.576 | 0.597 |
+| gpt-5-nano | Small | 0.335 | 0.861 | 0.510 | 0.537 |
+| qwen3.5-35b-a3b | 35B | 0.371 | 0.829 | 0.505 | 0.513 |
+| granite3.3:2b | 2B | 0.258 | 0.843 | 0.407 | 0.415 |
+| mistral-nemo | 12B | 0.065 | 0.794 | 0.424 | 0.553 |
+| glm4:9b | 9B | 0.231 | 0.732 | 0.425 | 0.466 |
+| qwen2:7b | 7B | 0.178 | 0.765 | 0.419 | 0.382 |
+| phi3.5:3.8b | 3.8B | 0.098 | 0.795 | 0.356 | 0.481 |
+| llama3:8b | 8B | 0.129 | 0.650 | 0.387 | 0.434 |
 
-| Model              | Size | BLEU | ROUGE | Levenshtein | Token F1 | JSON Sim. |
-|--------------------|------|------|-------|-------------|----------|-----------|
-| gemini-2.5-pro | Large | 0.122 | 0.254 | 0.377 | 0.380 | 0.457 |
-| gemma3:27b | 27B | 0.080 | 0.210 | 0.343 | 0.309 | 0.362 |
-| Kimi-K2.5 | Large | 0.071 | 0.170 | 0.311 | 0.270 | 0.374 |
-| gpt-5-nano | Small | 0.085 | 0.201 | 0.318 | 0.313 | 0.335 |
-| qwen3.5-35b-a3b | 35B | 0.057 | 0.204 | 0.368 | 0.273 | 0.371 |
-| granite3.3:2b | 2B | 0.085 | 0.165 | 0.317 | 0.266 | 0.258 |
-| mistral-nemo | 12B | 0.080 | 0.189 | 0.336 | 0.275 | 0.065 |
-| glm4:9b | 9B | 0.072 | 0.170 | 0.322 | 0.259 | 0.231 |
-| qwen2:7b | 7B | 0.054 | 0.159 | 0.291 | 0.270 | 0.178 |
-| phi3.5:3.8b | 3.8B | 0.077 | 0.115 | 0.287 | 0.218 | 0.098 |
-| llama3:8b | 8B | 0.077 | 0.160 | 0.314 | 0.245 | 0.129 |
+: Key metric scores per model across 62 test cases (Zero-Shot). JSON Sim. = structural compliance (deterministic); Sem. Sim. = semantic similarity (text-embedding-3-small); DAG and LLM-Judge = clinical extraction quality (GPT-4o-mini). {#tab:avg-scores-key}
 
-: Mean statistical metric scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-stat}
+Semantic similarity remains high across most models (0.650–0.861), indicating that even small SLMs comprehend the clinical content. The gap between semantic similarity and DAG scores (e.g. Granite 2B: 0.843 vs. 0.407) quantifies the difference between understanding content and producing usable structured output. JSON similarity reveals the most critical differentiation: Mistral-Nemo (0.065), Phi3.5 (0.098), and Llama3 (0.129) produce structurally unparseable output in the majority of cases.
 
-The statistical metrics measure whether the model reproduces the exact content and structure of the reference answer. For clinical deployment, these scores indicate how well a model's output could be automatically ingested into a health record system without manual correction. The overall low BLEU scores (0.054–0.122) reflect the expected lexical diversity in clinical text extraction — models express the same medical content using different phrasing. JSON similarity (rightmost column) is the most actionable metric here: a score near zero (e.g. Mistral-Nemo: 0.065) means the output is structurally unparseable.
+![Overall composite ranking across all eleven models. Cloud models (blue), MoE architecture (purple), and local dense SLMs (pink). Source: Authors.](../../assets/04-overall-ranking.png){#fig:overall-ranking width=85%}
 
-<!-- #R-TAB-JUDGE — regenerate from JSON, see INSTRUCTIONS.md -->
-**Embedding-Based Metric** (requires embedding model) and **LLM-as-a-Judge Metrics** (require generative LLM as evaluator):
+![Metric profile of the top five models across four key evaluation dimensions. The radar chart reveals that semantic similarity is uniformly high while JSON structural compliance and LLM-Judge scores differentiate models most strongly. Source: Authors.](../../assets/04-metric-profile-radar.png){#fig:metric-profile width=65%}
 
-| Model              | Size | Sem. Sim. | DAG | LLM-Judge |
-|--------------------|------|-----------|-----|-----------|
-| gemini-2.5-pro | Large | 0.835 | 0.569 | 0.752 |
-| gemma3:27b | 27B | 0.790 | 0.510 | 0.671 |
-| Kimi-K2.5 | Large | 0.818 | 0.576 | 0.597 |
-| gpt-5-nano | Small | 0.861 | 0.510 | 0.537 |
-| qwen3.5-35b-a3b | 35B | 0.829 | 0.505 | 0.513 |
-| granite3.3:2b | 2B | 0.843 | 0.407 | 0.415 |
-| mistral-nemo | 12B | 0.794 | 0.424 | 0.553 |
-| glm4:9b | 9B | 0.732 | 0.425 | 0.466 |
-| qwen2:7b | 7B | 0.765 | 0.419 | 0.382 |
-| phi3.5:3.8b | 3.8B | 0.795 | 0.356 | 0.481 |
-| llama3:8b | 8B | 0.650 | 0.387 | 0.434 |
+### Qualitative Example: Melanoma Follow-Up Report
 
-: Mean embedding and LLM-as-a-Judge scores per model across 62 test cases (Zero-Shot). {#tab:avg-scores-judge}
+To illustrate how metric differences manifest in practice, Table \ref{tab:example-extraction} compares the `medications.current` and `follow_up` fields extracted by four models from a melanoma follow-up report (Case 3, dermatology/oncology, 1629 tokens). The source document explicitly mentions "Abilify 10 mg 1/2-0-0" as current medication and a scheduled hospital admission for interferon therapy.
 
-Semantic similarity (Table \ref{tab:avg-scores-judge}) indicates whether a model captures the medical *meaning* regardless of exact wording. The high scores across most models (0.650–0.861) suggest that even small SLMs comprehend the clinical content. The DAG and LLM-Judge scores assess clinical extraction quality as judged by GPT-4o-mini: the gap between semantic similarity and DAG scores (e.g. Granite 2B: 0.843 vs. 0.407) quantifies the difference between understanding content and producing usable structured output.
+| Source | medications.current | follow_up |
+|--------|-------------------|-----------|
+| **Silver Answer** | Abilify 10 mg 1/2-0-0, Cipralex | Stationäre Aufnahme am 02.05.2023 um 14:30 Uhr, Station 1502, UK Klagenfurt |
+| Gemini 2.5 Pro | Abilify 10 mg 1/2-0-0 | Stationäre Aufnahme am 02.05.2023, 14:30 Uhr, Station 1502 |
+| Gemma3:27b | Abilify 10mg 1/2-0-0 | Stationäre Aufnahme zur Einleitung der Interferontherapie am 2023-05-02 |
+| Granite 3.3:2b | Abilify 10 mg 1/2-0-0 | Scheduled hospital admission for Interferon therapy initiation on 2023-05-02 |
+| Qwen3.5-35B-A3B | *(empty)* | *(empty)* |
+
+: Extraction comparison for Case 3 (melanoma follow-up) against the Silver Answer. {#tab:example-extraction}
+
+This case reveals four distinct observations. First, even Gemini 2.5 Pro — the model that generated the Silver Answers — misses "Cipralex" when re-evaluated in a Zero-Shot setting without CoT, illustrating the impact of prompting strategy on extraction completeness. Second, Gemma3:27b delivers a near-identical extraction to Gemini with only minor formatting differences. Third, Granite 3.3 (2B) extracts the correct medical content but violates the language constraint (English instead of German). Fourth, Qwen3.5-35B-A3B produces a structurally valid but content-empty JSON record — scoring 0.0 on content metrics despite having no parse error.
 
 <!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
 ### Composite Scores by Metric Category
