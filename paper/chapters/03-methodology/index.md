@@ -206,7 +206,36 @@ Once execution is complete, the platform displays the generated answers for each
 
 Beyond the session workflow, the platform includes User Management to control expert access and API Configuration to query sessions and results.
 
-**Model Output Filtering and API Integration Challenges**
+### Infrastructure and Deployment {#sec:experimental-setup}
+
+The complete source code for both the Silver Answers App, as well as all evaluation data, is available in the project repository^[<https://github.com/kindofwhat/dsp4d>].
+
+The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for golden answer generation.
+
+#### Hardware Configuration
+
+The system is built on an AMD Ryzen Threadripper Pro 9955WX with 128GB DDR5 RAM (5600 MHz) and an ASUS PRO WS WRX90E-SAGE SE mainboard. For GPU acceleration, a Radeon AI PRO R9700 AI TOP with 32GB GDDR6 memory provides a cost-effective alternative to NVIDIA solutions. The host system runs Fedora Server 42, with a dedicated Fedora Server 42 VM serving as the Docker host with GPU passthrough.
+
+#### LLM Inference Stack
+
+Local model inference is provided through Ollama (image: `ollama/ollama:rocm`) running in a Docker container with ROCm support for AMD GPU acceleration. The ROCm software stack is configured with `HSA_OVERRIDE_GFX_VERSION=12.0.1` to ensure compatibility with the Radeon AI PRO R9700. The Ollama service exposes its API on port 11434 and stores model data in a persistent volume at `/mnt/data/ollama-data`.
+
+#### User Interface
+Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based frontend for model interaction, accessible at https://ai.bniweb.ch and secured via Cloudflare. The interface connects to the Ollama backend and exposes its service on port 3030 (mapped to internal port 8080).
+
+#### Silver Answers App
+
+The Silver/Golden Answers web application — a cloud-based system that automates AI-powered document analysis using Google's Gemini large language model — runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
+
+![Silver Answers App Interface. Source: Authors (screenshot).](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
+
+[See Appendix: Silver Answers App for full description](#appendix-silver-answers)
+
+#### Cloud Services
+
+Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Pro model) and Cloud Storage.
+
+### Model Output Filtering and API Integration Challenges
 
 During the integration of State-of-the-Art cloud models, such as Gemini 2.5 Flash and Gemma 3, early empirical testing revealed systematic generation failures. These errors occurred when the models' internal output filters were triggered by the clinical text, resulting in blocked responses and empty outputs. Our initial mitigation strategy involved explicitly configuring the safety settings within the API payload to the lowest restrictive thresholds to accommodate medical terminology:
 
@@ -295,7 +324,9 @@ const MEDICAL_EXTRACTION_SCHEMA = {
 };
 ```
 
-**Conclusion:** The implementation of a standardized, OpenAI-compatible API interface provides substantial architectural convenience; however, it cannot solve all idiosyncratic challenges introduced by different models. Achieving robust, production-grade clinical extraction requires continuous, model-specific adaptation to overcome unique constraints—such as immutable safety filters and varying structural compliance capabilities.
+### Conclusion
+
+The implementation of a standardized, OpenAI-compatible API interface provides substantial architectural convenience; however, it cannot solve all idiosyncratic challenges introduced by different models. Achieving robust, production-grade clinical extraction requires continuous, model-specific adaptation to overcome unique constraints—such as immutable safety filters and varying structural compliance capabilities.
 
 
 ## Selecting Smaller Large Language Models (SLM) for the Evaluation
@@ -359,36 +390,7 @@ For Example:
 Models under restrictive licences (Llama 3.1, Gemma) require attribution notices; the full compliance template is available in the project repository.
 
 
-## Experimental Setup {#sec:experimental-setup}
-
-The complete source code for both the Silver Answers App and the llm-validator evaluation framework, as well as all evaluation data, is available in the project repository^[<https://github.com/kindofwhat/dsp4d> — the version identifier on the title page corresponds to the Git commit hash].
-
-### Server and Application Setup
-
-The experimental infrastructure consists of a dedicated workstation with GPU acceleration for local LLM inference and cloud services for golden answer generation.
-
-**Hardware Configuration.** The system is built on an AMD Ryzen Threadripper Pro 9955WX with 128GB DDR5 RAM (5600 MHz) and an ASUS PRO WS WRX90E-SAGE SE mainboard. For GPU acceleration, a Radeon AI PRO R9700 AI TOP with 32GB GDDR6 memory provides a cost-effective alternative to NVIDIA solutions. The host system runs Fedora Server 42, with a dedicated Fedora Server 42 VM serving as the Docker host with GPU passthrough.
-
-**LLM Inference Stack.** Local model inference is provided through Ollama (image: `ollama/ollama:rocm`) running in a Docker container with ROCm support for AMD GPU acceleration. The ROCm software stack is configured with `HSA_OVERRIDE_GFX_VERSION=12.0.1` to ensure compatibility with the Radeon AI PRO R9700. The Ollama service exposes its API on port 11434 and stores model data in a persistent volume at `/mnt/data/ollama-data`.
-
-**User Interface.** Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based frontend for model interaction, accessible at https://ai.bniweb.ch and secured via Cloudflare. The interface connects to the Ollama backend and exposes its service on port 3030 (mapped to internal port 8080).
-
-**Golden Answer Generation Platform.** The Silver/Golden Answers web application runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
-
-**Evaluation Framework.** The llm-validator application, implemented in Java 21 with Quarkus, runs as a deployed application in a separate virtual machine on the host system. This framework executes the multi-dimensional evaluation pipeline, applying both statistical metrics and LLM-as-a-Judge assessments to compare model outputs against golden answers.
-
-**Cloud Services.** Google Cloud Platform provides the infrastructure for golden answer generation through Vertex AI (Gemini 2.5 Pro model) and Cloud Storage.
-
-### Silver Answer App
-
-The Silver Answers App is a cloud-based web application that automates AI-powered document analysis using Google's Gemini large language model. The system enables researchers to process document collections through configurable prompt chains, evaluate results, and iteratively refine their analytical approaches. Built with React and Node.js, it integrates Google Cloud Platform services for AI processing and persistent storage.
-
-![Silver Answers App Interface. Source: Authors (screenshot).](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
-
-[See Appendix: Silver Answers App for full description](#appendix-silver-answers)
-
-
-## Evaluation Metrics {#sec:eval-metrics}
+## Evaluation Pipeline Application {#sec:eval-metrics}
 
 The evaluation pipeline combines established NLP metrics with purpose-built clinical quality measures. Each metric was selected for a specific reason related to the medical extraction use case. For detailed mathematical definitions and implementation specifics, see [Appendix: Evaluation Metrics Reference](#appendix-metrics-reference).
 
