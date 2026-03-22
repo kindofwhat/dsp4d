@@ -412,7 +412,7 @@ Cosine similarity between embedding vectors, computed using OpenAI's `text-embed
 
 ### JSON Structural Similarity {#sec:json-sim}
 
-Standard NLP metrics (BLEU, ROUGE) cannot capture whether a model's output is structurally usable in a clinical pipeline. A model may produce semantically correct medical content in free-text form or in the wrong JSON structure — in both cases, the output is unparseable and therefore unusable for automated health record updates. To address this gap, a custom metric was developed.
+Because the expected output is a structured JSON record, evaluation can be decomposed into two levels without requiring an LLM judge: first, the structural level — whether the output contains the correct keys, nesting, and array structure — and second, the content level — whether individual leaf values (dates, medication names, diagnoses) match the reference. At the leaf level, fields are short enough that classical string metrics become meaningful again: a Levenshtein comparison between `"Metformin 500mg"` and `"Metformin 500 mg"` is both fast and clinically interpretable. The implementation uses normalised Levenshtein distance exclusively.
 
 The algorithm flattens both the model output and the Silver Answer into leaf-path maps (e.g. `structured_health_record.medications.current`), aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. A score of 1.0 indicates perfect schema and content match; a score of 0.0 indicates either unparseable output or a completely non-conforming structure — regardless of the medical correctness of the content.
 
