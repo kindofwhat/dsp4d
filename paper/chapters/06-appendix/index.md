@@ -130,48 +130,182 @@ Below is the processing of the same kardiologische report, but utilizing the **K
 
 ### Input: Sample Clinical Report (GraSCCo-Style)
 
-TODO Beni: hier ganzes Beispiel: ich habe dieses NICHT gefunden
+```text
+Klinische Abteilung für Onkologie
 
-**Bericht vom 14.03.2025 – Kardiologische Gemeinschaftspraxis Dr. Müller**
+Berlin, am 16.5.2018
 
-**Anamnese:** 68-jähriger Patient stellt sich zur Verlaufskontrolle bei bekannter arterieller Hypertonie und stabiler Angina Pectoris vor. Aktuell klagt der Patient über gelegentliches Herzstolpern.
+Sehr geehrte KollegInnen,
 
-**Befunde:** RR 145/90 mmHg, Puls 72/min (arrhythmisch). EKG zeigt neu aufgetretenes Vorhofflimmern. Labor: LDL 110 mg/dl, Kreatinin 0,9 mg/dl.
+wir berichten über den stat. Aufenthalt von Frau  DAMARIS,
+Dyonisia, vom 2.5.2018 bis 16.5.2018.
 
-**Medikation:** Bisher Bisoprolol 5mg 1-0-0 und ASS 100mg 0-1-0.
+Fallnummer: 34998877
+Geboren am: 11.2.1967
 
-**Beurteilung:** Umstellung der Antikoagulation aufgrund des Vorhofflimmerns notwendig.
+HAUPT-UND NEBENDIAGNOSEN
+Hauptdiagnose(n), ICD-10
+Rektumkarzinom, (2/18), lokal weit fortgeschritten,
+C20
+Tumoranämie, (2/18), D63.0
+St.p. Port-a-cath Implantation 2/2018
 
-**Plan:** Absetzen von ASS 100mg. Neuansetzung von Apixaban 5mg 1-0-1. Echokardiographie in 2 Wochen zur Klärung der Klappenfunktion.
+VERLAUF DER TUMORERKRANKUNG
+Operation(en) und Histologie(n):
+diagnostische PE (Jan 2018)
+Histo: Adeno-CA
+Stad.: p N+MX G2
+endständige Sigmoideostomie (04/2018)
+
+Medizinische Tumortherapie(n):
+pall. PCT m. Folfox ab (05/18);
+1. Zyklus 75%, ab 2. Zyklus 100%
+
+Aufnahmegrund:
+Die stationäre Aufnahme von Frau Damaris erfolgte
+zur Fortführung der pall. Chemotherapie nach dem
+Folfox-Schema, 3. Zyklus.
+
+Anamnese:
+Die Patientin berichtet über leichte MMA-Symptomatik,
+sowie Mukositis Grad I nach der letzten Therapie;
+ansonsten beschwerdefrei, keine Infektzeichen,
+Haut intakt, bland, Schleimhäute bland, intakt,
+Stuhl- und Harnanamnese unauffällig.
+
+Status bei Aufnahme:
+Fünfigjährige Patientin in gutem AZ und EZ,
+kardiorespiratorisch stabil, allseits orientiert.
+neurologisch unauffällig.
+Caput/Collum: Meningismus negativ, HNAP frei, Pupillen rund,
+mittelweit, isokor, Lichtreaktion bds. direkt
+und indirekt prompt, Zunge feucht, gerade,
+Rachen und Mundschleimhaut bland.
+Cor: Herztöne rein, rhythmisch, normokard.
+Pulmo: Vesikuläratmen bds., keine path.
+Rasselgeräusche, sonorer KS bds.
+Abdomen: Bauchdecke weich, kein Druckschmerz,
+keine Abwehrspannung, kein Loslassschmerz,
+Darmgeräusche in allen Quadranten rege,
+Leber unter dem Rippenbogen, Milz non palp.,
+Nierenlager bds. frei.
+Extremitäten, Gelenke: aktiv und passiv frei
+beweglich, kein Wadendruckschmerz, keine
+trophischen Läsionen, periphere Pulse gut tastbar.
+
+Perianal: geringgr. Rückgang der tumorösen Masse,
+4 Fistelgänge, klinisch deutlich gebessert,
+anamn. kaum noch Sekretion
+
+Durchgeführte Untersuchungen
+Labor bei Aufnahme 2.5.2018
+CRP 43, Kreatinin 2,7, Harnstoff 122,
+Harnsäure 7,0, GFR 26,1, Ery 2,75,
+Hämoglobin 9,3, Hämatokrit 22,5, Kalium 3.2,
+Tumormarker: CEA: 332.5, CA19-9:<2
+
+CT-OBERBAUCH:
+Nieren bds. nativ unauffällig dargestellt. Kein Harnstau.
+Soweit nativ beurteilbar die Leber frei von fokal
+parenchymersetzenden Läsionen. Normale Weite der
+intra- und extrahepatischen Gallenwege.
+Zustand nach CHE.
+Mäßige Splenomegalie (12 x 8,6 cm).
+Regelrechte Darstellung des Pankreas.
+Keine pathologisch vergrößerten Lymphknoten
+retroperitoneal oder mesenteriell.
+Arteriosklerotischer Gefäßschaden der Aorta
+thorakalis und der Iliacalgefäße.
+
+CT-BECKEN:
+Keine freie intraperitoneale Luft oder
+Flüssigkeit. Unspezifische bis 8 mm im
+Querdurchmesser messende Inguinallymphknoten.
+Insuspekter pelviner Lymphknotenstatus.
+
+Zusammenfassung von Therapie und Verlauf
+Die stationäre Aufnahme von Frau Damaris
+erfolgte zur Fortführung der pall.
+Polychemotherapie nach dem Folfox-Schema,
+3. Zyklus. Die Patientin berichtet über gute
+Verträglichkeit der letzten Therapie, sodass
+sie am Tag 1 Oxaliplatin 95mg/m²,
+Calciumfolinat 500mg/m², 5FU als Blus
+500mg/m² und 5FU Dauerinfusion 2400mg/m²
+über 52 Stunden problemlos erhalten kann.
+Die Therapie wird unter entsprechenden
+antiemetischen Begleitmaßnahmen sehr gut
+vertragen, so dass Frau Damaris am 16.5.18
+in gutem AZ nach Hause entlassen werden kann.
+
+Empfohlene Therapie
+Furosemid 40mg 1/2-0-0
+Pantoloc 40mg 1-0-0
+Ferretab 1-0-0
+Molaxole 2 x 1 Beutel
+Ciproxin 500mg 1-0-1
+Mexalen 500mg 3 x 1
+Lovenox 40mg 1 x 1 s.c.
+
+Procedere
+Am 14.6.2018 um 8Uhr 15 stationäre
+Wiederaufnahme, Onkologie A33 zur Fortführung
+pall. Folfox, 4. Zyklus.
+
+
+Mit freundlichen kollegialen Grüßen
+
+Dr. Hanns Wurst OA Dr. Matthias Metzger
+```
 
 ---
 
 ### Output: Golden Answer (CoT)
 
-### Klinische Analyse (Internal Monologue)
-
-1. **Datum/Quelle:** Der Bericht ist datiert auf den 14.03.2025. Aussteller ist Dr. Müller (Kardiologie).
-2. **Kategorisierung:** Da es sich um eine kardiologische Praxis handelt und Herzrhythmusstörungen (Vorhofflimmern) sowie Hypertonie behandelt werden, sind "Kardiologie" und "Innere Medizin" die passenden Fachbereiche.
-3. **Diagnosen:** Bekannt sind Hypertonie und Angina Pectoris. Neu hinzu kommt "Vorhofflimmern" (dokumentiert via EKG).
-4. **Messwerte:** RR (145/90), Puls (72, arrhythmisch), LDL (110) und Kreatinin (0,9) sind explizit gelistet.
-5. **Medikation-Logik:** * *Status Quo:* Bisoprolol und ASS 100mg.
-* *Änderung:* Der Text sagt "Absetzen von ASS" und "Neuansetzung von Apixaban". Bisoprolol wird nicht erwähnt, bleibt also Teil der aktuellen Medikation.
-* *Wichtig:* Apixaban ist die neue Empfehlung aufgrund des Vorhofflimmerns.
-6. **Follow-up:** Der Plan sieht eine Echokardiographie in 2 Wochen vor.
-
----
-
-### Structured Health Record Update
-
-1. **Categories:** Kardiologie, Innere Medizin
-2. **Date and Source:** 14.03.2025; Kardiologische Gemeinschaftspraxis Dr. Müller
-3. **Diagnosis:** Arterielle Hypertonie, stabile Angina Pectoris, neu aufgetretenes Vorhofflimmern (EKG-gesichert)
-4. **Relevant metrics:** RR: 145/90 mmHg; Puls: 72/min (arrhythmisch); LDL: 110 mg/dl; Kreatinin: 0,9 mg/dl
-5. **Current or adviced medications:** * **Aktuelle Medikation:** Bisoprolol 5mg (1-0-0)
-* **Empfohlene/Verschriebene Medikation:** Apixaban 5mg (1-0-1); *Hinweis: ASS 100mg wurde abgesetzt.*
-6. **Follow up:** Echokardiographie in 2 Wochen zur Klärung der Klappenfunktion.
-
----
+```json
+ {
+  "internal_monologue": {
+    "1": "Bericht vom 16.5.2018 von Dr. Hanns Wurst und OA Dr. Matthias                                                                                                                                                                       
+    Metzger der Klinischen Abteilung für Onkologie.",
+    "2": "Patientin mit lokal weit fortgeschrittenem Rektumkarzinom und                                                                                                                                                                       
+    Tumoranämie, aufgenommen für den 3. Zyklus einer palliativen
+    Chemotherapie nach dem Folfox-Schema.",                                                                                                                                                                                             
+    "3": "Bei Aufnahme am 2.5.2018 zeigten sich erhöhte Entzündungs- und
+    Nierenwerte (CRP 43, Kreatinin 2,7, GFR 26,1), eine Anämie
+    (Hämoglobin 9,3) und ein hoher Tumormarker (CEA 332.5).",                                                                                                                                                                           
+    "4": "Die aktuelle Therapie bestand aus dem 3. Zyklus der                                                                                                                                                                                 
+    Folfox-Chemotherapie. Bei Entlassung wurden Furosemid, Pantoloc,
+    Ferretab, Molaxole, Ciproxin, Mexalen und Lovenox empfohlen.",                                                                                                                                                                      
+    "5": "Eine stationäre Wiederaufnahme ist für den 14.6.2018 geplant, um                                                                                                                                                                    
+    den 4. Zyklus der palliativen Folfox-Chemotherapie durchzuführen."                                                                                                                                                                  
+  },
+  "structured_health_record": {
+    "categories": ["Onkologie"],
+    "date_and_source": "16.5.2018, Klinische Abteilung für Onkologie,
+    Dr. Hanns Wurst, OA Dr. Matthias Metzger",                                                                                                                                                                            
+    "diagnosis": "Lokal weit fortgeschrittenes Rektumkarzinom (C20, ED 02/18)                                                                                                                                                                 
+    mit Tumoranämie (D63.0). Zustand nach Port-a-cath
+    Implantation (02/18) und endständiger Sigmoideostomie
+    (04/18). Aufnahme zur Fortführung der palliativen
+    Chemotherapie (Folfox-Schema, 3. Zyklus).",                                                                                                                                                                                 
+    "relevant_metrics": "Labor bei Aufnahme (2.5.2018): CRP 43,                                                                                                                                                                               
+    Kreatinin 2,7 mg/dL, GFR 26,1 ml/min,
+    Hämoglobin 9,3 g/dL, CEA 332.5 ng/mL. CT: Mäßige
+    Splenomegalie, kein Harnstau, keine Leberläsionen.",                                                                                                                                                                 
+    "medications": {
+      "current": "Palliative Polychemotherapie nach Folfox-Schema                                                                                                                                                                             
+      (3. Zyklus): Oxaliplatin 95mg/m², Calciumfolinat 500mg/m²,
+      5FU als Bolus 500mg/m² und 5FU als Dauerinfusion
+      2400mg/m².",                                                                                                                                                                                                                
+      "advised": "Furosemid 40mg 1/2-0-0, Pantoloc 40mg 1-0-0,                                                                                                                                                                                
+      Ferretab 1-0-0, Molaxole 2x1 Beutel, Ciproxin 500mg
+      1-0-1, Mexalen 500mg 3x1, Lovenox 40mg 1x1 s.c."                                                                                                                                                                            
+    },
+    "follow_up": "Stationäre Wiederaufnahme am 14.6.2018 zur Fortführung                                                                                                                                                                      
+    der palliativen Chemotherapie (Folfox, 4. Zyklus)."                                                                                                                                                                         
+  }
+} 
+```
 
 ### Evaluation of the CoT Benefit
 
