@@ -121,7 +121,7 @@
 ## Critical Success Factors
 
 - **Consistent Testing**: Use identical prompts (base instruction), temperature settings, and evaluation criteria across all models.
-- **Context Quality**: Ensure retrieval quality (RAG) and example quality (Few-shot) are high—poor context will skew results.
+- **Context Quality**: Ensure retrieval quality (RAG) and example quality (Few-shot) are high-poor context will skew results.
 - **Real-world Relevance**: Focus on practical scenarios that mirror actual sensitive data use cases.
 - **Statistical Rigor**: Multiple runs per configuration to ensure statistical significance.
 

@@ -18,7 +18,7 @@
 : Providing a small number of examples in the prompt to guide model behavior.
 
 **GraSCCo**
-: Graz Synthetic Clinical text Corpus — a German clinical text corpus for NLP research.
+: Graz Synthetic Clinical text Corpus - a German clinical text corpus for NLP research.
 
 **RAG (Retrieval-Augmented Generation)**
 : A technique that combines information retrieval with text generation to improve accuracy.

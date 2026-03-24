@@ -1,10 +1,10 @@
-<!-- #R-INTRO — AI-generated (Claude, Feb 2026) — see paper/INSTRUCTIONS.md -->
+<!-- #R-INTRO - AI-generated (Claude, Feb 2026) - see paper/INSTRUCTIONS.md -->
 
 # Results {#sec:results}
 
 This chapter presents the empirical findings of the Zero-Shot evaluation across all eleven models and 62 test cases from the GraSCCo corpus, using the metrics defined in Section \ref{sec:eval-metrics}. Table \ref{tab:avg-scores-key} presents the four key metric scores and Table \ref{tab:composite} the composite scores. All LLM-as-a-Judge evaluations were performed by GPT-4o-mini (OpenAI).
 
-An important caveat for interpreting the results: Gemini 2.5 Pro was also the model used to generate the silver answers (with CoT prompting in Phase II). Its top ranking is therefore expected — it is effectively being compared against its own prior outputs, albeit in a different prompting configuration (Zero-Shot vs. CoT). This self-similarity advantage does not extend to the other models, making the relative ranking among the remaining ten models the more meaningful comparison.
+An important caveat for interpreting the results: Gemini 2.5 Pro was also the model used to generate the silver answers (with CoT prompting in Phase II). Its top ranking is therefore expected - it is effectively being compared against its own prior outputs, albeit in a different prompting configuration (Zero-Shot vs. CoT). This self-similarity advantage does not extend to the other models, making the relative ranking among the remaining ten models the more meaningful comparison.
 
 ## Impact of LLM Size
 
@@ -48,9 +48,9 @@ To illustrate how metric differences manifest in practice, Table \ref{tab:exampl
 
 : Extraction comparison for Case 3 (melanoma follow-up) against the silver answer. {#tab:example-extraction}
 
-This case reveals four distinct observations. First, even Gemini 2.5 Pro — the model that generated the silver answers — misses "Cipralex" when re-evaluated in a Zero-Shot setting without CoT, illustrating the impact of prompting strategy on extraction completeness. Second, Gemma3:27b delivers a near-identical extraction to Gemini with only minor formatting differences. Third, Granite 3.3 (2B) extracts the correct medical content but violates the language constraint (English instead of German). Fourth, Qwen3.5-35B-A3B produces a structurally valid but content-empty JSON record — scoring 0.0 on content metrics despite having no parse error.
+This case reveals four distinct observations. First, even Gemini 2.5 Pro - the model that generated the silver answers - misses "Cipralex" when re-evaluated in a Zero-Shot setting without CoT, illustrating the impact of prompting strategy on extraction completeness. Second, Gemma3:27b delivers a near-identical extraction to Gemini with only minor formatting differences. Third, Granite 3.3 (2B) extracts the correct medical content but violates the language constraint (English instead of German). Fourth, Qwen3.5-35B-A3B produces a structurally valid but content-empty JSON record - scoring 0.0 on content metrics despite having no parse error.
 
-<!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
+<!-- #R-TAB-COMPOSITE - regenerate from JSON, see INSTRUCTIONS.md -->
 ### Composite Scores by Metric Category
 
 To provide a consolidated view, Table \ref{tab:composite} aggregates the metric averages into three categories and an overall composite score.
@@ -71,12 +71,12 @@ To provide a consolidated view, Table \ref{tab:composite} aggregates the metric 
 
 : Composite scores (mean of metric averages) by category. Statistical = 5 lexical/structural metrics; Embedding = semantic similarity (text-embedding-3-small); LLM-as-a-Judge = 2 generative evaluation metrics (judged by GPT-4o-mini). {#tab:composite}
 
-The composite score (Table \ref{tab:composite}) provides a consolidated view for clinical deployment viability. An overall score of 0.468 (Gemini 2.5 Pro) represents the current ceiling: a GP using this model would still need to review and correct a substantial portion of extractions. The averaging across metric categories is appropriate here because all three dimensions — lexical fidelity, semantic comprehension, and clinical quality — must be satisfied simultaneously for pipeline integration.
+The composite score (Table \ref{tab:composite}) provides a consolidated view for clinical deployment viability. An overall score of 0.468 (Gemini 2.5 Pro) represents the current ceiling: a GP using this model would still need to review and correct a substantial portion of extractions. The averaging across metric categories is appropriate here because all three dimensions - lexical fidelity, semantic comprehension, and clinical quality - must be satisfied simultaneously for pipeline integration.
 
-Gemini 2.5 Pro achieves the highest overall composite score (0.468), followed by Gemma3:27b (0.409) and Kimi-K2.5 (0.398). Among the locally executable SLMs, Qwen3.5-35B-A3B — a MoE model with only 3B active parameters — ranks 5th at 0.390, closely matching the cloud models. Granite 3.3 (2B) achieves 0.344, outperforming several models with significantly more parameters.
+Gemini 2.5 Pro achieves the highest overall composite score (0.468), followed by Gemma3:27b (0.409) and Kimi-K2.5 (0.398). Among the locally executable SLMs, Qwen3.5-35B-A3B - a MoE model with only 3B active parameters - ranks 5th at 0.390, closely matching the cloud models. Granite 3.3 (2B) achieves 0.344, outperforming several models with significantly more parameters.
 
 
-<!-- #R-TAB-JSON — regenerate from JSON, see INSTRUCTIONS.md -->
+<!-- #R-TAB-JSON - regenerate from JSON, see INSTRUCTIONS.md -->
 ## JSON Structural Similarity
 
 A critical finding concerns the models' ability to produce valid, structurally correct JSON output matching the expected schema and the respective content. The `json_similarity_dsp4d_record` metric directly measures this capability.
@@ -100,7 +100,7 @@ A critical finding concerns the models' ability to produce valid, structurally c
 Gemini 2.5 Pro is the only model with no zero-score cases (min 0.298), producing consistently structured output. Kimi-K2.5 (0.374), Qwen3.5-35B-A3B (0.371), and Gemma3:27b (0.362) also achieve strong mean scores, though each except Gemma3 has occasional zero-score cases. Among the smaller SLMs, Mistral-Nemo (0.065), Phi3.5 (0.098), and Llama3 (0.129) exhibit severe structural compliance issues with high variance.
 
 
-<!-- #R-CORRELATION — regenerate heatmap from JSON, see INSTRUCTIONS.md -->
+<!-- #R-CORRELATION - regenerate heatmap from JSON, see INSTRUCTIONS.md -->
 ## Metric Correlation Analysis
 
 To understand the relationships between evaluation metrics, Figure \ref{fig:metric-correlation} presents the Pearson correlation matrix computed across all model-document interactions (see [Appendix: Pearson Correlation Coefficient](#appendix-pearson) for the mathematical definition).
@@ -111,11 +111,11 @@ Several patterns emerge from the correlation analysis:
 
 **Strong intra-group correlation among lexical metrics.** Levenshtein similarity, ROUGE, and Token F1 form a tightly correlated cluster (r = 0.53–0.88). This is expected, as all three measure character- or token-level overlap. BLEU correlates moderately with this group (r = 0.23–0.34), likely due to its n-gram precision focus versus the recall-oriented nature of ROUGE and Token F1.
 
-**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical semantic field extraction shows weak correlation with the lexical metrics (r = 0.13–0.27), and LLM-Judge field comparison similarly exhibits weak correlations (r = 0.10–0.20). This confirms that the LLM-based evaluators capture a fundamentally different quality dimension — clinical extraction fidelity — that lexical overlap metrics cannot approximate.
+**Low correlation between LLM-as-a-Judge and statistical metrics.** DAG medical semantic field extraction shows weak correlation with the lexical metrics (r = 0.13–0.27), and LLM-Judge field comparison similarly exhibits weak correlations (r = 0.10–0.20). This confirms that the LLM-based evaluators capture a fundamentally different quality dimension - clinical extraction fidelity - that lexical overlap metrics cannot approximate.
 
 **Moderate correlation between LLM-as-a-Judge metrics.** The two judge metrics now show a meaningful positive correlation (r = 0.35), a significant improvement over the previous evaluation run where they were nearly uncorrelated. This suggests that the refined judge prompts (using GPT-4o-mini) achieve better alignment between the DAG-based and direct judge approaches.
 
-**JSON similarity correlates with judge metrics.** JSON similarity shows the highest cross-category correlation with the DAG metric (r = 0.45) and LLM-Judge (r = 0.31), stronger than its correlation with the lexical group (r = 0.17–0.42). This suggests that models producing well-structured JSON also tend to generate clinically more accurate content — format compliance and content quality are not independent.
+**JSON similarity correlates with judge metrics.** JSON similarity shows the highest cross-category correlation with the DAG metric (r = 0.45) and LLM-Judge (r = 0.31), stronger than its correlation with the lexical group (r = 0.17–0.42). This suggests that models producing well-structured JSON also tend to generate clinically more accurate content - format compliance and content quality are not independent.
 
 <!-- END AI-GENERATED CONTENT -->
 

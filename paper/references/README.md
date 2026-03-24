@@ -44,9 +44,9 @@ dsp4d/
 
 ## Key Documents
 
-- **[project.md](project.md)** — Detailed project plan, timeline, research questions
-- **[paper/paper.md](paper/paper.md)** — Academic paper draft
-- **[research/README.md](research/README.md)** — Research overview
+- **[project.md](project.md)** - Detailed project plan, timeline, research questions
+- **[paper/paper.md](paper/paper.md)** - Academic paper draft
+- **[research/README.md](research/README.md)** - Research overview
 
 ## Success Metrics
 
@@ -57,9 +57,9 @@ dsp4d/
 
 ## Resources
 
-- [WebLLM](https://webllm.mlc.ai/) — Browser-based LLM
-- [Ollama](https://ollama.ai/) — Local deployment
-- [Groq](https://groq.com/) — Fast inference API
+- [WebLLM](https://webllm.mlc.ai/) - Browser-based LLM
+- [Ollama](https://ollama.ai/) - Local deployment
+- [Groq](https://groq.com/) - Fast inference API
 
 ---
 

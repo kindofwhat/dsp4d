@@ -2,9 +2,9 @@
 
 **Development of an Algorithmic Framework for Resource-Efficient Local LLM Selection**
 
-The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of  silver answers, this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. To implement this framework, two custom applications were developed: the *Silver Answers App* for generating and annotating reference answers via a SOTA cloud model, and *llm-validator* for executing the multi-model evaluation pipeline with statistical and LLM-as-a-Judge metrics. Both applications, along with two custom evaluation metrics, were built from scratch — no existing framework was reused.
+The primary objective of this study is the development of an algorithmic selection framework designed to identify the most resource-efficient Large Language Model (LLM) suitable for local execution. By validating output quality against a set of  silver answers, this research seeks to establish an optimal equilibrium between computational performance and data sovereignty. To implement this framework, two custom applications were developed: the *Silver Answers App* for generating and annotating reference answers via a SOTA cloud model, and *llm-validator* for executing the multi-model evaluation pipeline with statistical and LLM-as-a-Judge metrics. Both applications, along with two custom evaluation metrics, were built from scratch - no existing framework was reused.
 
-The theoretical foundations established in Chapter \ref{sec:related-work} directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Section \ref{sec:scaling-laws}: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Section \ref{sec:context-engineering} demonstrates that Chain-of-Thought (CoT) prompting provides the traceability needed for scientific validation of medical extraction outputs. These two constraints together make a CoT-based silver answer generation via a large, capable model in Phase I a methodological necessity — against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
+The theoretical foundations established in Chapter \ref{sec:related-work} directly dictate the structure of this methodology. Local Small Language Models (SLMs) face hard architectural limits as described by the scaling laws and the Densing Law in Section \ref{sec:scaling-laws}: beyond a certain parameter threshold, gains in capability density plateau, making larger models unnecessary for well-scoped tasks. At the same time, Section \ref{sec:context-engineering} demonstrates that Chain-of-Thought (CoT) prompting provides the traceability needed for scientific validation of medical extraction outputs. These two constraints together make a CoT-based silver answer generation via a large, capable model in Phase I a methodological necessity - against which the smaller SLMs are then evaluated in a Zero-Shot setting in Phase III.
 
 ## Procedure
 
@@ -19,12 +19,12 @@ The 62 clinical reports from the GraSCCo corpus are selected, categorised by med
 Using the *Silver Answers App*, a SOTA model (Gemini 2.5 Pro) generates structured extractions for all 62 documents via Chain-of-Thought prompting. The GP reviews a subset of these outputs, correcting hallucinations and omissions to produce validated reference answers. The prompt engineering sessions are logged to enable comparison of prompting strategies across model sizes in Phase III.
 
 ### Phase III: Technical Implementation of the Multi-Model Evaluation Pipeline
-This pipeline is implemented as *llm-validator*, a purpose-built evaluation framework described in Section \ref{sec:eval-metrics}. The framework executes each of the 11 candidate models against all 62 test cases in a Zero-Shot configuration. Each model receives the identical system prompt and clinical input. The framework captures eight evaluation metrics per interaction — five statistical, one embedding-based, and two LLM-as-a-Judge — producing the empirical dataset for analysis.
+This pipeline is implemented as *llm-validator*, a purpose-built evaluation framework described in Section \ref{sec:eval-metrics}. The framework executes each of the 11 candidate models against all 62 test cases in a Zero-Shot configuration. Each model receives the identical system prompt and clinical input. The framework captures eight evaluation metrics per interaction - five statistical, one embedding-based, and two LLM-as-a-Judge - producing the empirical dataset for analysis.
 
 ### Phase IV: Statistical Analysis and Optimal Model Identification
 The evaluation data is aggregated into composite scores per model, combining statistical, embedding-based, and LLM-as-a-Judge metrics. Cross-metric correlation analysis identifies which metrics capture independent quality dimensions. The results are interpreted against the research questions to determine the minimum viable model size for clinical deployment.
 
-**Self-Built Components.** Three purpose-built tools were developed to implement this pipeline: (1) The *Silver Answers App* (Node.js/React, cloud-based) facilitates Phase I–II by generating and annotating reference answers via Gemini 2.5 Pro (Section \ref{sec:experimental-setup}). (2) The *llm-validator* (Java 21/Quarkus, locally deployed) implements the evaluation pipeline for Phase III–IV, orchestrating batch execution across multiple models and applying both statistical and LLM-as-a-Judge metrics (Section \ref{sec:eval-metrics}). (3) Two *custom evaluation metrics* — JSON Structural Similarity and the DAG-based medical extraction quality metric — were developed specifically for this study to capture structured extraction quality that standard NLP metrics cannot assess (Sections \ref{sec:json-sim}–\ref{sec:dag-metric}). No existing evaluation framework (e.g. RAGAS, DeepEval) was used; the entire pipeline was implemented from scratch to ensure full control over the evaluation process and compatibility with both cloud and local LLM providers.
+**Self-Built Components.** Three purpose-built tools were developed to implement this pipeline: (1) The *Silver Answers App* (Node.js/React, cloud-based) facilitates Phase I–II by generating and annotating reference answers via Gemini 2.5 Pro (Section \ref{sec:experimental-setup}). (2) The *llm-validator* (Java 21/Quarkus, locally deployed) implements the evaluation pipeline for Phase III–IV, orchestrating batch execution across multiple models and applying both statistical and LLM-as-a-Judge metrics (Section \ref{sec:eval-metrics}). (3) Two *custom evaluation metrics* - JSON Structural Similarity and the DAG-based medical extraction quality metric - were developed specifically for this study to capture structured extraction quality that standard NLP metrics cannot assess (Sections \ref{sec:json-sim}–\ref{sec:dag-metric}). No existing evaluation framework (e.g. RAGAS, DeepEval) was used; the entire pipeline was implemented from scratch to ensure full control over the evaluation process and compatibility with both cloud and local LLM providers.
 
 ## Data Source: GraSCCo {#sec:data-source}
 
@@ -92,7 +92,7 @@ To minimize "hallucinations" and ensure clinical reliability, the prompt instruc
 To generate these silver answers, we have selected Chain-of-Thought (CoT) prompting. Based on the Comprehensive Comparison of Prompting Techniques, CoT was chosen over other methods for the following strategic reasons:
 
 * Clinical Reasoning Alignment: CoT instructs the model to generate intermediate reasoning steps. In a medical context, this is critical for connecting implied symptoms to explicit medical codes and prevents the model from "skipping" vital clinical details.
-* Improved Traceability: By breaking down the task—for example, listing medications first, then checking their historical status, and finally formatting the output—the model's reasoning becomes auditable, making unsupported extractions detectable during expert review.
+* Improved Traceability: By breaking down the task-for example, listing medications first, then checking their historical status, and finally formatting the output-the model's reasoning becomes auditable, making unsupported extractions detectable during expert review.
 * Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
 
 [Annex: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
@@ -111,7 +111,7 @@ While techniques like Self-Consistency or Multi-Persona Prompting offer higher r
 
 ### System Prompt: Clinical Data Extraction (CoT)
 
-The system prompt is formulated in English while input documents are German. This pragmatic choice reflects the English-centric training data of most instruction-tuned models, though recent research suggests that the advantage of English-language prompts over native-language prompts is task-dependent rather than universal [@huang2025multilingualprompt]. The output schema constrains extracted medical content to the source language (German), ensuring clinical accuracy. In a Swiss deployment context, this separation of instruction language and content language is additionally practical, as clinical reports may arrive in German, French, or Italian. It should be noted that the model selection (Section \ref{sec:experimental-setup}) did not specifically account for whether individual models were trained on multilingual corpora — a factor that may influence extraction quality for non english clinical texts.
+The system prompt is formulated in English while input documents are German. This pragmatic choice reflects the English-centric training data of most instruction-tuned models, though recent research suggests that the advantage of English-language prompts over native-language prompts is task-dependent rather than universal [@huang2025multilingualprompt]. The output schema constrains extracted medical content to the source language (German), ensuring clinical accuracy. In a Swiss deployment context, this separation of instruction language and content language is additionally practical, as clinical reports may arrive in German, French, or Italian. It should be noted that the model selection (Section \ref{sec:experimental-setup}) did not specifically account for whether individual models were trained on multilingual corpora - a factor that may influence extraction quality for non english clinical texts.
 
 In a medical context, the CoT structure is particularly valuable because it forces the LLM to identify the evidence in the text before committing to a category or a medication status. This reduces "lazy" extractions where a model might miss a nuance (like a medication being discontinued).
 
@@ -182,7 +182,7 @@ This component manages the medical corpora, specifically the GraSCCo raw text fi
 
 **Configuration & Prompt Engineering**
 
-The platform allows for sophisticated prompt management. While it supports single-prompt execution, it is optimized for Prompt Chaining—breaking complex medical tasks into subtasks (e.g., Extraction -> Filtering -> Formatting) to isolate errors and improve reliability.
+The platform allows for sophisticated prompt management. While it supports single-prompt execution, it is optimized for Prompt Chaining-breaking complex medical tasks into subtasks (e.g., Extraction -> Filtering -> Formatting) to isolate errors and improve reliability.
 To ensure clinical accuracy, users can fine-tune the following model parameters:
 
 * Temperature: Controls randomness. For medical extraction, a lower range of 0.2–0.5 is recommended to ensure deterministic, consistent, and predictable outputs.
@@ -225,7 +225,7 @@ Open WebUI (image: `ghcr.io/open-webui/open-webui:main`) provides a web-based fr
 
 #### Silver Answers App
 
-The silver/golden answers web application — a cloud-based system that automates AI-powered document analysis using Google's Gemini large language model — runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
+The silver/golden answers web application - a cloud-based system that automates AI-powered document analysis using Google's Gemini large language model - runs as a containerized Node.js backend (port 3051) and React frontend (port 3050) using Docker Compose. The backend integrates with Google Cloud Platform via a service account key for Gemini API access and Cloud Storage operations. Both services communicate over a dedicated Docker bridge network (`golden-answers-network`) with persistent volumes for database and upload storage.
 
 ![Silver Answers App Interface. Source: Authors (screenshot).](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
@@ -326,7 +326,7 @@ const MEDICAL_EXTRACTION_SCHEMA = {
 
 ### Conclusion
 
-The implementation of a standardized, OpenAI-compatible API interface provides substantial architectural convenience; however, it cannot solve all idiosyncratic challenges introduced by different models. Achieving robust, production-grade clinical extraction requires continuous, model-specific adaptation to overcome unique constraints—such as immutable safety filters and varying structural compliance capabilities.
+The implementation of a standardized, OpenAI-compatible API interface provides substantial architectural convenience; however, it cannot solve all idiosyncratic challenges introduced by different models. Achieving robust, production-grade clinical extraction requires continuous, model-specific adaptation to overcome unique constraints-such as immutable safety filters and varying structural compliance capabilities.
 
 
 ## Selecting Smaller Large Language Models (SLM) for the Evaluation
@@ -344,7 +344,7 @@ To filter the hundreds of available open-source models down to a manageable set,
 #### 1. Hardware-Aware Parameter Efficiency
 
 * **Criterion:** Models must have between 7B to 20B parameters that support 4-bit or 8-bit quantization
-* **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16). Grounded in the observations of the Densing Law by Xiao et al. (Section \ref{sec:scaling-laws}), we deliberately set the upper limit at under 20B parameters: modern SLMs in this range already achieve the capability density required for medical text extraction tasks, making larger models unnecessary for this scope. Furthermore, a typical Swiss medical practice runs on consumer-grade workstations with a standard GPU offering 8–16 GB of (V)RAM — a hard hardware constraint that makes 4-bit quantization not merely an optimisation but a prerequisite for local deployment.
+* **Why:** A standard laptop/desktop with 16Gb Memory (shared or dedicated VRAM) cannot run a 20B model at 16-bit full precision (FP16). Grounded in the observations of the Densing Law by Xiao et al. (Section \ref{sec:scaling-laws}), we deliberately set the upper limit at under 20B parameters: modern SLMs in this range already achieve the capability density required for medical text extraction tasks, making larger models unnecessary for this scope. Furthermore, a typical Swiss medical practice runs on consumer-grade workstations with a standard GPU offering 8–16 GB of (V)RAM - a hard hardware constraint that makes 4-bit quantization not merely an optimisation but a prerequisite for local deployment.
 For Example: 
     * A 7B model requires ~16GB RAM at FP16 but only 5GB to 6GB at 4-bit quantization
     * A 14B model requires ~30GB at FP16 but fits into 10GB to 12GB at 4-bit, making it feasible for professional consumer desktops
@@ -373,7 +373,7 @@ For Example:
 #### 5. License & Data Sovereignty
 
 * **Criterion:** Permissive licenses (Apache 2.0, MIT) allowing local commercial use
-* **Why:** The primary advantage of SLMs in healthcare is data sovereignty—running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.
+* **Why:** The primary advantage of SLMs in healthcare is data sovereignty-running locally so patient data never leaves the machine. Open-source models allow to inspect the model and ensure no data is sent to external APIs.
 * **Selection:** Model is truly open source (and does not require any API calls)
 
 
@@ -399,24 +399,24 @@ This section describes the evaluation metrics, their selection rationale, and th
 
 ### Rationale for Metric Selection
 
-Classical n-gram metrics such as BLEU and ROUGE are known to correlate weakly with human judgment for complex reasoning tasks [@reiter2018structured], penalising clinically correct paraphrases (e.g. "Myokardinfarkt" vs. "Herzinfarkt") while rewarding superficial lexical overlap. Despite these limitations, statistical metrics are included for three reasons. First, they are *computationally inexpensive*: unlike LLM-as-a-Judge metrics, they require no model inference and can be computed deterministically in milliseconds, enabling rapid iteration during pipeline development. Second, their relationship to the LLM-based quality metrics is *empirically evaluated* through Pearson correlation analysis (Chapter \ref{sec:results}), quantifying the extent to which lexical overlap approximates clinical extraction quality — and where it fails. Third, because the extraction target is a *structured JSON record*, statistical metrics regain practical relevance for compact, deterministic fields such as dates (`"2025-03-14"`), category labels (`"Kardiologie"`), and medication names (`"Metformin 500mg"`) — where exact match is both expected and clinically meaningful [@papineni2002bleu; @lin2004rouge]. The actual clinical decision-making power rests on the purpose-built DAG metric and the JSON Structural Similarity measure.
+Classical n-gram metrics such as BLEU and ROUGE are known to correlate weakly with human judgment for complex reasoning tasks [@reiter2018structured], penalising clinically correct paraphrases (e.g. "Myokardinfarkt" vs. "Herzinfarkt") while rewarding superficial lexical overlap. Despite these limitations, statistical metrics are included for three reasons. First, they are *computationally inexpensive*: unlike LLM-as-a-Judge metrics, they require no model inference and can be computed deterministically in milliseconds, enabling rapid iteration during pipeline development. Second, their relationship to the LLM-based quality metrics is *empirically evaluated* through Pearson correlation analysis (Chapter \ref{sec:results}), quantifying the extent to which lexical overlap approximates clinical extraction quality - and where it fails. Third, because the extraction target is a *structured JSON record*, statistical metrics regain practical relevance for compact, deterministic fields such as dates (`"2025-03-14"`), category labels (`"Kardiologie"`), and medication names (`"Metformin 500mg"`) - where exact match is both expected and clinically meaningful [@papineni2002bleu; @lin2004rouge]. The actual clinical decision-making power rests on the purpose-built DAG metric and the JSON Structural Similarity measure.
 
 ### Statistical Metrics
 
 - **BLEU** [@papineni2002bleu]: Computes modified n-gram precision $p_n$ for $n = 1 \ldots 4$, combined with a brevity penalty $BP$: $\text{BLEU} = BP \cdot \exp\left(\sum_{n=1}^{4} w_n \log p_n\right)$. Captures verbatim reproduction of clinical terms.
-- **ROUGE** [@lin2004rouge]: Recall-oriented overlap — ROUGE-1 (unigram recall), ROUGE-2 (bigram recall), and ROUGE-L (longest common subsequence). Measures completeness of extraction.
+- **ROUGE** [@lin2004rouge]: Recall-oriented overlap - ROUGE-1 (unigram recall), ROUGE-2 (bigram recall), and ROUGE-L (longest common subsequence). Measures completeness of extraction.
 - **Token F1**: Harmonic mean of token-level precision and recall between generated and reference text.
 - **Levenshtein Similarity** [@levenshtein1966binary]: Normalised complement of the edit distance: $1 - \frac{d(s_1, s_2)}{\max(|s_1|, |s_2|)}$, where $d$ is the minimum number of single-character edits. Catches format mismatches (e.g. "2025-03-14" vs. "14.03.2025").
 
 ### Semantic Similarity
 
-Cosine similarity between embedding vectors, computed using OpenAI's `text-embedding-3-small` model. This metric captures whether the model conveys the same medical content regardless of exact wording — a property that the lexical metrics above cannot assess.
+Cosine similarity between embedding vectors, computed using OpenAI's `text-embedding-3-small` model. This metric captures whether the model conveys the same medical content regardless of exact wording - a property that the lexical metrics above cannot assess.
 
 ### JSON Structural Similarity {#sec:json-sim}
 
-Because the expected output is a structured JSON record, evaluation can be decomposed into two levels without requiring an LLM judge: first, the structural level — whether the output contains the correct keys, nesting, and array structure — and second, the content level — whether individual leaf values (dates, medication names, diagnoses) match the reference. At the leaf level, fields are short enough that classical string metrics become meaningful again: a Levenshtein comparison between `"Metformin 500mg"` and `"Metformin 500 mg"` is both fast and clinically interpretable. The implementation uses normalised Levenshtein distance exclusively.
+Because the expected output is a structured JSON record, evaluation can be decomposed into two levels without requiring an LLM judge: first, the structural level - whether the output contains the correct keys, nesting, and array structure - and second, the content level - whether individual leaf values (dates, medication names, diagnoses) match the reference. At the leaf level, fields are short enough that classical string metrics become meaningful again: a Levenshtein comparison between `"Metformin 500mg"` and `"Metformin 500 mg"` is both fast and clinically interpretable. The implementation uses normalised Levenshtein distance exclusively.
 
-The algorithm flattens both the model output and the silver answer into leaf-path mapsbt, aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. A score of 1.0 indicates perfect schema and content match; a score of 0.0 indicates either unparseable output or a completely non-conforming structure — regardless of the medical correctness of the content.
+The algorithm flattens both the model output and the silver answer into leaf-path mapsbt, aligns array elements via greedy best-match, and computes normalised Levenshtein similarity per leaf pair. The overall score is the arithmetic mean across all leaves. A score of 1.0 indicates perfect schema and content match; a score of 0.0 indicates either unparseable output or a completely non-conforming structure - regardless of the medical correctness of the content.
 
 For a detailed description of the algorithm see [Appendix: JSON Structural Similarity Algorithm](#appendix-json-sim).
 
@@ -432,19 +432,19 @@ The judge LLM evaluates the factual correctness of each of seven extracted field
 
 A single-prompt LLM-as-a-Judge approach conflates multiple quality dimensions into one score, making it impossible to distinguish *where* a model fails. A model that produces perfectly formatted but factually wrong output would receive a similar score to one that extracts correct content in the wrong structure. To address this limitation, a DAG evaluation metric was developed, inspired by the decomposition principle of the DeepEval framework but implemented from scratch.
 
-The DAG metric decomposes the evaluation into four parallel assessment nodes, each scored independently by the judge LLM on a 0–1 scale: (1) *format compliance* — does the output conform to the expected JSON schema? (2) *factual accuracy* — are the extracted values correct according to the source document? (3) *completeness* — are all relevant clinical fields populated? (4) *medical terminology* — does the output use appropriate clinical language? The overall DAG score is the arithmetic mean of these four dimensions.
+The DAG metric decomposes the evaluation into four parallel assessment nodes, each scored independently by the judge LLM on a 0–1 scale: (1) *format compliance* - does the output conform to the expected JSON schema? (2) *factual accuracy* - are the extracted values correct according to the source document? (3) *completeness* - are all relevant clinical fields populated? (4) *medical terminology* - does the output use appropriate clinical language? The overall DAG score is the arithmetic mean of these four dimensions.
 
-This decomposition enables diagnostic interpretation of model performance. For example, a model scoring 0.9 on completeness but 0.3 on format compliance tells a fundamentally different story than one scoring 0.5 uniformly — the former can likely be fixed with format-specific Few-Shot examples, while the latter indicates deeper comprehension issues.
+This decomposition enables diagnostic interpretation of model performance. For example, a model scoring 0.9 on completeness but 0.3 on format compliance tells a fundamentally different story than one scoring 0.5 uniformly - the former can likely be fixed with format-specific Few-Shot examples, while the latter indicates deeper comprehension issues.
 
 For a detailed description of the execution engine and the graph structure see [Appendix: DAG-Based Medical Extraction Quality Algorithm](#appendix-dag).
 
 #### Discarded: G-Eval
 
-G-Eval [@liu2023geval] was evaluated as a candidate for probability-weighted scoring but could not be reliably used due to inconsistent `logprobs` support across LLM providers — most critically, Ollama and LM Studio (the primary local inference backends) do not provide logprobs on their OpenAI-compatible API endpoints. The multi-sample fallback defined by the G-Eval paper ($n=20$ calls) proved impractical due to cost and rate-limiting issues. The evaluation therefore relies on direct LLM-as-a-Judge scoring via the DAG metric and a one-shot field comparison. See [Appendix: G-Eval Investigation](#appendix-geval) for the full compatibility analysis and fallback strategy.
+G-Eval [@liu2023geval] was evaluated as a candidate for probability-weighted scoring but could not be reliably used due to inconsistent `logprobs` support across LLM providers - most critically, Ollama and LM Studio (the primary local inference backends) do not provide logprobs on their OpenAI-compatible API endpoints. The multi-sample fallback defined by the G-Eval paper ($n=20$ calls) proved impractical due to cost and rate-limiting issues. The evaluation therefore relies on direct LLM-as-a-Judge scoring via the DAG metric and a one-shot field comparison. See [Appendix: G-Eval Investigation](#appendix-geval) for the full compatibility analysis and fallback strategy.
 
 ### llm-validator: The Evaluation Framework
 
-To facilitate the systematic evaluation described in Phase III and IV, a purpose-built evaluation framework — *llm-validator* — was developed as part of this research. The tool serves as the central instrumentation layer for capturing, executing, and assessing LLM interactions across multiple models and prompting strategies.
+To facilitate the systematic evaluation described in Phase III and IV, a purpose-built evaluation framework - *llm-validator* - was developed as part of this research. The tool serves as the central instrumentation layer for capturing, executing, and assessing LLM interactions across multiple models and prompting strategies.
 
 ![llm-validator Interface. Source: Authors (screenshot).](../../assets/sceen_llm-validator.png){#fig:llm-validator width=75%}
 
@@ -458,13 +458,13 @@ Several patterns were implemented to ensure robust evaluation at scale. The eval
 
 To handle the inherent unreliability of LLM provider APIs, the framework employs exponential backoff retry for transient failures, combined with adaptive throttling that dynamically reduces concurrency when a provider's error rate increases and gradually recovers when it stabilises. LLM-as-a-Judge metrics are gated behind a global semaphore to control concurrent judge invocations. The entire pipeline runs on virtual threads, preventing thread starvation under high batch loads.
 
-The evaluation metrics — including the LLM-as-a-Judge and JSON Structural Similarity metrics — can be configured interactively through the web UI, and all functionality is accessible via REST API.
+The evaluation metrics - including the LLM-as-a-Judge and JSON Structural Similarity metrics - can be configured interactively through the web UI, and all functionality is accessible via REST API.
 
 ![llm-validator DAG Editor. Source: Authors (screenshot).](../../assets/DAG-Editor.png){#fig:dag-editor width=75%}
 
 #### Evaluation Pipeline Execution
 
-Test cases — each comprising a clinical query, an optional system prompt, and a silver answer — are organised into *Test Runs* and executed in batch against one or more models. The framework applies all configured metrics and presents the results in the web UI. Test runs can be created from CSV imports or assembled from previously captured proxy interactions, executed across multiple model configurations in parallel, and exported with all metric scores for offline analysis.
+Test cases - each comprising a clinical query, an optional system prompt, and a silver answer - are organised into *Test Runs* and executed in batch against one or more models. The framework applies all configured metrics and presents the results in the web UI. Test runs can be created from CSV imports or assembled from previously captured proxy interactions, executed across multiple model configurations in parallel, and exported with all metric scores for offline analysis.
 
 ![Test setup: clinical documents are processed by the LLM under test, then evaluated using statistical metrics and an LLM judge against golden answers. Source: Authors.](../../assets/03-test-setup.png){#fig:test-setup width=70%}
 

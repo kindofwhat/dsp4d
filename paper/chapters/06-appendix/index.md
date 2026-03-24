@@ -284,7 +284,7 @@ Context windows >=8k
 | Mistral | Mistral AI Non-Production / Commercial | No | Restricted / Tiered | Optional (API vs local) | Smaller models are often Apache 2.0; flagship models require commercial agreements. |
 
 
-<!-- #A-JSON-SIM — AI-generated (Claude, Feb 2026) — algorithm from JsonSimilarityMetric.java + JsonFlattener.java -->
+<!-- #A-JSON-SIM - AI-generated (Claude, Feb 2026) - algorithm from JsonSimilarityMetric.java + JsonFlattener.java -->
 
 ## Appendix: JSON Structural Similarity Algorithm {#appendix-json-sim}
 
@@ -353,18 +353,18 @@ double overallScore = leafScores.values().stream()
         .average().orElse(0.0);
 ```
 
-<!-- #A-DAG — AI-generated (Claude, Feb 2026) — algorithm from DAG engine + medical_extraction_quality graph -->
+<!-- #A-DAG - AI-generated (Claude, Feb 2026) - algorithm from DAG engine + medical_extraction_quality graph -->
 
 ## Appendix: DAG-Based Medical Extraction Quality Algorithm {#appendix-dag}
 
-To evaluate the clinical quality of model outputs beyond what statistical metrics can capture, a Directed Acyclic Graph (DAG) evaluation metric was developed. Unlike single-prompt LLM-as-a-Judge approaches that ask one broad question, the DAG metric decomposes the evaluation into multiple specialised assessment tasks — each executed by the judge LLM — and aggregates their results through a graph of conditional judgements.
+To evaluate the clinical quality of model outputs beyond what statistical metrics can capture, a Directed Acyclic Graph (DAG) evaluation metric was developed. Unlike single-prompt LLM-as-a-Judge approaches that ask one broad question, the DAG metric decomposes the evaluation into multiple specialised assessment tasks - each executed by the judge LLM - and aggregates their results through a graph of conditional judgements.
 
 ### DAG Execution Engine
 
 The DAG execution engine traverses a graph of four node types:
 
 - **Task nodes** present the judge LLM with specific evaluation instructions and a subset of the evaluation context (actual output, expected output, original input). The LLM's response is stored as accumulated context for downstream nodes.
-- **Binary judgement nodes** ask the judge LLM a yes/no question based on accumulated context. The result determines which branch (true/false child) is followed — enabling conditional evaluation paths.
+- **Binary judgement nodes** ask the judge LLM a yes/no question based on accumulated context. The result determines which branch (true/false child) is followed - enabling conditional evaluation paths.
 - **Non-binary judgement nodes** present the judge LLM with multiple verdict options (e.g., "fully compliant", "minor issues", "significant issues"). The LLM selects the most appropriate verdict, routing to the corresponding child node.
 - **Verdict nodes** are terminal leaves that carry a predefined numeric score (0.0–1.0).
 
@@ -481,7 +481,7 @@ are equivalent).
 - 0.2: Wrong date, wrong source, or major inaccuracies
 - 0.05: Field missing or empty in ACTUAL
 
-### 3. diagnosis (weight: 2 — most critical field)
+### 3. diagnosis (weight: 2 - most critical field)
 Check: (1) Primary diagnosis present and correct? (2) Secondary
 diagnoses and past medical history? (3) Any hallucinated diagnoses
 not in EXPECTED? (4) Important diagnoses missing? Hallucinated
@@ -1449,7 +1449,7 @@ The `logprobs` feature that enables this weighted scoring is not uniformly suppo
 | Provider | Logprobs | Notes |
 |----------|----------|-------|
 | OpenAI (standard models) | Yes | gpt-4o, gpt-4.1-mini etc. via `/v1/chat/completions` |
-| OpenAI (reasoning models) | **No** | o-series, gpt-5-mini — `logprobs` not supported, `temperature` fixed at 1.0 |
+| OpenAI (reasoning models) | **No** | o-series, gpt-5-mini - `logprobs` not supported, `temperature` fixed at 1.0 |
 | vLLM (self-hosted) | Yes | Any HuggingFace model; logprobs reflect raw model output before post-processing |
 | Together.ai | Yes | Open-weight models via OpenAI-compatible API |
 | Ollama | **No** | Logprobs only on native `/api/generate`, not on OpenAI-compatible `/v1/chat/completions` |
@@ -1460,7 +1460,7 @@ The `logprobs` feature that enables this weighted scoring is not uniformly suppo
 
 Particularly problematic is the incompatibility with reasoning models (OpenAI o-series, gpt-5-mini, gpt-5-nano). These models employ an internal reasoning phase that consumes tokens from the `max_completion_tokens` budget before any visible output is produced. For a task that merely requires a single integer score, reasoning models are architecturally unsuitable.
 
-This problem also affects existing reference implementations. DeepEval, the most widely used Python implementation of G-Eval, works around the issue with a hardcoded list of reasoning models for which it falls back to plain JSON extraction without probability weighting — which de facto is no longer G-Eval but a simple LLM-as-a-Judge approach.
+This problem also affects existing reference implementations. DeepEval, the most widely used Python implementation of G-Eval, works around the issue with a hardcoded list of reasoning models for which it falls back to plain JSON extraction without probability weighting - which de facto is no longer G-Eval but a simple LLM-as-a-Judge approach.
 
 ### Fallback Strategy
 
@@ -1470,4 +1470,4 @@ A promising alternative for local execution is vLLM, a high-throughput self-host
 
 ### Consequence for Judge Model Selection
 
-The choice of judge model for G-Eval evaluation is therefore constrained: either a non-reasoning cloud model with logprobs support is used (e.g. gpt-4o-mini), a self-hosted vLLM instance serves as judge, or the cost-intensive multi-sample fallback is required. For this study, first an auto-detection strategy was implemented that first attempts the logprobs path and automatically falls back to multi-sample upon failure — enabling both cloud APIs and local models to serve as judges. In practice, the performance was not sufficient to take a G-Eval metric into consideration.
+The choice of judge model for G-Eval evaluation is therefore constrained: either a non-reasoning cloud model with logprobs support is used (e.g. gpt-4o-mini), a self-hosted vLLM instance serves as judge, or the cost-intensive multi-sample fallback is required. For this study, first an auto-detection strategy was implemented that first attempts the logprobs path and automatically falls back to multi-sample upon failure - enabling both cloud APIs and local models to serve as judges. In practice, the performance was not sufficient to take a G-Eval metric into consideration.

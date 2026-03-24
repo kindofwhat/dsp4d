@@ -56,7 +56,7 @@ Structure:
 
 ## What Was Written
 
-### Chapter 04 — Results (`paper/chapters/04-results/index.md`)
+### Chapter 04 - Results (`paper/chapters/04-results/index.md`)
 
 All content is data-driven. Sections and their data sources:
 
@@ -72,32 +72,32 @@ All content is data-driven. Sections and their data sources:
 | Metric Correlation Analysis | Pearson correlation matrix + heatmap figure | Computed from all 558 data points (see image generation below) |
 | Latency | Mean latencyMs per model | Aggregated from JSON |
 
-### Chapter 05 — Discussion (`paper/chapters/05-discussion/index.md`)
+### Chapter 05 - Discussion (`paper/chapters/05-discussion/index.md`)
 
 Interpretive text referencing the numbers from Chapter 04. Sections:
 
-- **Model Size Does Not Linearly Predict Performance** — references composite scores
-- **Cloud Models Retain an Advantage** — references semantic similarity and composite gap
-- **The Format Compliance Problem** — references JSON structural similarity
-- **Semantic Understanding Is Preserved** — references semantic similarity range
-- **Mistral-Nemo: An Outlier** — references DAG and JSON scores
-- **Implications for Clinical Practice** — 3 points derived from results
-- **Addressing the Research Questions** — RQ1/RQ2/RQ3 with specific numbers
-- **Limitations** — 6 points (methodology-aware, not data-dependent)
-- **Future Work** — 5 points
+- **Model Size Does Not Linearly Predict Performance** - references composite scores
+- **Cloud Models Retain an Advantage** - references semantic similarity and composite gap
+- **The Format Compliance Problem** - references JSON structural similarity
+- **Semantic Understanding Is Preserved** - references semantic similarity range
+- **Mistral-Nemo: An Outlier** - references DAG and JSON scores
+- **Implications for Clinical Practice** - 3 points derived from results
+- **Addressing the Research Questions** - RQ1/RQ2/RQ3 with specific numbers
+- **Limitations** - 6 points (methodology-aware, not data-dependent)
+- **Future Work** - 5 points
 
 **When data changes:** Update all numbers in the discussion that reference specific scores. Search for decimal numbers like `0.470`, `0.390`, etc.
 
-### Chapter 03 — Methodology (`paper/chapters/03-methodology/index.md`)
+### Chapter 03 - Methodology (`paper/chapters/03-methodology/index.md`)
 
 Two brief summaries were added to the "Evaluation Metrics" section, each referencing the corresponding appendix:
 
-- **JSON Structural Similarity** — one-paragraph summary, links to `#appendix-json-sim`
-- **DAG-Based Medical Extraction Quality** — one-paragraph summary, links to `#appendix-dag`
+- **JSON Structural Similarity** - one-paragraph summary, links to `#appendix-json-sim`
+- **DAG-Based Medical Extraction Quality** - one-paragraph summary, links to `#appendix-dag`
 
-These summaries are static — only update if the algorithm itself changes.
+These summaries are static - only update if the algorithm itself changes.
 
-### Chapter 06 — Appendix (`paper/chapters/06-appendix/index.md`)
+### Chapter 06 - Appendix (`paper/chapters/06-appendix/index.md`)
 
 Two new appendix sections with algorithm descriptions and code excerpts:
 
@@ -113,7 +113,7 @@ Two new appendix sections with algorithm descriptions and code excerpts:
 
 **DAG graph definition:** The specific `medical_extraction_quality` graph is exported from the llm-validator UI and stored at `paper/assets/dag-medical-extraction-quality.json`. The appendix text describes its 4 parallel branches with all verdict scores. If the graph changes, re-export from the UI and update the branch descriptions + score values in `#A-DAG`.
 
-**When to update:** Only when the algorithm implementation or the DAG graph definition changes — these sections are independent of the evaluation JSON data.
+**When to update:** Only when the algorithm implementation or the DAG graph definition changes - these sections are independent of the evaluation JSON data.
 
 ## Scripts Used to Extract Data
 
@@ -317,12 +317,12 @@ The markdown files contain HTML comment markers (`<!-- #ID -->`) that identify A
 | `#D-SEMANTIC` | Semantic Understanding | `#R-TAB-SEMANTIC` | Semantic sim range (0.650–0.861), individual scores |
 | `#D-MISTRAL` | Mistral-Nemo Outlier | `#R-TAB-JUDGE` | DAG score (0.424 vs 0.407), JSON sim (0.065) |
 | `#D-RQ` | Research Questions | `#R-TAB-PASS` | Pass rates (75.8%, 93.5%, 100%, 30.8%) |
-| `#D-LIMITS` | Limitations | Methodology | Mostly static — update only if methodology changes |
-| `#D-FUTURE` | Future Work | — | Static |
+| `#D-LIMITS` | Limitations | Methodology | Mostly static - update only if methodology changes |
+| `#D-FUTURE` | Future Work | - | Static |
 
 ### Methodology chapter (`03-methodology/index.md`)
 
-Brief summaries linking to the appendix — no markers needed, static unless algorithm changes.
+Brief summaries linking to the appendix - no markers needed, static unless algorithm changes.
 
 ### Appendix chapter (`06-appendix/index.md`)
 
