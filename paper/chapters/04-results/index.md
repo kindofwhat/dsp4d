@@ -30,7 +30,7 @@ The following table presents the mean scores across all 62 test cases per model 
 
 Semantic similarity remains high across most models (0.650–0.861), indicating that even small SLMs comprehend the clinical content. The gap between semantic similarity and DAG scores (e.g. Granite 2B: 0.843 vs. 0.407) quantifies the difference between understanding content and producing usable structured output. JSON similarity reveals the most critical differentiation: Mistral-Nemo (0.065), Phi3.5 (0.098), and Llama3 (0.129) produce structurally unparseable output in the majority of cases.
 
-![Overall composite ranking across all eleven models. Cloud models (blue), MoE architecture (purple), and local dense SLMs (pink). Source: Authors.](../../assets/04-overall-ranking.png){#fig:overall-ranking width=85%}
+![Overall composite ranking across all eleven models. Cloud models (blue), Mixture of Experts (MoE) architecture (purple), and local dense SLMs (pink). Source: Authors.](../../assets/04-overall-ranking.png){#fig:overall-ranking width=85%}
 
 ![Metric profile of the top five models across four key evaluation dimensions. The radar chart reveals that semantic similarity is uniformly high while JSON structural compliance and LLM-Judge scores differentiate models most strongly. Source: Authors.](../../assets/04-metric-profile-radar.png){#fig:metric-profile width=65%}
 

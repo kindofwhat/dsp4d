@@ -18,6 +18,8 @@ department: "Data Sovereignty Procedures for Doctors (DSP4D), v1.0, 24.März 202
 logo: "assets/bfh-logo.jpg"
 
 toc: true
+lof: true
+lot: true
 declaration: true
 
 header-includes: |
@@ -30,6 +32,17 @@ header-includes: |
   \pretocmd{\section}{\needspace{5\baselineskip}}{}{}
   \pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
   \pretocmd{\subsubsection}{\needspace{3\baselineskip}}{}{}
+  \usepackage[htt]{hyphenat}
+  \usepackage{letltxmacro}
+  \LetLtxMacro{\origttfamily}{\ttfamily}
+  \renewcommand{\ttfamily}{\origttfamily\hyphenchar\font=`\-\relax}
+  \makeatletter
+  \renewcommand{\texttt}[1]{%
+    {\origttfamily\hyphenchar\font=`\-\relax
+     \def\_{\textunderscore\discretionary{}{}{}}%
+     \def\.{\char`\.\discretionary{}{}{}}%
+     #1}}
+  \makeatother
 
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size

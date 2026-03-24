@@ -2,12 +2,16 @@
 
 # Discussion {#sec:discussion}
 
+This chapter interprets the empirical findings, examines their implications for local deployment, and addresses the limitations of the study.
+
 ## Interpretation of Results
+
+The following subsections examine the key patterns that emerged from the Zero-Shot evaluation across all eleven models.
 
 <!-- #D-SIZE — update numbers from #R-TAB-COMPOSITE when JSON changes -->
 ### Model Size Does Not Linearly Predict Performance
 
-The results challenge the assumption that larger models necessarily produce better outputs for clinical extraction tasks (Table \ref{tab:composite}). While Gemini 2.5 Pro — the largest model — achieves the highest composite score (0.468), the ranking among SLMs reveals no consistent correlation between parameter count and output quality. Granite 3.3 with only 2B parameters (composite: 0.344, Table \ref{tab:composite}) outperforms GLM4:9b (0.335), Qwen2:7b (0.315), Phi3.5:3.8b (0.303), and Llama3:8b (0.300) — models with two to four times as many parameters. Similarly, Mistral-Nemo at 12B parameters (0.339) performs only marginally better than the 2B Granite model. Notably, Qwen3.5-35B-A3B — a MoE model with only 3B active parameters — achieves 0.390, ranking ahead of all dense SLMs and closely matching GPT-5-nano (0.395).
+The results challenge the assumption that larger models necessarily produce better outputs for clinical extraction tasks (Table \ref{tab:composite}). While Gemini 2.5 Pro — the largest model — achieves the highest composite score (0.468), the ranking among SLMs reveals no consistent correlation between parameter count and output quality. Granite 3.3 with only 2B parameters (composite: 0.344, Table \ref{tab:composite}) outperforms GLM4:9b (0.335), Qwen2:7b (0.315), Phi3.5:3.8b (0.303), and Llama3:8b (0.300) — models with two to four times as many parameters. Similarly, Mistral-Nemo at 12B parameters (0.339) performs only marginally better than the 2B Granite model. Notably, Qwen3.5-35B-A3B — a Mixture of Experts (MoE) model with only 3B active parameters — achieves 0.390, ranking ahead of all dense SLMs and closely matching GPT-5-nano (0.395).
 
 This finding is visualised in Figure \ref{fig:overall-ranking}, which shows no monotonic relationship between model size and composite score. Architecture, training data composition, and instruction-tuning quality matter more than raw parameter count for structured medical extraction tasks. The radar chart (Figure \ref{fig:metric-profile}) further illustrates that the top five models differ most on JSON structural compliance and LLM-Judge scores, while semantic similarity is uniformly high.
 
@@ -53,7 +57,7 @@ The results do not support a single minimum size threshold — performance depen
 
 This study applied context engineering at two distinct levels. In Phase II, Chain-of-Thought (CoT) prompting was selected over 15 alternative strategies following a systematic comparison. CoT was chosen for its transparent reasoning process, zero-shot generalizability, and traceability — properties that are particularly valuable for medical text extraction where auditability is essential. The structured CoT prompt with an explicit internal monologue proved effective for generating clinically defensible silver answers from the GraSCCo corpus: the reasoning trace allowed verification that the model correctly distinguished current from discontinued medications, identified implicit diagnoses, and avoided fabricating clinical details.
 
-In Phase III, the SLMs were evaluated in a Zero-Shot configuration to establish an unaugmented baseline. This deliberate separation allows the impact of context engineering to be measured in subsequent phases: the Zero-Shot results reported here serve as the control condition against which Few-Shot, RAG, and Long-Context strategies can be compared. Early indications — particularly the severe format compliance failures of smaller models — suggest that context engineering at the SLM evaluation level (e.g., Few-Shot examples demonstrating the expected JSON schema) may yield disproportionate improvements for structural quality.
+In Phase III, the SLMs were evaluated using the same Zero-Shot Chain-of-Thought approach employed during silver answer generation in Phase II. No additional context engineering strategies (Few-Shot, RAG, or Long-Context) were applied at this stage, leaving those to be implemented in future work.
 
 **RQ3: Can sub-3B parameter models achieve clinically acceptable extraction quality on standard consumer hardware?**
 

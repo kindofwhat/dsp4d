@@ -110,6 +110,8 @@
 ||**Cons / Risks:** Mostly affects style, less impact on factual extraction accuracy.|
 ||**References:** [@k2view2024prompttechniques], [@dairai2024promptguide] |
 
+: Comprehensive comparison of 20 prompting techniques with application to medical silver answers. {#tab:prompting-techniques}
+
 ## MMLU-Pro Benchmark Leaderboard
 
 [MMLU-Pro Benchmark Leaderboard (filtered)](https://artificialanalysis.ai/evaluations/mmlu-pro?models=apriel-v1-5-15b-thinker%2Capriel-v1-6-15b-thinker%2Cqwen3-vl-8b-reasoning%2Cdeepseek-r1-qwen3-8b%2Cqwen3-14b-instruct-reasoning%2Cdeepseek-r1-distill-qwen-14b%2Cfalcon-h1r-7b%2Cnvidia-nemotron-nano-12b-v2-vl-reasoning%2Cnvidia-nemotron-nano-9b-v2-reasoning%2Cllama-3-1-nemotron-nano-4b-reasoning%2Cqwen3-4b-instruct-reasoning%2Cqwen3-vl-4b-reasoning%2Cqwen3-8b-instruct-reasoning%2Cdeepseek-r1-distill-llama-8b%2Cjamba-reasoning-3b%2Colmo-3-7b-think%2Cdeepseek-r1-distill-qwen-1-5b%2Cexaone-4-0-1-2b-reasoning%2Cqwen3-1.7b-instruct-reasoning%2Cqwen3-0.6b-instruct-reasoning&model-filters=open-source%2Ctiny-models%2Csmall-models%2Creasoning-models)
@@ -561,6 +563,53 @@ Respond in exactly this JSON format:
 
 The weighted average formula assigns double weight to the diagnosis field, reflecting its clinical criticality. The overall score ranges from 0.0 to 1.0.
 
+
+## Model Licence Attribution and EULA Compliance Template {#appendix-licence-compliance}
+
+Several models used in this study are distributed under restrictive licences that require attribution notices to be included in any derivative work or deployment. The following attribution texts and compliance template apply when deploying these models in a clinical setting.
+
+**Attribution Notices:**
+
+- If using Gemma: "Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms".
+- If using Llama 3.1: "Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved".
+
+**EULA Compliance Template:**
+
+```
+Section X: AI Usage and Compliance
+
+X.1 License Grant and Pass-Down Terms. Licensor grants Customer a limited license
+to use the Software incorporating [Insert Model Name, e.g., Gemma 2 / Llama 3.1].
+This Software is subject to the [Insert Model Terms, e.g., Gemma Terms of Use /
+Llama 3.1 Community License], which are incorporated herein by reference.
+
+X.2 Professional Advice Disclaimer. The Software is an automated tool and is NOT
+a substitute for professional medical, legal, financial, or other licensed advice.
+Customer agrees that:
+- Output will not be used as authoritative for the unlicensed practice of medicine,
+  law, or financial services.
+- All high-stakes outputs must be reviewed and authorized by a qualified human
+  professional before any action is taken.
+
+X.3 Prohibited Use & Safety. Customer shall not use the Software to:
+- Generate or facilitate illegal activities, violence, or terrorism.
+- Engage in harassment, bullying, or unlawful discrimination.
+- Create malicious code, malware, or viruses.
+- Deceive or mislead others, including the creation of disinformation or fake
+  reviews.
+
+X.4 Local Deployment and Liability. As the Software is deployed locally on
+Customer's private infrastructure, Customer assumes all risk associated with the
+use and distribution of the Software and its results. Customer shall indemnify and
+hold harmless the deploying organisation and the Model Provider (e.g., Google/Meta)
+from any third-party claims arising out of Customer's breach of these safety or
+professional advice policies.
+
+X.5 Termination for Misuse. The deploying organisation reserves the right to
+terminate this Agreement immediately and without notice if Customer is found to be
+in violation of the safety or acceptable use policies mandated by the Model
+Provider.
+```
 
 ## Implementation Description: Silver Answers App {#appendix-silver-answers}
 

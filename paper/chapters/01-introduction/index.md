@@ -25,5 +25,3 @@ Locally deployed Large Language Models (LLMs) offer a potential resolution. By r
 1. What is the minimum model size for reliable clinical document classification in a Zero-Shot setting?
 2. Which context engineering strategy is most effective for generating high-quality reference answers from medical documents, and how does the choice of strategy influence downstream evaluation?
 3. Can sub-3B parameter models achieve clinically acceptable extraction quality on standard consumer hardware?
-
-The following chapter reviews related work on LLM evaluation in medical contexts, scaling laws for small language models, and context engineering strategies that inform the methodology of this study.
