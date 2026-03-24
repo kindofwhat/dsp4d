@@ -95,7 +95,7 @@ To generate these silver answers, we have selected Chain-of-Thought (CoT) prompt
 * Improved Traceability: By breaking down the task-for example, listing medications first, then checking their historical status, and finally formatting the output-the model's reasoning becomes auditable, making unsupported extractions detectable during expert review.
 * Structural Integrity: Unlike simpler techniques, CoT allows for the separation of the "thought" process from the final "golden answer," ensuring
 
-[Annex: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
+[Appendix: Comprehensive Comparison of Prompting Techniques](#appendix-promp-techs)
 
 While techniques like Self-Consistency or Multi-Persona Prompting offer higher reliability, they were deemed less efficient for this stage due to significantly higher complexity, computational costs and latency. CoT provides the optimal balance between reasoning depth and token efficiency for clinical document classification.
 
@@ -229,7 +229,7 @@ The silver/golden answers web application - a cloud-based system that automates 
 
 ![Silver Answers App Interface. Source: Authors (screenshot).](../../assets/03-screen-silver-answers.png){#fig:silver-answers-app width=75%}
 
-[See Appendix: Silver Answers App for full description](#appendix-silver-answers)
+[Appendix: Silver Answers App for full description](#appendix-silver-answers)
 
 #### Cloud Services
 
@@ -440,7 +440,7 @@ For a detailed description of the execution engine and the graph structure see [
 
 #### Discarded: G-Eval
 
-G-Eval [@liu2023geval] was evaluated as a candidate for probability-weighted scoring but could not be reliably used due to inconsistent `logprobs` support across LLM providers - most critically, Ollama and LM Studio (the primary local inference backends) do not provide logprobs on their OpenAI-compatible API endpoints. The multi-sample fallback defined by the G-Eval paper ($n=20$ calls) proved impractical due to cost and rate-limiting issues. The evaluation therefore relies on direct LLM-as-a-Judge scoring via the DAG metric and a one-shot field comparison. See [Appendix: G-Eval Investigation](#appendix-geval) for the full compatibility analysis and fallback strategy.
+G-Eval [@liu2023geval] was evaluated as a candidate for probability-weighted scoring but could not be reliably used due to inconsistent `logprobs` support across LLM providers - most critically, Ollama and LM Studio (the primary local inference backends) do not provide logprobs on their OpenAI-compatible API endpoints. The multi-sample fallback defined by the G-Eval paper ($n=20$ calls) proved impractical due to cost and rate-limiting issues. The evaluation therefore relies on direct LLM-as-a-Judge scoring via the DAG metric and a one-shot field comparison. [Appendix: G-Eval Investigation](#appendix-geval) for the full compatibility analysis and fallback strategy.
 
 ### llm-validator: The Evaluation Framework
 
