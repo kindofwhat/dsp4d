@@ -2,34 +2,47 @@
 title: Test Setup – Evaluation Pipeline
 ---
 flowchart TD
-    subgraph INPUT ["Test Case"]
-        direction LR
-        Q["Clinical Document"]
-        SP["System Prompt"]
-        GA["Golden Answer"]
-    end
-
-    subgraph EXECUTION ["Test Run Execution"]
+    subgraph LOCAL ["llm-validator"]
         direction TB
-        LLM1["LLM under Test<br/>(e.g. Gemma, LLaMA,<br/>Gemini, GPT)"]
-        RESP["Generated Response"]
-        LLM1 --> RESP
+        subgraph INPUT ["Test Cases"]
+            direction LR
+            Q["Clinical Document"]
+            SP["System Prompt"]
+        end
+
+        subgraph EVAL ["Evaluation Pipeline"]
+            direction LR
+            STAT["Statistical Metrics<br/>BLEU, ROUGE, Token F1,<br/>Levenshtein, Semantic Sim.,<br/>JSON Structural Sim."]
+            GA["Silver Answer"]
+            RESP["LLM Response"]
+        end
+
+        subgraph OUTPUT ["Result Aggregation"]
+            direction TB
+            SCORES["Metric Scores<br/>per Test Case"]
+            AGG["Aggregated<br/>Comparison"]
+            GEN["Generative Metrics<br/>Medical Field Comparison,<br/>Medical Semantic Field<br/>Comparison (DAG)"]
+            SCORES --> AGG
+        end
     end
 
-    subgraph EVAL ["Evaluation"]
-        direction LR
-        STAT["Statistical Metrics<br/>BLEU, ROUGE, Token F1,<br/>Levenshtein, Semantic Sim.,<br/>JSON Structural Sim."]
+    subgraph CLOUD ["OpenAI Cloud (API)"]
+        direction TB
         JUDGE_LLM["Judge LLM<br/>(GPT-4.1-mini)"]
-        GEN["Generative Metrics<br/>Medical Field Comparison,<br/>Medical Semantic Field<br/>Comparison (DAG)"]
         JUDGE_LLM --> GEN
     end
 
-    subgraph OUTPUT ["Results"]
+    subgraph EXECUTION ["Ollama Model Serving"]
         direction TB
-        SCORES["Metric Scores<br/>per Test Case"]
-        AGG["Aggregated<br/>Comparison"]
-        SCORES --> AGG
+        LLM1["LLM under Test<br/>(e.g. Gemma, LLaMA,<br/>Gemini, GPT)"]
+        LLM1 --> RESP
     end
+
+    SGF["Silver Generation<br/>Framework"]
+
+    SGF -.-> Q
+    SGF -.->SP
+    SGF -.-> GA
 
     Q --> LLM1
     SP --> LLM1
@@ -40,8 +53,14 @@ flowchart TD
     STAT --> SCORES
     GEN --> SCORES
 
+    style SGF fill:#d1c4e9,stroke:#333
+    style Q fill:#ffe0b2,stroke:#333
+    style SP fill:#ffe0b2,stroke:#333
+    style GA fill:#ffe0b2,stroke:#333
+    style LOCAL fill:#fafafa,stroke:#666,stroke-dasharray: 5 5
     style INPUT fill:#fff3e0,stroke:#333
     style EXECUTION fill:#e3f2fd,stroke:#333
+    style CLOUD fill:#e8eaf6,stroke:#333
     style EVAL fill:#f0f4ff,stroke:#7799cc,stroke-dasharray: 5 5
     style OUTPUT fill:#e8f5e9,stroke:#333
     style LLM1 fill:#bbdefb,stroke:#333
