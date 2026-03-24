@@ -124,9 +124,9 @@ This "Gold Standard" example now includes the **Internal Monologue**, which is t
 
 ---
 
-## Appendix: Gold Standard Example (CoT Approach){#appendix-gold-standard}
+## Appendix: Silver Standard Example (CoT Approach){#appendix-gold-standard}
 
-Below is the processing of the same kardiologische report, but utilizing the **Klinische Analyse** to ensure clinical accuracy.
+Below is the processing of the same cardiologic report, but utilizing the **Klinische Analyse** to ensure clinical accuracy.
 
 ### Input: Sample Clinical Report (GraSCCo-Style)
 
@@ -260,7 +260,7 @@ Dr. Hanns Wurst OA Dr. Matthias Metzger
 
 ---
 
-### Output: Golden Answer (CoT)
+### Output: Silver Answer (CoT)
 
 ```json
  {
