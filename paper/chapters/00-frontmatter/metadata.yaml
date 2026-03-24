@@ -43,6 +43,15 @@ header-includes: |
      \def\.{\char`\.\discretionary{}{}{}}%
      #1}}
   \makeatother
+  \addto\captionsngerman{%
+    \renewcommand{\figurename}{Figure}%
+    \renewcommand{\tablename}{Table}%
+    \renewcommand{\listfigurename}{List of Figures}%
+    \renewcommand{\listtablename}{List of Tables}%
+    \renewcommand{\contentsname}{Table of Contents}%
+  }
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size
