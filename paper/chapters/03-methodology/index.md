@@ -117,8 +117,6 @@ In a medical context, the CoT structure is particularly valuable because it forc
 
 **Used prompt:**
 
-TODO BENI
-
 ```text
 Role: You are a Medical Data Analyst. Your task is to transform clinical
 documents into a structuredJSON format for administrative processing. You are
