@@ -126,7 +126,7 @@ This "Gold Standard" example now includes the **Internal Monologue**, which is t
 
 ## Appendix: Silver Standard Example (CoT Approach){#appendix-gold-standard}
 
-Below is the processing of the same cardiologic report, but utilizing the **Klinische Analyse** to ensure clinical accuracy.
+Below is the processing of the same cardiologic report, but utilizing the clinical analysis to ensure clinical accuracy.
 
 ### Input: Sample Clinical Report (GraSCCo-Style)
 
@@ -344,6 +344,8 @@ Evaluation Based on benchmarks in disciplines: Biology, Chemistry, Health and Ps
 | DeepseekMath-7B-Instruct | Instruct | 7 | TIGER-Lab | 0.353 | 0.46 | 0.4108 | 0.2506 | 0.3947 | 0.379025 |
 | Granite-3.1-2B-Instruct | Instruct | 2 | TIGER-Lab | 0.3197 | 0.5007 | 0.2412 | 0.3056 | 0.4411 | 0.37215 |
 
+: SLM candidates after selection steps 1–3 (parameter size, benchmarks, instruction tuning) with MMLU-Pro scores. {#tab:slm-step1-3}
+
 ```{=latex}
 \normalsize
 \end{landscape}
@@ -375,6 +377,8 @@ Context windows >=8k
 | DeepSeek-Coder-V2-IT | Instruct | 128k | DeepSeek | 16 | 0.4157 | 0.5007 | 0.4293 | 0.2995 | 0.4687 | 0.42455 |
 | Granite-3.1-2B-IT | Instruct | 128k | Apache 2.0 | 2 | 0.3197 | 0.5007 | 0.2412 | 0.3056 | 0.4411 | 0.37215 |
 
+: SLM candidates after selection step 4 (context window >= 8k tokens). {#tab:slm-step4}
+
 ```{=latex}
 \normalsize
 \end{landscape}
@@ -401,6 +405,8 @@ Context windows >=8k
 | DeepSeek-Coder-V2-IT | Instruct | 128k | DeepSeek | 16 | 0.4157 | 0.5007 | 0.4293 | 0.2995 | 0.4687 | 0.42455 |
 | Granite-3.1-2B-IT | Instruct | 128k | Apache 2.0 | 2 | 0.3197 | 0.5007 | 0.2412 | 0.3056 | 0.4411 | 0.37215 |
 
+: SLM candidates after selection step 5 (permissive open-source licences). {#tab:slm-step5}
+
 ```{=latex}
 \normalsize
 \end{landscape}
@@ -416,6 +422,8 @@ Context windows >=8k
 | DeepSeek | DeepSeek Model License | No (Open Weights) | Permitted | No (Local weights available) | Allows modifications and derivative works, including model distillation. |
 | EXAONE | EXAONE Non-Commercial (NC) | No | Prohibited | No | Strictly restricted to research and experimental purposes only. |
 | Mistral | Mistral AI Non-Production / Commercial | No | Restricted / Tiered | Optional (API vs local) | Smaller models are often Apache 2.0; flagship models require commercial agreements. |
+
+: Comparison of model licence types relevant to local clinical deployment. {#tab:licence-comparison}
 
 
 <!-- #A-JSON-SIM - AI-generated (Claude, Feb 2026) - algorithm from JsonSimilarityMetric.java + JsonFlattener.java -->
@@ -758,18 +766,21 @@ The Silver Answers App is a cloud-based web application designed to automate the
 The application follows a three-tier architecture pattern:
 
 **Presentation Layer (Frontend)**
+
 - Single-page React application (React 18.2.0)
 - Component-based UI with four primary panels
 - Real-time state management and progress tracking
 - Responsive design with custom dark mode styling
 
 **Application Layer (Backend)**
+
 - Node.js/Express RESTful API server (Express 4.18.2)
 - Service-oriented architecture with separation of concerns
 - Middleware for error handling, CORS, and rate limiting
 - Asynchronous processing with progress callbacks
 
 **Data & AI Layer (Cloud Services)**
+
 - Google Cloud Vertex AI for Gemini API integration
 - Google Cloud Storage (GCS) for persistent data storage
 - Configuration management through cloud-based JSON files
@@ -778,6 +789,7 @@ The application follows a three-tier architecture pattern:
 #### Technology Stack
 
 **Frontend Technologies:**
+
 - React 18.2.0 - Component framework
 - Axios 1.6.0 - HTTP client for API communication
 - react-beautiful-dnd 13.1.1 - Drag-and-drop functionality for prompt reordering
@@ -785,6 +797,7 @@ The application follows a three-tier architecture pattern:
 - Custom CSS with CSS variables for theming
 
 **Backend Technologies:**
+
 - Node.js with Express 4.18.2 - Web server framework
 - `@google-cloud/vertexai` 1.1.0 - Gemini API integration
 - `@google-cloud/storage` 7.7.0 - Cloud storage client
@@ -793,6 +806,7 @@ The application follows a three-tier architecture pattern:
 - dotenv 16.3.1 - Environment configuration
 
 **Cloud Infrastructure:**
+
 - Google Cloud Platform (GCP) Project: cas-gen-ki
 - Vertex AI API - Gemini 2.5 Flash model
 - Cloud Storage - Document and configuration persistence
@@ -808,6 +822,7 @@ The frontend implements a four-panel layout with an additional session managemen
 **Purpose:** Orchestrates work sessions that bind document bases, prompt sets, and generation results together.
 
 **Key Features:**
+
 - Session creation with optional document base and prompt set selection
 - Session switching with automatic state restoration
 - Session history tracking (creation date, modification date, generation runs)
@@ -825,6 +840,7 @@ The frontend implements a four-panel layout with an additional session managemen
 **Purpose:** Manages document collections that serve as input for AI processing.
 
 **Key Features:**
+
 - JSON file upload with URL-based document references (Zenodo integration)
 - Folder upload with text file content embedding
 - Document preview modal with content display
