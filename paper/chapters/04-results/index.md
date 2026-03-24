@@ -4,7 +4,7 @@
 
 This chapter presents the empirical findings of the Zero-Shot evaluation across all eleven models and 62 test cases from the GraSCCo corpus, using the metrics defined in Section \ref{sec:eval-metrics}. Table \ref{tab:avg-scores-key} presents the four key metric scores and Table \ref{tab:composite} the composite scores. All LLM-as-a-Judge evaluations were performed by GPT-4o-mini (OpenAI).
 
-An important caveat for interpreting the results: Gemini 2.5 Pro was also the model used to generate the Silver Answers (with CoT prompting in Phase II). Its top ranking is therefore expected — it is effectively being compared against its own prior outputs, albeit in a different prompting configuration (Zero-Shot vs. CoT). This self-similarity advantage does not extend to the other models, making the relative ranking among the remaining ten models the more meaningful comparison.
+An important caveat for interpreting the results: Gemini 2.5 Pro was also the model used to generate the silver answers (with CoT prompting in Phase II). Its top ranking is therefore expected — it is effectively being compared against its own prior outputs, albeit in a different prompting configuration (Zero-Shot vs. CoT). This self-similarity advantage does not extend to the other models, making the relative ranking among the remaining ten models the more meaningful comparison.
 
 ## Impact of LLM Size
 
@@ -46,9 +46,9 @@ To illustrate how metric differences manifest in practice, Table \ref{tab:exampl
 | Granite 3.3:2b | Abilify 10 mg 1/2-0-0 | Scheduled hospital admission for Interferon therapy initiation on 2023-05-02 |
 | Qwen3.5-35B-A3B | *(empty)* | *(empty)* |
 
-: Extraction comparison for Case 3 (melanoma follow-up) against the Silver Answer. {#tab:example-extraction}
+: Extraction comparison for Case 3 (melanoma follow-up) against the silver answer. {#tab:example-extraction}
 
-This case reveals four distinct observations. First, even Gemini 2.5 Pro — the model that generated the Silver Answers — misses "Cipralex" when re-evaluated in a Zero-Shot setting without CoT, illustrating the impact of prompting strategy on extraction completeness. Second, Gemma3:27b delivers a near-identical extraction to Gemini with only minor formatting differences. Third, Granite 3.3 (2B) extracts the correct medical content but violates the language constraint (English instead of German). Fourth, Qwen3.5-35B-A3B produces a structurally valid but content-empty JSON record — scoring 0.0 on content metrics despite having no parse error.
+This case reveals four distinct observations. First, even Gemini 2.5 Pro — the model that generated the silver answers — misses "Cipralex" when re-evaluated in a Zero-Shot setting without CoT, illustrating the impact of prompting strategy on extraction completeness. Second, Gemma3:27b delivers a near-identical extraction to Gemini with only minor formatting differences. Third, Granite 3.3 (2B) extracts the correct medical content but violates the language constraint (English instead of German). Fourth, Qwen3.5-35B-A3B produces a structurally valid but content-empty JSON record — scoring 0.0 on content metrics despite having no parse error.
 
 <!-- #R-TAB-COMPOSITE — regenerate from JSON, see INSTRUCTIONS.md -->
 ### Composite Scores by Metric Category
