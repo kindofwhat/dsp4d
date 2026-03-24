@@ -36,7 +36,7 @@ patient privacy.
 The corpus provides a diverse set of clinical scenarios, which we use to evaluate the models' ability to classify document intent and generate appropriate 
 clinical actions based on German-language clinical reports.
 
-The task we give the models is to update a patients health record (HBA) based on supplied clinical report. [Appendix: Gold Standard Example](#appendix-gold-standard) shows a representative GraSCCo clinical report alongside its CoT-extracted structured output.
+The task we give the models is to update a patients health record (HBA) based on supplied clinical report. [Appendix: Silver Standard Example](#appendix-gold-standard) shows a representative GraSCCo clinical report alongside its CoT-extracted structured output.
 
 ## Golden Answer Generation {#sec:golden-answer-generation}
 
@@ -107,7 +107,7 @@ While techniques like Self-Consistency or Multi-Persona Prompting offer higher r
 | **Token Usage** | Low (Cost-efficient) | Higher (More verbose output) |
 | **Auditability** | Difficult (Only the result is visible) | Transparent (You see why it chose a category) |
 
-: Comparison of standard prompting vs. Chain-of-Thought prompting for clinical document extraction. {#tab:cot-comparison}
+: Comparison of standard prompting vs. Chain-of-Thought prompting for clinical document extraction.
 
 ### System Prompt: Clinical Data Extraction (CoT)
 
@@ -169,7 +169,7 @@ Please analyze this training document:
 {document}
 ```
 
-[Gold Standard Example (CoT Approach)](#appendix-gold-standard)
+[Appendix: Silver Standard Example (CoT Approach)](#appendix-gold-standard)
 
 ### Ground Truth Generation and Annotation Platform
 To facilitate the seamless generation and validation of these answers, we developed a dedicated and custom web application. This platform serves three primary functions:
@@ -182,7 +182,7 @@ The platform consists of the following components:
 
 **Session Framework**
 
-The core of the platform is organized into Sessions. A Session acts as the functional container for processing input documents into "silver answers" and managing the subsequent expert annotation process.
+The core of the platform is organized into sessions. A session acts as the functional container for processing input documents into "silver answers" and managing the subsequent expert annotation process.
 
 **Input Documents**
 
@@ -269,11 +269,11 @@ const safetySettings = [
 ];
 ```
 
-While this resolved standard safety blocks, we subsequently encountered the `RECITATION` output filter, which blocks content perceived as memorized training data. **Unlike standard safety categories, the `RECITATION` filter cannot be actively directed, managed, or bypassed via API parameters.** To mitigate this intractable issue, we transitioned the backend model to Gemini 2.5 Pro. This architectural shift successfully reduced the `RECITATION` filter blocks to a highly manageable margin of only 2 out of 62 documents. 
+While this resolved standard safety blocks, we subsequently encountered the `RECITATION` output filter, which blocks content perceived as memorized training data. Unlike standard safety categories, the `RECITATION` filter cannot be actively directed, managed, or bypassed via API parameters. To mitigate this intractable issue, we transitioned the backend model to Gemini 2.5 Pro. This architectural shift successfully reduced the `RECITATION` filter blocks to a highly manageable margin of only 2 out of 62 documents. 
 
 To achieve a complete 100% processing rate and fully bypass these residual blocks, a context-setting directive was introduced into the prompt. By explicitly prepending the phrase, "Please analyze this training document:", the model was linguistically instructed to treat the clinical text as a training artifact. This semantic framing successfully relaxed the heuristic strictness of the RECITATION filter, enabling the successful evaluation of all 62 documents without triggering generation failures.
 
-Despite this improvement in content generation, Gemini 2.5 Pro exhibited difficulties in reliably producing structural JSON output according to the schema provided solely in the system prompt. **To guarantee strict format compliance and avoid parsing errors, the expected JSON schema had to be manually injected and enforced directly within the Vertex AI client's configuration**:
+Despite this improvement in content generation, Gemini 2.5 Pro exhibited difficulties in reliably producing structural JSON output according to the schema provided solely in the system prompt. To guarantee strict format compliance and avoid parsing errors, the expected JSON schema had to be manually injected and enforced directly within the Vertex AI client's configuration:
 
 ```javascript
 /**
@@ -343,7 +343,7 @@ The objective is to identify a set of 5 SLMs that can run locally on consumer-gr
 
 While a comprehensive understanding of general-purpose context may be disregarded, it is important to note that the models demonstrate a robust understanding of clinical context and the ability to perform precise information extraction. Furthermore, our selection criteria for SLMs are not strictly limited to models with specialized medical pre-training. Rather, we aim to investigate the inherent suitability and performance of general-purpose models within this specialized domain.
 
-Because we are evaluating SLMs answers against "silver/golden answers" derived from a larger model (Gemini) and human verification, the selected SLMs must be capable of strict instruction following to ensure their outputs can be parsed and scored by our custom evaluation framework. The selection procedure prioritizes models that show "emergent" reasoning capabilities usually reserved for larger models, while remaining compressible enough to fit in local (V)RAM.  [See: Selection of Prompting Technique: Chain-of-Thought](#selection-of-prompting-technique-chain-of-thought-cot)
+Because we are evaluating SLMs answers against "silver/golden answers" derived from a larger model (Gemini) and human verification, the selected SLMs must be capable of strict instruction following to ensure their outputs can be parsed and scored by our custom evaluation framework. The selection procedure prioritizes models that show "emergent" reasoning capabilities usually reserved for larger models, while remaining compressible enough to fit in local (V)RAM.  [Appendix: Selection of Prompting Technique: Chain-of-Thought](#selection-of-prompting-technique-chain-of-thought-cot)
 
 ### Procedure: Selection Criteria for 'suitable' Clinical SLMs
 
