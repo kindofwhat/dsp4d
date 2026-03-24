@@ -119,7 +119,7 @@ $endif$
 
 % Float control — force figures to appear at their source position
 \usepackage{float}
-\floatplacement{figure}{H}
+\floatplacement{figure}{htbp!}
 
 % Code highlighting (if needed)
 $if(highlighting-macros)$
@@ -278,6 +278,10 @@ $endif$
 %% DOCUMENT
 %% ============================================================================
 
+$for(header-includes)$
+$header-includes$
+$endfor$
+
 \begin{document}
 
 % Title page
@@ -296,17 +300,19 @@ $if(toc)$
 \tableofcontents
 \clearpage
 $endif$
+% Main content
+$body$
+
 $if(lof)$
+\addcontentsline{toc}{section}{\listfigurename}
 \listoffigures
 \clearpage
 $endif$
 $if(lot)$
+\addcontentsline{toc}{section}{\listtablename}
 \listoftables
 \clearpage
 $endif$
-
-% Main content
-$body$
 
 % Declaration (if enabled)
 $if(declaration)$

@@ -1,10 +1,3 @@
-# List of Figures {.unnumbered}
-
-<!-- Will be auto-generated if using proper figure captions -->
-
-# List of Tables {.unnumbered}
-
-<!-- Will be auto-generated if using proper table captions -->
 
 # Glossary {.unnumbered}
 

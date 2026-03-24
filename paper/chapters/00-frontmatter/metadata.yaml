@@ -23,26 +23,12 @@ lot: true
 declaration: true
 
 header-includes: |
-  \usepackage{float}
-  \floatplacement{figure}{H}
   \usepackage{needspace}
   \widowpenalty=10000
   \clubpenalty=10000
-  \usepackage{etoolbox}
   \pretocmd{\section}{\needspace{5\baselineskip}}{}{}
   \pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
   \pretocmd{\subsubsection}{\needspace{3\baselineskip}}{}{}
-  \usepackage[htt]{hyphenat}
-  \usepackage{letltxmacro}
-  \LetLtxMacro{\origttfamily}{\ttfamily}
-  \renewcommand{\ttfamily}{\origttfamily\hyphenchar\font=`\-\relax}
-  \makeatletter
-  \renewcommand{\texttt}[1]{%
-    {\origttfamily\hyphenchar\font=`\-\relax
-     \def\_{\textunderscore\discretionary{}{}{}}%
-     \def\.{\char`\.\discretionary{}{}{}}%
-     #1}}
-  \makeatother
   \addto\captionsngerman{%
     \renewcommand{\figurename}{Figure}%
     \renewcommand{\tablename}{Table}%
@@ -50,8 +36,6 @@ header-includes: |
     \renewcommand{\listtablename}{List of Tables}%
     \renewcommand{\contentsname}{Table of Contents}%
   }
-  \usepackage{fvextra}
-  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 
 abstract: |
   This paper investigates the minimum viable Large Language Model (LLM) size

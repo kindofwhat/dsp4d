@@ -857,6 +857,7 @@ The frontend implements a four-panel layout with an additional session managemen
 **Purpose:** Enables creation and configuration of prompt chains for document processing.
 
 **Key Features:**
+
 - Prompt creation (System and User types)
 - Drag-and-drop reordering with visual feedback
 - Prompt deletion with confirmation
@@ -865,6 +866,7 @@ The frontend implements a four-panel layout with an additional session managemen
 - Prompt set saving for reusability
 
 **Prompt Chain Execution:**
+
 1. System prompts set context/instructions for the AI
 2. User prompts provide specific questions/tasks
 3. Prompts execute sequentially, with each output feeding into the next
@@ -874,6 +876,7 @@ The frontend implements a four-panel layout with an additional session managemen
 **Purpose:** Displays generation results with expandable document details.
 
 **Key Features:**
+
 - Hierarchical result display (generation → documents → steps)
 - Expandable/collapsible document sections
 - Intermediate step visualization
@@ -885,6 +888,7 @@ The frontend implements a four-panel layout with an additional session managemen
 **Purpose:** Provides detailed view and rating interface for individual results.
 
 **Key Features:**
+
 - Full answer display with formatting
 - Star rating system (1-5 stars)
 - Comment field for qualitative feedback
@@ -896,6 +900,7 @@ The frontend implements a four-panel layout with an additional session managemen
 
 ##### Server Configuration (server.js)
 **Responsibilities:**
+
 - Express application initialization
 - Middleware configuration (CORS, JSON parsing, rate limiting)
 - Route registration for all API endpoints
@@ -904,6 +909,7 @@ The frontend implements a four-panel layout with an additional session managemen
 - Health check endpoint
 
 **Rate Limiting:**
+
 - 60 requests per minute per IP address
 - Applied to all /api/* endpoints
 - Configurable through config.json
@@ -911,6 +917,7 @@ The frontend implements a four-panel layout with an additional session managemen
 ##### Service Layer
 
 **Gemini Service (services/gemini.js)**
+
 - Vertex AI client initialization with authentication
 - Token estimation (1 token $\approx$ 4 characters)
 - Token limit validation (30,000 input tokens for Gemini 1.5 Flash)
@@ -920,6 +927,7 @@ The frontend implements a four-panel layout with an additional session managemen
 - Safety rating monitoring
 
 **Key Algorithm - Document Chain Processing:**
+
 ```
 For each document:
   currentInput = documentContent
@@ -941,6 +949,7 @@ For each document:
 ```
 
 **Processor Service (services/processor.js)**
+
 - Document content fetching from URLs (Zenodo)
 - Multi-document batch processing
 - Progress callback system for real-time updates
@@ -948,6 +957,7 @@ For each document:
 - Support for both URL-based and text-based documents
 
 **Storage Service (services/storage.js)**
+
 - GCS file upload/download operations
 - File listing with prefix filtering
 - File deletion
@@ -957,6 +967,7 @@ For each document:
 ##### Route Layer
 
 **Documents Routes (routes/documents.js)**
+
 - `GET /api/documents` - List all document bases from GCS
 - `POST /api/documents/upload` - Upload JSON with URL references
 - `POST /api/documents/upload-folder` - Upload folder with text content
@@ -965,6 +976,7 @@ For each document:
 - `DELETE /api/documents/:id` - Delete document base
 
 **Sessions Routes (routes/sessions.js)**
+
 - `GET /api/sessions` - List all sessions (sorted by last modified)
 - `POST /api/sessions` - Create new session
 - `GET /api/sessions/:id` - Get session with full details
@@ -976,6 +988,7 @@ For each document:
 - `DELETE /api/sessions/:id` - Delete session (with cascade options)
 
 **Generation Routes (routes/generation.js)**
+
 - `POST /api/generation/analyze` - Analyze token usage without generation
 - `POST /api/generation/start` - Start asynchronous generation process
 - `GET /api/generation/:id/status` - Get generation progress
@@ -983,10 +996,12 @@ For each document:
 - `GET /api/generation/results/:id` - Get specific generation result
 
 **Ratings Routes (routes/ratings.js)**
+
 - `POST /api/ratings` - Save rating (updates session)
 - `GET /api/ratings/:generationId/:documentId` - Get specific rating
 
 **Prompt Sets Routes (routes/prompt-sets.js)**
+
 - `GET /api/prompt-sets` - List all saved prompt sets
 - `POST /api/prompt-sets` - Create new prompt set
 - `GET /api/prompt-sets/:id` - Get specific prompt set
@@ -998,6 +1013,7 @@ For each document:
 #### Session-Based Workflow
 
 **Phase 1: Session Initialization**
+
 1. User creates new session or selects existing session
 2. User selects/uploads document base (optional at creation)
 3. User selects/creates prompt set (optional at creation)
@@ -1005,6 +1021,7 @@ For each document:
 5. Frontend loads session state and associated resources
 
 **Phase 2: Configuration**
+
 1. User uploads/selects document base if not already set
 2. System parses document metadata and stores in GCS
 3. User creates/loads prompts for the session
@@ -1012,6 +1029,7 @@ For each document:
 5. User can preview token usage estimates
 
 **Phase 3: Generation**
+
 1. User initiates generation process
 2. Backend creates unique generation ID
 3. For each document in parallel or sequence:
@@ -1025,6 +1043,7 @@ For each document:
 6. Return results to frontend with progress updates
 
 **Phase 4: Evaluation**
+
 1. User reviews generated answers in Prospect Answers panel
 2. User selects document for detailed view
 3. User provides rating (1-5 stars)
@@ -1034,6 +1053,7 @@ For each document:
 7. Rating metadata includes timestamp for tracking
 
 **Phase 5: Iteration**
+
 1. User analyzes results and ratings
 2. User modifies prompts based on feedback
 3. User re-runs generation (creates new result entry in session)
@@ -1071,6 +1091,7 @@ Output = Final Answer
 ```
 
 **Token Growth Pattern:**
+
 - Prompt 1: ~D tokens (document size)
 - Prompt 2: ~D + O1 tokens (document + output 1)
 - Prompt 3: ~D + O1 + O2 tokens
@@ -1096,6 +1117,7 @@ gs://cas-gen-ki-golden-answers/
 ```
 
 **Persistence Characteristics:**
+
 - All data stored as JSON in GCS
 - Atomic writes with timestamp-based IDs
 - No database required - file-based storage
@@ -1427,6 +1449,7 @@ REACT_APP_API_URL=http://localhost:3001/api
 #### Deployment Process
 
 **Prerequisites:**
+
 1. Node.js 18+ installed
 2. GCP account with billing enabled
 3. Service account created with proper roles
@@ -1450,6 +1473,7 @@ npm start
 ```
 
 **Production Considerations:**
+
 - Use process manager (PM2) for backend
 - Build optimized frontend bundle
 - Configure reverse proxy (nginx)
@@ -1462,24 +1486,28 @@ npm start
 #### Use Cases
 
 **Prompt Engineering Research:**
+
 - Test different prompt formulations
 - Compare system vs. user prompt effectiveness
 - Analyze chain-of-thought vs. direct prompting
 - Measure impact of prompt order
 
 **Document Analysis:**
+
 - Batch process research papers
 - Extract structured information
 - Generate summaries and insights
 - Compare AI vs. human analysis
 
 **Model Evaluation:**
+
 - Rate AI-generated outputs
 - Collect human corrections
 - Build ground truth datasets
 - Measure improvement over iterations
 
 **Iterative Refinement:**
+
 - Track prompt evolution
 - Compare results across sessions
 - Identify optimal configurations
@@ -1488,6 +1516,7 @@ npm start
 #### Data Collection
 
 **Quantitative Metrics:**
+
 - Star ratings (1-5 scale)
 - Token usage statistics
 - Processing times
@@ -1495,12 +1524,14 @@ npm start
 - Generation run counts
 
 **Qualitative Data:**
+
 - User comments on results
 - Human corrections/ground truth
 - Prompt configurations
 - Session notes and descriptions
 
 **Exportable Data:**
+
 - Session JSON files
 - Generation results
 - Rating datasets
@@ -1511,12 +1542,14 @@ npm start
 #### Potential Improvements
 
 **Architecture:**
+
 - Database integration for better querying
 - Real-time collaboration features
 - Webhook support for external integrations
 - Microservices decomposition for scalability
 
 **Features:**
+
 - Bulk operations across multiple sessions
 - Advanced analytics dashboard
 - Export to various formats (CSV, PDF)
@@ -1525,6 +1558,7 @@ npm start
 - A/B testing framework
 
 **AI Integration:**
+
 - Support for multiple AI models
 - Model comparison features
 - Automatic prompt optimization
@@ -1532,6 +1566,7 @@ npm start
 - RAG (Retrieval-Augmented Generation) support
 
 **User Experience:**
+
 - Advanced filtering and search
 - Customizable dashboards
 - Keyboard shortcuts
@@ -1541,12 +1576,14 @@ npm start
 #### Scalability Considerations
 
 **Current Limitations:**
+
 - File-based storage (not optimized for high concurrency)
 - In-memory state management
 - Sequential document processing
 - Manual session management
 
 **Scaling Strategies:**
+
 - Implement database (PostgreSQL, Firestore)
 - Add caching layer (Redis)
 - Implement job queue (Bull, Cloud Tasks)
